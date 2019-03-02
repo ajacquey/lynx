@@ -18,24 +18,30 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxElementAverageValue.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxElementAverageValue);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxElementAverageValue>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<ElementAverageValue>();
+  params.addClassDescription("Compute the average value (integral sense) based on a forward "
+                             "projection (unconditionally stable) of the advected variable.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxElementAverageValue::LynxElementAverageValue(const InputParameters & parameters)
+  : ElementAverageValue(parameters),
+    _value_old(_fe_problem.isTransient() ? valueOld() : _zero),
+    _value_older(_fe_problem.isTransient() ? valueOlder() : _zero)
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxElementAverageValue::computeQpIntegral()
+{
+  return _t_step > 0 ? (1.0 + _dt / _dt_old) * _value_old[_qp] - _dt / _dt_old * _value_older[_qp]
+                     : _value_old[_qp];
+}

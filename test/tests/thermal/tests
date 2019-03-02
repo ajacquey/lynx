@@ -1,0 +1,7 @@
+[Tests]
+  [./plate_cooling]
+    type = 'Exodiff'
+    input = 'plate_cooling.i'
+    exodiff = 'plate_cooling_out.e'
+  [../]
+[]

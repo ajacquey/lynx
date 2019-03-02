@@ -18,24 +18,32 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXTHERMALCONSTANT_H
+#define LYNXTHERMALCONSTANT_H
 
-#include "MooseApp.h"
+#include "LynxThermalBase.h"
 
-class LynxApp;
+class LynxThermalConstant;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxThermalConstant>();
 
-class LynxApp : public MooseApp
+class LynxThermalConstant : public LynxThermalBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxThermalConstant(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpHeatCap() override;
+  virtual void computeQpThermalCond() override;
+  virtual void computeQpThermalExp() override;
+
+  const std::vector<Real> _fluid_thermal_cond;
+  const std::vector<Real> _solid_thermal_cond;
+  const std::vector<Real> _fluid_heat_cap;
+  const std::vector<Real> _solid_heat_cap;
+  const std::vector<Real> _fluid_thermal_exp;
+  const std::vector<Real> _solid_thermal_exp;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXTHERMALCONSTANT_H

@@ -18,24 +18,45 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxExtremeVectorValue.h"
+#include "MooseMesh.h"
 
-#include "MooseApp.h"
+#include <algorithm>
+#include <limits>
 
-class LynxApp;
+registerMooseObject("LynxApp", LynxExtremeVectorValue);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxExtremeVectorValue>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<ElementExtremeValue>();
+  params.addClassDescription(
+      "Compute the global minimum/maximum of a vectorial variable @ quadrature "
+      "points with reference to the node.");
+  params.addCoupledVar("add_var_1", 0.0, "The first additional variable.");
+  params.addCoupledVar("add_var_2", 0.0, "The second additional variable.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxExtremeVectorValue::LynxExtremeVectorValue(const InputParameters & parameters)
+  : DerivativeMaterialInterface<ElementExtremeValue>(parameters),
+    _v(_mesh.dimension() > 1 ? coupledValue("add_var_1") : _zero),
+    _w(_mesh.dimension() > 2 ? coupledValue("add_var_2") : _zero)
+{
+}
 
-#endif /* LYNXAPP_H */
+void
+LynxExtremeVectorValue::computeQpValue()
+{
+  RealVectorValue vv(_u[_qp], _v[_qp], _w[_qp]);
+  switch (_type)
+  {
+    case MAX:
+      _value = std::max(_value, vv.norm());
+      break;
+    case MIN:
+      _value = std::min(_value, vv.norm());
+      break;
+  }
+}

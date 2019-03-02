@@ -18,24 +18,28 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXVELOCITYBC_H
+#define LYNXVELOCITYBC_H
 
-#include "MooseApp.h"
+#include "PresetNodalBC.h"
 
-class LynxApp;
+class LynxVelocityBC;
+class Function;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxVelocityBC>();
 
-class LynxApp : public MooseApp
+class LynxVelocityBC : public PresetNodalBC
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxVelocityBC(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpValue() override;
+
+  const VariableValue & _u_old;
+  const Real & _value;
+  Function * const _function;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXVELOCITYBC_H

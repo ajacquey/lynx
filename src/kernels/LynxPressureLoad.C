@@ -18,24 +18,43 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxPressureLoad.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxPressureLoad);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxPressureLoad>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription(
+      "Kernel calculating the lithostatic pressure based on density distribution.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxPressureLoad::LynxPressureLoad(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Kernel>(parameters),
+    _bulk_density(getDefaultMaterialProperty<Real>("reference_bulk_density")),
+    _gravity(getDefaultMaterialProperty<RealVectorValue>("gravity_vector"))
+{
+}
 
-#endif /* LYNXAPP_H */
+/******************************************************************************/
+/*                                  RESIDUALS                                 */
+/******************************************************************************/
+
+Real
+LynxPressureLoad::computeQpResidual()
+{
+  return (_grad_u[_qp] - _bulk_density[_qp] * _gravity[_qp]) * _grad_test[_i][_qp];
+}
+
+/******************************************************************************/
+/*                                  JACOBIAN                                  */
+/******************************************************************************/
+
+Real
+LynxPressureLoad::computeQpJacobian()
+{
+  return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+}

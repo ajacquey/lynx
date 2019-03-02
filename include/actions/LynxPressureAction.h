@@ -18,24 +18,26 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXPRESSUREACTION_H
+#define LYNXPRESSUREACTION_H
 
-#include "MooseApp.h"
+#include "Action.h"
 
-class LynxApp;
+class LynxPressureAction;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxPressureAction>();
 
-class LynxApp : public MooseApp
+class LynxPressureAction : public Action
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxPressureAction(const InputParameters & params);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+  virtual void act() override;
+
+protected:
+  std::vector<std::vector<AuxVariableName>> _save_in_vars;
+  std::vector<bool> _has_save_in_vars;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXPRESSUREACTION_H

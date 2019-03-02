@@ -18,24 +18,50 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXHYDROBASE_H
+#define LYNXHYDROBASE_H
 
-#include "MooseApp.h"
+#include "LynxMaterialBase.h"
+#include "RankTwoTensor.h"
 
-class LynxApp;
+class LynxHydroBase;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxHydroBase>();
 
-class LynxApp : public MooseApp
+class LynxHydroBase : public LynxMaterialBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxHydroBase(const InputParameters & parameters);
+  virtual ~LynxHydroBase() {}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpProperties() override;
+  virtual void computeQpCompressibilities();
+  virtual void computeQpFluidMobility();
+  virtual void computeQpPoroMech();
+  virtual void computeQpFluidCompressibility() = 0;
+  virtual void computeQpSolidCompressibility() = 0;
+  virtual void computeQpPermeability() = 0;
+  virtual void computeQpFluidViscosity() = 0;
+
+  const VariableValue & _porosity;
+  const MaterialProperty<Real> & _K;
+  const MaterialProperty<RankFourTensor> & _tangent_modulus;
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
+  const MaterialProperty<RankTwoTensor> & _inelastic_strain;
+  const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
+  MaterialProperty<Real> & _biot;
+  MaterialProperty<Real> & _C_d;
+  MaterialProperty<Real> & _C_biot;
+  MaterialProperty<Real> & _fluid_mobility;
+  MaterialProperty<Real> & _poro_mech;
+  MaterialProperty<Real> & _poro_mech_jac;
+
+  std::vector<Real> _C_f;
+  std::vector<Real> _C_s;
+  std::vector<Real> _k;
+  std::vector<Real> _eta_f;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXHYDROBASE_H

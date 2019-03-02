@@ -18,24 +18,43 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxExtrapolateValue.h"
 
-#include "MooseApp.h"
+#include <algorithm>
+#include <limits>
 
-class LynxApp;
+registerMooseObject("LynxApp", LynxExtrapolateValue);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxExtrapolateValue>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<ElementExtremeValue>();
+  params.addClassDescription("Compute the global range of variation based on a forward "
+                             "projection (unconditionally stable) of the advected variable.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxExtrapolateValue::LynxExtrapolateValue(const InputParameters & parameters)
+  : DerivativeMaterialInterface<ElementExtremeValue>(parameters),
+    _value_old(_fe_problem.isTransient() ? valueOld() : _zero),
+    _value_older(_fe_problem.isTransient() ? valueOlder() : _zero)
+{
+}
 
-#endif /* LYNXAPP_H */
+void
+LynxExtrapolateValue::computeQpValue()
+{
+  Real extrapolated_value =
+      _t_step > 0 ? (1.0 + _dt / _dt_old) * _value_old[_qp] - _dt / _dt_old * _value_older[_qp]
+                  : _value_old[_qp];
+  switch (_type)
+  {
+    case MAX:
+      _value = std::max(_value, extrapolated_value);
+      break;
+    case MIN:
+      _value = std::min(_value, extrapolated_value);
+      break;
+  }
+}

@@ -18,24 +18,27 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxVonMisesStressAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxVonMisesStressAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxVonMisesStressAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<LynxStressAuxBase>();
+  params.addClassDescription("Calculates the Von Mises stress.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxVonMisesStressAux::LynxVonMisesStressAux(const InputParameters & parameters)
+  : LynxStressAuxBase(parameters)
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxVonMisesStressAux::computeValue()
+{
+  RankTwoTensor stress_dev = _stress[_qp].deviatoric();
+  return std::sqrt(3.0 / 2.0) * stress_dev.L2norm();
+}

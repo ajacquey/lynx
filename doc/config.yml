@@ -11,9 +11,25 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: Lynx
+    name: LYNX
+    repo: https://gitext.gfz-potsdam.de/ajacquey/lynx
+    # home: https://www.mooseframework.org
+    google_analytics: True
+
+Translators:
+    type: MooseDocs.base.Translator
+    incremental_build: False
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: 'LYNX'
+        repo: https://gitext.gfz-potsdam.de/ajacquey/lynx
+        # home: https://www.mooseframework.org
+        menu:
+            Getting Started: getting_started/index.md
+            Documentation: documentation.menu.md
+            Help: help.menu.md
+            # News: newsletter/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
         includes:

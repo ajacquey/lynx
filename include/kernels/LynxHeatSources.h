@@ -18,24 +18,42 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXHEATSOURCES_H
+#define LYNXHEATSOURCES_H
 
-#include "MooseApp.h"
+#include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
+#include "RankTwoTensor.h"
 
-class LynxApp;
+class LynxHeatSources;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxHeatSources>();
 
-class LynxApp : public MooseApp
+class LynxHeatSources : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxHeatSources(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  Real _coeff_Hs;
+
+  const MaterialProperty<Real> & _rhoC_b;
+  const MaterialProperty<Real> & _radiogenic_heat;
+  const MaterialProperty<Real> & _rho_b;
+  const MaterialProperty<Real> & _dinvrho_dtemp;
+  const MaterialProperty<Real> & _inelastic_heat;
+  const MaterialProperty<Real> & _adiabatic_heat;
+  const MaterialProperty<Real> & _damage_heat;
+  // const MaterialProperty<Real> & _dinelastic_heat_dtemp;
+  const MaterialProperty<RankTwoTensor> & _dinelastic_heat_dstrain;
+  const bool _coupled_disp;
+  unsigned int _ndisp;
+  std::vector<unsigned int> _disp_var;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXHEATSOURCES_H

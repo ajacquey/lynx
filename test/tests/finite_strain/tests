@@ -1,0 +1,12 @@
+[Tests]
+  [./rotation]
+    type = 'Exodiff'
+    input = 'rotation.i'
+    exodiff = 'rotation_out.e'
+  [../]
+  [./bending]
+    type = 'Exodiff'
+    input = 'bending.i'
+    exodiff = 'bending_out.e'
+  [../]
+[]

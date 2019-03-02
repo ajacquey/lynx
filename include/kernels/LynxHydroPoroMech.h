@@ -18,24 +18,31 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXHYDROPOROMECH_H
+#define LYNXHYDROPOROMECH_H
 
-#include "MooseApp.h"
+#include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxHydroPoroMech;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxHydroPoroMech>();
 
-class LynxApp : public MooseApp
+class LynxHydroPoroMech : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxHydroPoroMech(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  unsigned int _ndisp;
+  const MaterialProperty<Real> & _poro_mech;
+  const MaterialProperty<Real> & _poro_mech_jac;
+  std::vector<unsigned int> _disp_var;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXHYDROPOROMECH_H

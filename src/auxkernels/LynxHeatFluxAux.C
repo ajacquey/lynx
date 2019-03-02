@@ -18,24 +18,41 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxHeatFluxAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxHeatFluxAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxHeatFluxAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription(
+    "Calculates the heat flux in each element for the given direction.");
+  params.addRequiredCoupledVar("temperature", "The temperature variable.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+    "component",
+    "component >= 0 & component <= 2",
+    "Integer corresponding to direction of the heat flux (0, 1, 2.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxHeatFluxAux::LynxHeatFluxAux(const InputParameters & parameters)
+  : DerivativeMaterialInterface<AuxKernel>(parameters),
+    _component(getParam<unsigned int>("component")),
+    _grad_T(coupledGradient("temperature")),
+    _rhoC_b(getDefaultMaterialProperty<Real>("bulk_specific_heat")),
+    _thermal_diff(getDefaultMaterialProperty<Real>("thermal_diffusivity"))
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxHeatFluxAux::computeValue()
+{
+  if (_rhoC_b[_qp] == 0.0)
+    _cond_bulk = _thermal_diff[_qp];
+  else
+    _cond_bulk = _thermal_diff[_qp] * _rhoC_b[_qp];
+
+  return -1*_cond_bulk*_grad_T[_qp](_component);
+}

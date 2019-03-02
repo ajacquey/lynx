@@ -18,24 +18,32 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXADVECTIONTEMPERATURE_H
+#define LYNXADVECTIONTEMPERATURE_H
 
-#include "MooseApp.h"
+#include "LynxAdvectionBase.h"
 
-class LynxApp;
+class LynxAdvectionTemperature;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxAdvectionTemperature>();
 
-class LynxApp : public MooseApp
+class LynxAdvectionTemperature : public LynxAdvectionBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxAdvectionTemperature(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeArtificialViscosity() override;
+  virtual void computeEntropyResidual();
+
+  // diffusion residual
+  const MaterialProperty<Real> & _thermal_diff;
+  // source term residual
+  Real _coeff_Hs;
+  const MaterialProperty<Real> & _rhoC;
+  const MaterialProperty<Real> & _radiogenic_heat;
+  const MaterialProperty<Real> & _inelastic_heat;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXADVECTIONTEMPERATURE_H

@@ -18,24 +18,26 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXVELOCITYNORMAUX_H
+#define LYNXVELOCITYNORMAUX_H
 
-#include "MooseApp.h"
+#include "AuxKernel.h"
 
-class LynxApp;
+class LynxVelocityNormAux;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxVelocityNormAux>();
 
-class LynxApp : public MooseApp
+class LynxVelocityNormAux : public AuxKernel
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxVelocityNormAux(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeValue() override;
+
+  unsigned int _n_vel;
+  std::vector<const VariableValue *> _vel;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXVELOCITYNORMAUX_H

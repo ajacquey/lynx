@@ -18,24 +18,27 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXVELOCITYROOTMEANSQUARE_H
+#define LYNXVELOCITYROOTMEANSQUARE_H
 
-#include "MooseApp.h"
+#include "ElementIntegralPostprocessor.h"
 
-class LynxApp;
+class LynxVelocityRootMeanSquare;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxVelocityRootMeanSquare>();
 
-class LynxApp : public MooseApp
+class LynxVelocityRootMeanSquare : public ElementIntegralPostprocessor
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxVelocityRootMeanSquare(const InputParameters & parameters);
+  virtual Real getValue() override;
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpIntegral() override;
+
+  unsigned int _n_vel;
+  std::vector<const VariableValue *> _vel;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXVELOCITYROOTMEANSQUARE_H

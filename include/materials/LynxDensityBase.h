@@ -18,24 +18,37 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXDENSITYBASE_H
+#define LYNXDENSITYBASE_H
 
-#include "MooseApp.h"
+#include "LynxMaterialBase.h"
 
-class LynxApp;
+class LynxDensityBase;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxDensityBase>();
 
-class LynxApp : public MooseApp
+class LynxDensityBase : public LynxMaterialBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxDensityBase(const InputParameters & parameters);
+  virtual ~LynxDensityBase() {}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpGravity();
+
+  const VariableValue & _porosity;
+
+  bool _has_gravity;
+  Real _g;
+  // const std::vector<Real> _fluid_density;
+  const std::vector<Real> _solid_density;
+
+  MaterialProperty<RealVectorValue> & _gravity;
+  // MaterialProperty<Real> & _rho_f;
+  MaterialProperty<Real> & _rho_s;
+  MaterialProperty<Real> & _rho_b;
+  MaterialProperty<Real> & _reference_rho_b;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXDENSITYBASE_H

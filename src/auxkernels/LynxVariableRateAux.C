@@ -18,24 +18,37 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxVariableRateAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxVariableRateAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxVariableRateAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Computes the rate of change of a coupled scalar variable.");
+  params.addRequiredCoupledVar("coupled_variable", "The coupled variable.");
+  params.addParam<Real>("time_scale_factor", 1.0, "Multiply the time step size by this factor.");
+  params.addParam<bool>("output_relative", false,
+                        "If true, write gradient relative to the absolute value of coupled_variable.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxVariableRateAux::LynxVariableRateAux(const InputParameters & parameters)
+  : DerivativeMaterialInterface<AuxKernel>(parameters),
+    _cvar(coupledValue("coupled_variable")),
+    _cvar_old(coupledValueOld("coupled_variable")),
+    _tscale(getParam<Real>("time_scale_factor")),
+    _relative(getParam<bool>("output_relative"))
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxVariableRateAux::computeValue()
+{
+  if (_relative)
+    return (_cvar[_qp] - _cvar_old[_qp])/_cvar_old[_qp]/_dt/_tscale;
+  else
+    return (_cvar[_qp] - _cvar_old[_qp])/_dt/_tscale;
+}

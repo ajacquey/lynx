@@ -1,0 +1,7 @@
+[Tests]
+  [./thermal_expansion]
+    type = 'Exodiff'
+    input = 'thermal_expansion.i'
+    exodiff = 'thermal_expansion_out.e'
+  [../]
+[]

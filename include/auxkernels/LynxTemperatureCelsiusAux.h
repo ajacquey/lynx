@@ -18,24 +18,25 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXTEMPERATURECELSIUSAUX_H
+#define LYNXTEMPERATURECELSIUSAUX_H
 
-#include "MooseApp.h"
+#include "AuxKernel.h"
 
-class LynxApp;
+class LynxTemperatureCelsiusAux;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxTemperatureCelsiusAux>();
 
-class LynxApp : public MooseApp
+class LynxTemperatureCelsiusAux : public AuxKernel
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxTemperatureCelsiusAux(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeValue() override;
+
+  const VariableValue & _T_K;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXTEMPERATURECELSIUSAUX_H

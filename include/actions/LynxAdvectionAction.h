@@ -18,24 +18,60 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXADVECTIONACTION_H
+#define LYNXADVECTIONACTION_H
 
-#include "MooseApp.h"
+#include "Action.h"
 
-class LynxApp;
+class LynxAdvectionAction;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxAdvectionAction>();
 
-class LynxApp : public MooseApp
+class LynxAdvectionAction : public Action
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxAdvectionAction(InputParameters params);
+  enum ElementLengthType
+  {
+    MIN,
+    MAX,
+    AVERAGE
+  };
+  enum ExecuteOnType
+  {
+    TIMESTEP_BEGIN,
+    TIMESTEP_END
+  };
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+  virtual void act() override;
+
+protected:
+  virtual void createAuxVariableActions();
+  virtual void createAuxKernelActions();
+  virtual void createPostProcessorActions();
+  virtual void createKernelActions();
+
+  ElementLengthType _element_length_type;
+  ExecuteOnType _execute_on;
+
+  Real _beta_stabilization;
+  Real _cr_stabilization;
+  Real _coeff_Hs;
+
+  std::vector<VariableName> _velocities;
+  std::vector<VariableName> _displacements;
+  std::vector<VariableName> _compositional_phases;
+  std::vector<VariableName> _temperature;
+
+  std::vector<std::string> _aux_variables;
+  std::vector<std::string> _aux_kernels;
+  std::vector<std::string> _max_var_pp;
+  std::vector<std::string> _min_var_pp;
+  std::vector<std::string> _avg_var_pp;
+  std::vector<std::string> _max_entropy_pp;
+  std::vector<std::string> _min_entropy_pp;
+  std::vector<std::string> _avg_entropy_pp;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXADVECTIONACTION_H

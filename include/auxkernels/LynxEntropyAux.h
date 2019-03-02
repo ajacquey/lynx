@@ -17,25 +17,29 @@
 /*      You should have received a copy of the GNU General Public License     */
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
+#ifndef LYNXENTROPYAUX_H
+#define LYNXENTROPYAUX_H
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "AuxKernel.h"
+#include "DerivativeMaterialInterface.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
-
+class LynxEntropyAux;
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxEntropyAux>();
 
-class LynxApp : public MooseApp
+class LynxEntropyAux : public DerivativeMaterialInterface<AuxKernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxEntropyAux(const InputParameters & parameters);
+  virtual ~LynxEntropyAux() {}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeValue();
+  const VariableValue & _var_old;
+  const VariableValue & _var_older;
+
+  const PostprocessorValue & _pp_max_var;
+  const PostprocessorValue & _pp_min_var;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXENTROPY_H

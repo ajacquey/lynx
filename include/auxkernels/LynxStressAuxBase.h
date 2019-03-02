@@ -18,24 +18,25 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXSTRESSAUXBASE_H
+#define LYNXSTRESSAUXBASE_H
 
-#include "MooseApp.h"
+#include "AuxKernel.h"
+#include "RankTwoTensor.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxStressAuxBase;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxStressAuxBase>();
 
-class LynxApp : public MooseApp
+class LynxStressAuxBase : public DerivativeMaterialInterface<AuxKernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxStressAuxBase(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  const MaterialProperty<RankTwoTensor> & _stress;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXSTRESSAUXBASE_H

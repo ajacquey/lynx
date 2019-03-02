@@ -18,24 +18,40 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxComboPhasesAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxComboPhasesAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxComboPhasesAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Sample all compositional phases in one aux variable. It gets the "
+                             "index of the maximum phase at one quadrature point.");
+  params.addCoupledVar("compositional_phases", "The active compositional phases.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxComboPhasesAux::LynxComboPhasesAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _n_composition(coupledComponents("compositional_phases")),
+    _compositional_phases(_n_composition)
+{
+  for (unsigned i = 0; i < _n_composition; ++i)
+    _compositional_phases[i] = &coupledValue("compositional_phases", i);
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxComboPhasesAux::computeValue()
+{
+  Real phase = (*_compositional_phases[0])[_qp];
+  Real value = 0;
+  for (unsigned i = 1; i < _n_composition; ++i)
+    if ((*_compositional_phases[i])[_qp] > phase)
+    {
+      phase = (*_compositional_phases[i])[_qp];
+      value = i;
+    }
+  return value;
+}

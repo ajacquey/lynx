@@ -18,24 +18,30 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXHEATFLUXAUX_H
+#define LYNXHEATFLUXAUX_H
 
-#include "MooseApp.h"
+#include "AuxKernel.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxHeatFluxAux;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxHeatFluxAux>();
 
-class LynxApp : public MooseApp
+class LynxHeatFluxAux : public DerivativeMaterialInterface<AuxKernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxHeatFluxAux(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeValue() override;
+
+  const unsigned int _component;
+  const VariableGradient & _grad_T;
+  const MaterialProperty<Real> & _rhoC_b;
+  const MaterialProperty<Real> & _thermal_diff;
+  Real _cond_bulk;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LynxHeatFluxAux_H

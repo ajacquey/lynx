@@ -18,24 +18,19 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
-
-#include "MooseApp.h"
-
-class LynxApp;
+#include "LynxStressAuxBase.h"
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxStressAuxBase>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Base class for outputting stress values.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
-
-#endif /* LYNXAPP_H */
+LynxStressAuxBase::LynxStressAuxBase(const InputParameters & parameters)
+  : DerivativeMaterialInterface<AuxKernel>(parameters),
+    _stress(getMaterialProperty<RankTwoTensor>("stress"))
+{
+}

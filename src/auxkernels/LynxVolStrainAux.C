@@ -18,24 +18,27 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxVolStrainAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxVolStrainAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxVolStrainAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<LynxStrainAuxBase>();
+  params.addClassDescription(
+      "Access the volumetric part of the strain (total, inelastic, creep or plastic) tensor.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxVolStrainAux::LynxVolStrainAux(const InputParameters & parameters)
+  : LynxStrainAuxBase(parameters)
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxVolStrainAux::computeValue()
+{
+  return _u_old[_qp] + (*_strain_incr)[_qp].trace();
+}

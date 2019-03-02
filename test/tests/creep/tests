@@ -1,0 +1,17 @@
+[Tests]
+  [./viscoelastic_loading]
+    type = 'Exodiff'
+    input = 'viscoelastic_loading.i'
+    exodiff = 'viscoelastic_loading_out.e'
+  [../]
+  [./dislocation_custom]
+    type = 'Exodiff'
+    input = 'dislocation_custom.i'
+    exodiff = 'dislocation_custom_out.e'
+  [../]
+  [./stoke_inclusion]
+    type = 'Exodiff'
+    input = 'stoke_inclusion.i'
+    exodiff = 'stoke_inclusion_out.e'
+  [../]
+[]

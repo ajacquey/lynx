@@ -18,24 +18,23 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXDENSITYCONSTANT_H
+#define LYNXDENSITYCONSTANT_H
 
-#include "MooseApp.h"
+#include "LynxDensityBase.h"
 
-class LynxApp;
+class LynxDensityConstant;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxDensityConstant>();
 
-class LynxApp : public MooseApp
+class LynxDensityConstant : public LynxDensityBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxDensityConstant(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpProperties() override;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXDENSITYCONSTANT_H

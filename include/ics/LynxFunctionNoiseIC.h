@@ -18,24 +18,29 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXFUNCTIONNOISEIC_H
+#define LYNXFUNCTIONNOISEIC_H
 
-#include "MooseApp.h"
+#include "InitialCondition.h"
 
-class LynxApp;
+class LynxFunctionNoiseIC;
+class Function;
+class RandomIC;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxFunctionNoiseIC>();
 
-class LynxApp : public MooseApp
+class LynxFunctionNoiseIC : public InitialCondition
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxFunctionNoiseIC(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real value(const Point & p) override;
+  virtual RealGradient gradient(const Point & p) override;
+
+  Function & _func;
+  Real _rand_per;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXFUNCTIONNOISEIC_H

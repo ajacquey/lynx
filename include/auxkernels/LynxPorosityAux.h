@@ -18,24 +18,35 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXPOROSITYAUX_H
+#define LYNXPOROSITYAUX_H
 
-#include "MooseApp.h"
+#include "AuxKernel.h"
+#include "RankTwoTensor.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxPorosityAux;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxPorosityAux>();
 
-class LynxApp : public MooseApp
+class LynxPorosityAux : public DerivativeMaterialInterface<AuxKernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxPorosityAux(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeValue() override;
+  virtual Real computeEvDot();
+  virtual Real computeEvInDot();
+
+  bool _coupled_pf;
+  const VariableValue & _pf_dot;
+  const MaterialProperty<Real> & _biot;
+  const MaterialProperty<Real> & _C_d;
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
+  const MaterialProperty<RankTwoTensor> & _inelastic_strain;
+  const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXPOROSITYAUX_H

@@ -1,0 +1,37 @@
+[Tests]
+  [./shear]
+    type = 'Exodiff'
+    input = 'elastic_shear.i'
+    exodiff = 'elastic_shear_out.e'
+  [../]
+  [./vol_comp]
+    type = 'Exodiff'
+    input = 'elastic_vol_comp.i'
+    exodiff = 'elastic_vol_comp_out.e'
+  [../]
+  [./vol_ext]
+    type = 'Exodiff'
+    input = 'elastic_vol_ext.i'
+    exodiff = 'elastic_vol_ext_out.e'
+  [../]
+  [./grav]
+    type = 'Exodiff'
+    input = 'elastic_grav.i'
+    exodiff = 'elastic_grav_out.e'
+  [../]
+  [./grav_lithostatic_pressure]
+    type = 'Exodiff'
+    input = 'elastic_grav_p_lith.i'
+    exodiff = 'elastic_grav_p_lith_out.e'
+  [../]
+  [./bending_plate]
+    type = 'Exodiff'
+    input = 'elastic_bending_plate.i'
+    exodiff = 'elastic_bending_plate_out.e'
+  [../]
+#  [./initial_stress]
+#    type = 'Exodiff'
+#    input = 'elastic_initial_stress.i'
+#    exodiff = 'elastic_initial_stress_out.e'
+#  [../]
+[]

@@ -17,25 +17,38 @@
 /*      You should have received a copy of the GNU General Public License     */
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
+#ifndef LYNXDENSITYCOMPRESSIBLE_H
+#define LYNXDENSITYCOMPRESSIBLE_H
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxDensityBase.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+class LynxDensityCompressible;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxDensityCompressible>();
 
-class LynxApp : public MooseApp
+class LynxDensityCompressible : public LynxDensityBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxDensityCompressible(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  void computeQpProperties();
+
+  const bool _coupled_temp;
+  const VariableValue & _temp;
+  const VariableValue & _reference_temperature;
+  const std::vector<Real> _beta_solid;
+  // const bool _temperature_from_multiapp;
+  MaterialProperty<Real> & _drho_dtemp;
+  MaterialProperty<Real> & _drho_dev;
+  MaterialProperty<Real> & _dinvrho_dtemp;
+  MaterialProperty<Real> & _dinvrho_dev;
+
+  const bool _coupled_plith;
+  const VariableValue & _plith;
+  const MaterialProperty<RankTwoTensor> & _stress;
+  const MaterialProperty<Real> & _K;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXDENSITYCOMPRESSIBLE_H

@@ -18,24 +18,24 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXADVECTIONCOMPOSITION_H
+#define LYNXADVECTIONCOMPOSITION_H
 
-#include "MooseApp.h"
+#include "LynxAdvectionBase.h"
 
-class LynxApp;
+class LynxAdvectionComposition;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxAdvectionComposition>();
 
-class LynxApp : public MooseApp
+class LynxAdvectionComposition : public LynxAdvectionBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxAdvectionComposition(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeArtificialViscosity() override;
+  virtual void computeEntropyResidual();
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXADVECTIONCOMPOSITION_H

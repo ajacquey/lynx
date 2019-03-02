@@ -18,24 +18,28 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXPRESSUREBC_H
+#define LYNXPRESSUREBC_H
 
-#include "MooseApp.h"
+#include "IntegratedBC.h"
 
-class LynxApp;
+class LynxPressureBC;
+class Function;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxPressureBC>();
 
-class LynxApp : public MooseApp
+class LynxPressureBC : public IntegratedBC
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxPressureBC(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual();
+
+  const int _component;
+  const Real _value;
+  Function * const _function;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXPRESSUREBC_H

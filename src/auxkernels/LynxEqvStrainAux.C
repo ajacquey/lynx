@@ -18,24 +18,27 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxEqvStrainAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxEqvStrainAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxEqvStrainAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<LynxStrainAuxBase>();
+  params.addClassDescription(
+      "Calculates the equivalent strain of the given tensor.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxEqvStrainAux::LynxEqvStrainAux(const InputParameters & parameters)
+  : LynxStrainAuxBase(parameters)
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxEqvStrainAux::computeValue()
+{
+  return _u_old[_qp] + std::sqrt(2.0 / 3.0) * (*_strain_incr)[_qp].deviatoric().L2norm();
+}

@@ -18,24 +18,34 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXWINKLERBC_H
+#define LYNXWINKLERBC_H
 
-#include "MooseApp.h"
+#include "IntegratedBC.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxWinklerBC;
+class Function;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxWinklerBC>();
 
-class LynxApp : public MooseApp
+class LynxWinklerBC : public DerivativeMaterialInterface<IntegratedBC>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxWinklerBC(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual();
+
+  unsigned int _ndisp;
+  std::vector<const VariableValue *> _disp;
+  const int _component;
+  const Real _value;
+  Function * const _function;
+  const Real _rho_ext;
+  const Real _g;
+  const MaterialProperty<Real> & _rho_b;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXWINKLERBC_H

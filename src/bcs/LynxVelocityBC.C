@@ -18,24 +18,37 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxVelocityBC.h"
+#include "Function.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxVelocityBC);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxVelocityBC>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<PresetNodalBC>();
+  params.addClassDescription("Applies a velocity whose value is described by a function.");
+  params.addParam<Real>("value", 0.0, "Value of the velocity applied.");
+  params.addParam<FunctionName>("function", "Function giving the velocity applied.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxVelocityBC::LynxVelocityBC(const InputParameters & parameters)
+  : PresetNodalBC(parameters),
+    _u_old(valueOld()),
+    _value(getParam<Real>("value")),
+    _function(isParamValid("function") ? &getFunction("function") : NULL)
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxVelocityBC::computeQpValue()
+{
+  Real value = _value;
+
+  if (_function)
+    value = _function->value(_t, *_current_node);
+
+  return _u_old[_qp] + value * _dt;
+}

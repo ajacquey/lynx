@@ -18,24 +18,30 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXHEATFLUXBC_H
+#define LYNXHEATFLUXBC_H
 
-#include "MooseApp.h"
+#include "IntegratedBC.h"
 
-class LynxApp;
+class LynxHeatFluxBC;
+class Function;
+class MooseRandom;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxHeatFluxBC>();
 
-class LynxApp : public MooseApp
+class LynxHeatFluxBC : public IntegratedBC
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxHeatFluxBC(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual() override;
+
+  const Real & _value;
+  Function * const _function;
+  Real _rand_per;
+  const MaterialProperty<Real> & _rhoC_b;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXHEATFLUXBC_H

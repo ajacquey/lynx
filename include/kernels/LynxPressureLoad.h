@@ -18,24 +18,28 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXPRESSURELOAD_H
+#define LYNXPRESSURELOAD_H
 
-#include "MooseApp.h"
+#include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxPressureLoad;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxPressureLoad>();
 
-class LynxApp : public MooseApp
+class LynxPressureLoad : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxPressureLoad(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+
+  const MaterialProperty<Real> & _bulk_density;
+  const MaterialProperty<RealVectorValue> & _gravity;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXPRESSURELOAD_H

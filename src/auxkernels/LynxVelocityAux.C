@@ -18,24 +18,34 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxVelocityAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxVelocityAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxVelocityAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredCoupledVar("displacement",
+                               "The displacement variable to calculate the velocity.");
+  params.addClassDescription("Calculates a component of the solid velocity based on displacement.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxVelocityAux::LynxVelocityAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _disp(coupledValue("displacement")),
+    _disp_old(_is_transient ? coupledValueOld("displacement") : _zero)
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxVelocityAux::computeValue()
+{
+  Real inv_dt = 1.0;
+  if (_is_transient)
+    inv_dt /= _dt;
+
+  return (_disp[_qp] - _disp_old[_qp]) * inv_dt;
+}

@@ -18,24 +18,26 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXELEMENTAVERAGEVALUE_H
+#define LYNXELEMENTAVERAGEVALUE_H
 
-#include "MooseApp.h"
+#include "ElementAverageValue.h"
 
-class LynxApp;
+class LynxElementAverageValue;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxElementAverageValue>();
 
-class LynxApp : public MooseApp
+class LynxElementAverageValue : public ElementAverageValue
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxElementAverageValue(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpIntegral() override;
+
+  const VariableValue & _value_old;
+  const VariableValue & _value_older;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXELEMENTAVERAGEVALUE_H

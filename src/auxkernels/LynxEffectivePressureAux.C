@@ -18,24 +18,26 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxEffectivePressureAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxEffectivePressureAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxEffectivePressureAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<LynxStressAuxBase>();
+  params.addClassDescription("Calculates the effective pressure.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxEffectivePressureAux::LynxEffectivePressureAux(const InputParameters & parameters)
+  : LynxStressAuxBase(parameters)
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxEffectivePressureAux::computeValue()
+{
+  return -_stress[_qp].trace() / 3.0;
+}

@@ -18,24 +18,37 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxStrainAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxStrainAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxStrainAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<LynxStrainAuxBase>();
+  params.addClassDescription(
+      "Access a component of the strain (total, inelastic or plastic) tensor.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "index_i",
+      "index_i >= 0 & index_i <= 2",
+      "The index i of ij for the stress tensor (0, 1, 2)");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "index_j",
+      "index_j >= 0 & index_j <= 2",
+      "The index j of ij for the stress tensor (0, 1, 2)");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxStrainAux::LynxStrainAux(const InputParameters & parameters)
+  : LynxStrainAuxBase(parameters),
+    _i(getParam<unsigned int>("index_i")),
+    _j(getParam<unsigned int>("index_j"))
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxStrainAux::computeValue()
+{
+  return _u_old[_qp] + (*_strain_incr)[_qp](_i, _j);
+}

@@ -18,24 +18,36 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXMATERIALBASE_H
+#define LYNXMATERIALBASE_H
 
-#include "MooseApp.h"
+#include "Material.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxMaterialBase;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxMaterialBase>();
 
-class LynxApp : public MooseApp
+class LynxMaterialBase : public DerivativeMaterialInterface<Material>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxMaterialBase(const InputParameters & parameters);
+  virtual ~LynxMaterialBase() {}
+  static MooseEnum averageType();
+  template <typename T>
+  const std::vector<T> & getLynxParam(const std::string & name) const;
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real averageProperty(const std::vector<Real> & properties);
+  virtual Real arithmetic_average(const std::vector<Real> & properties);
+  virtual Real harmonic_average(const std::vector<Real> & properties);
+  virtual Real max_average(const std::vector<Real> & properties);
+
+  bool _has_compositional_phases;
+  unsigned int _n_composition;
+  const MooseEnum _average_type;
+  std::vector<const VariableValue *> _compositional_phases;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXSTRAINBASE_H

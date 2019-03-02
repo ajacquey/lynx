@@ -18,24 +18,41 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxPressureBC.h"
+#include "Function.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxPressureBC);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxPressureBC>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<IntegratedBC>();
+  params.addClassDescription("Applies a pressure on a given boundary in a given direction.");
+  params.addRequiredParam<unsigned int>("component", "The component for the pressure.");
+  params.addParam<Real>("value", 0.0, "Value of the pressure applied.");
+  params.addParam<FunctionName>("function", "The function that describes the pressure.");
+  params.set<bool>("use_displaced_mesh") = false;
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxPressureBC::LynxPressureBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
+    _component(getParam<unsigned int>("component")),
+    _value(getParam<Real>("value")),
+    _function(isParamValid("function") ? &getFunction("function") : NULL)
+{
+  if (_component > 2)
+    mooseError("Invalid component given for ", name(), ": ", _component, ".\n");
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxPressureBC::computeQpResidual()
+{
+  Real value = _value;
+
+  if (_function)
+    value = _function->value(_t, _q_point[_qp]);
+
+  return value * (_normals[_qp](_component) * _test[_i][_qp]);
+}

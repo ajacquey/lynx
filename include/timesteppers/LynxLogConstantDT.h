@@ -18,24 +18,32 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXLOGCONSTANTDT_H
+#define LYNXLOGCONSTANTDT_H
 
-#include "MooseApp.h"
+#include "TimeStepper.h"
 
-class LynxApp;
+class LynxLogConstantDT;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxLogConstantDT>();
 
-class LynxApp : public MooseApp
+class LynxLogConstantDT : public TimeStepper
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxLogConstantDT(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
+
+private:
+
+  const Real _log_dt;
+  const Real _first_dt;
+  const Real _max_dt;
+  const Real _dt_factor;
+  const Real _growth_factor;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXLOGCONSTANTDT_H

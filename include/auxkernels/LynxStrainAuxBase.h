@@ -18,24 +18,28 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXSTRAINAUXBASE_H
+#define LYNXSTRAINAUXBASE_H
 
-#include "MooseApp.h"
+#include "AuxKernel.h"
+#include "RankTwoTensor.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxStrainAuxBase;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxStrainAuxBase>();
 
-class LynxApp : public MooseApp
+class LynxStrainAuxBase : public DerivativeMaterialInterface<AuxKernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxStrainAuxBase(const InputParameters & parameters);
+  static MooseEnum strainType();
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  MooseEnum _strain_type;
+  std::string _strain_name;
+  const MaterialProperty<RankTwoTensor> * _strain_incr;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXSTRAINAUXBASE_H

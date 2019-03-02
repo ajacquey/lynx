@@ -1,0 +1,7 @@
+[Tests]
+  [./phase_1D]
+    type = 'Exodiff'
+    input = 'advection_phase_1D.i'
+    exodiff = 'advection_phase_1D_out.e'
+  [../]
+[]

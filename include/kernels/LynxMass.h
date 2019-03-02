@@ -18,24 +18,40 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXMASS_H
+#define LYNXMASS_H
 
-#include "MooseApp.h"
+#include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxMass;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxMass>();
 
-class LynxApp : public MooseApp
+class LynxMass : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxMass(const InputParameters & parameters);
+  virtual ~LynxMass() {}
+  enum PenaltyType
+  {
+    LINEAR,
+    LAPLACE
+  };
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned jvar);
+
+  PenaltyType _penalty_type;
+
+  unsigned _ndisp;
+  std::vector<unsigned> _disp_var;
+
+  const MaterialProperty<Real> & _penalty;
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXMASS_H

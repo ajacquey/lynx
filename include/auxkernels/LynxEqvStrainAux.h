@@ -18,24 +18,23 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXEQVSTRAINAUX_H
+#define LYNXEQVSTRAINAUX_H
 
-#include "MooseApp.h"
+#include "LynxStrainAuxBase.h"
 
-class LynxApp;
+class LynxEqvStrainAux;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxEqvStrainAux>();
 
-class LynxApp : public MooseApp
+class LynxEqvStrainAux : public LynxStrainAuxBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxEqvStrainAux(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeValue() override;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXEQVSTRAINAUX_H

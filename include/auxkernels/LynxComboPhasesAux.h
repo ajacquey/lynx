@@ -18,24 +18,26 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXCOMBOPHASESAUX_H
+#define LYNXCOMBOPHASESAUX_H
 
-#include "MooseApp.h"
+#include "AuxKernel.h"
 
-class LynxApp;
-
+class LynxComboPhasesAux;
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxComboPhasesAux>();
 
-class LynxApp : public MooseApp
+class LynxComboPhasesAux : public AuxKernel
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxComboPhasesAux(const InputParameters & parameters);
+  virtual ~LynxComboPhasesAux() {}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeValue();
+
+  unsigned _n_composition;
+  std::vector<const VariableValue *> _compositional_phases;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXCOMBOPHASESAUX_H

@@ -18,24 +18,49 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxLogConstantDT.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("MooseApp", LynxLogConstantDT);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxLogConstantDT>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<TimeStepper>();
+  params.addClassDescription(
+      "TimeStepper which imposes a time step constant in the logarithmic space");
+  params.addRequiredRangeCheckedParam<Real>("log_dt", "log_dt > 0", "Time step in log10(time)");
+  params.addRequiredRangeCheckedParam<Real>(
+      "first_dt", "first_dt > 0", "Initial time step (in absolute time)");
+  params.addRequiredRangeCheckedParam<Real>("max_dt", "max_dt > 0", "Maximum value of time step.");
+  params.addRangeCheckedParam<Real>(
+      "growth_factor",
+      2,
+      "growth_factor>=1",
+      "Maximum ratio of new to previous timestep sizes following a step that required the time"
+      " step to be cut due to a failed solve.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxLogConstantDT::LynxLogConstantDT(const InputParameters & parameters)
+  : TimeStepper(parameters),
+    _log_dt(getParam<Real>("log_dt")),
+    _first_dt(getParam<Real>("first_dt")),
+    _max_dt(getParam<Real>("max_dt")),
+    _dt_factor(std::pow(10.0, _log_dt)),
+    _growth_factor(getParam<Real>("growth_factor"))
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxLogConstantDT::computeInitialDT()
+{
+  return _first_dt;
+}
+
+Real
+LynxLogConstantDT::computeDT()
+{
+  Real next = _time * _dt_factor;
+  return std::min(next - _time, std::min(_growth_factor * getCurrentDT(), _max_dt));
+}

@@ -18,24 +18,30 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxTemperatureCelsiusAux.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxTemperatureCelsiusAux);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxTemperatureCelsiusAux>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredCoupledVar("temperature",
+                               "The temperature variable to convert to Celsius.");
+  params.addClassDescription("Converts Kelvin to degree Celsius.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxTemperatureCelsiusAux::LynxTemperatureCelsiusAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _T_K(coupledValue("temperature"))
+{
+}
 
-#endif /* LYNXAPP_H */
+Real
+LynxTemperatureCelsiusAux::computeValue()
+{
+  Real dt_K = 273.15;
+  return _T_K[_qp] - dt_K;
+}

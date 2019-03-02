@@ -18,24 +18,31 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "LynxDensityConstant.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+registerMooseObject("LynxApp", LynxDensityConstant);
 
 template <>
-InputParameters validParams<LynxApp>();
-
-class LynxApp : public MooseApp
+InputParameters
+validParams<LynxDensityConstant>()
 {
-public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  InputParameters params = validParams<LynxDensityBase>();
+  params.addClassDescription("Material calculating densities as constant values.");
+  return params;
+}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-};
+LynxDensityConstant::LynxDensityConstant(const InputParameters & parameters)
+  : LynxDensityBase(parameters)
+{
+}
 
-#endif /* LYNXAPP_H */
+void
+LynxDensityConstant::computeQpProperties()
+{
+  computeQpGravity();
+  // _rho_f[_qp] = averageProperty(_fluid_density);
+  _rho_s[_qp] = averageProperty(_solid_density);
+  // _rho_b[_qp] = _porosity[_qp] * _rho_f[_qp] + (1.0 - _porosity[_qp]) * _rho_s[_qp];
+  _rho_b[_qp] = _rho_s[_qp];
+  _reference_rho_b[_qp] = _rho_s[_qp];
+}

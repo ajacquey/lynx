@@ -17,25 +17,26 @@
 /*      You should have received a copy of the GNU General Public License     */
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
+#ifndef LYNXEXTREMEVECTORVALUE_H
+#define LYNXEXTREMEVECTORVALUE_H
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "ElementExtremeValue.h"
+#include "DerivativeMaterialInterface.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+class LynxExtremeVectorValue;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxExtremeVectorValue>();
 
-class LynxApp : public MooseApp
+class LynxExtremeVectorValue : public DerivativeMaterialInterface<ElementExtremeValue>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxExtremeVectorValue(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpValue() override;
+  const VariableValue & _v;
+  const VariableValue & _w;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXEXTREMESCALARVALUE_H

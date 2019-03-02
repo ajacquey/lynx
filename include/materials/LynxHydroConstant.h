@@ -18,24 +18,31 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXHYDROCONSTANT
+#define LYNXHYDROCONSTANT
 
-#include "MooseApp.h"
+#include "LynxHydroBase.h"
 
-class LynxApp;
+class LynxHydroConstant;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxHydroConstant>();
 
-class LynxApp : public MooseApp
+class LynxHydroConstant : public LynxHydroBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxHydroConstant(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpFluidCompressibility() override;
+  virtual void computeQpSolidCompressibility() override;
+  virtual void computeQpPermeability() override;
+  virtual void computeQpFluidViscosity() override;
+
+  std::vector<Real> _perm;
+  std::vector<Real> _fluid_viscosity;
+  std::vector<Real> _fluid_compr;
+  std::vector<Real> _solid_compr;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXHYDROCONSTANT

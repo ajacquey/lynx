@@ -17,25 +17,36 @@
 /*      You should have received a copy of the GNU General Public License     */
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
+#ifndef LYNXEXPLICITTIMESTEPSELECTOR_H
+#define LYNXEXPLICITTIMESTEPSELECTOR_H
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#include "ElementPostprocessor.h"
+#include "DerivativeMaterialInterface.h"
 
-#include "MooseApp.h"
-
-class LynxApp;
+class LynxExplicitTimeStepSelector;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxExplicitTimeStepSelector>();
 
-class LynxApp : public MooseApp
+class LynxExplicitTimeStepSelector : public DerivativeMaterialInterface<ElementPostprocessor>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxExplicitTimeStepSelector(const InputParameters & parameters);
+  virtual ~LynxExplicitTimeStepSelector();
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+  virtual void initialize();
+  virtual void execute();
+  virtual Real getValue();
+  virtual void threadJoin(const UserObject & uo);
+
+protected:
+  Real _value;
+  const VariableValue & _vel_norm;
+  Real _beta;
+  Real _epsilon;
+  bool _has_premult;
+  Real _initial_value;
+  Real _maximum_value;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXEXPLICITTIMESTEPSELECTOR_H

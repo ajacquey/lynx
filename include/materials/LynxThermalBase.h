@@ -18,24 +18,55 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXTHERMALBASE_H
+#define LYNXTHERMALBASE_H
 
-#include "MooseApp.h"
+#include "LynxMaterialBase.h"
+#include "RankTwoTensor.h"
 
-class LynxApp;
+class LynxThermalBase;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxThermalBase>();
 
-class LynxApp : public MooseApp
+class LynxThermalBase : public LynxMaterialBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxThermalBase(const InputParameters & parameters);
+  virtual ~LynxThermalBase() {}
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpProperties() override;
+  virtual void computeQpSpecificHeat();
+  virtual void computeQpThermalDiff();
+  virtual void computeQpThermalExpansion();
+  virtual void computeQpThermalStrain();
+  virtual void computeQpThermalSource();
+  virtual void computeQpHeatCap() = 0;
+  virtual void computeQpThermalCond() = 0;
+  virtual void computeQpThermalExp() = 0;
+  virtual Real computeMixtureProperty(const Real fluid_prop, const Real solid_prop);
+
+  const VariableValue & _temp_dot;
+  const VariableValue & _porosity;
+  const std::vector<Real> _heat_source;
+
+  const MaterialProperty<Real> & _rho_f;
+  const MaterialProperty<Real> & _rho_s;
+  MaterialProperty<Real> & _thermal_diff;
+  MaterialProperty<Real> & _rhoC_b;
+  MaterialProperty<Real> & _rhoC_f;
+  MaterialProperty<Real> & _thermal_exp;
+  MaterialProperty<RankTwoTensor> & _thermal_strain_incr;
+  MaterialProperty<RankTwoTensor> & _dthermal_strain_dtemp;
+  MaterialProperty<Real> & _radiogenic_heat;
+
+  std::vector<Real> _c_f;
+  std::vector<Real> _c_s;
+  std::vector<Real> _lambda_f;
+  std::vector<Real> _lambda_s;
+  std::vector<Real> _beta_f;
+  std::vector<Real> _beta_s;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXTHERMALBASE_H

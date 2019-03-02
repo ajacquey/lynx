@@ -1,0 +1,32 @@
+[Tests]
+  [./oedometer]
+    type = 'Exodiff'
+    input = 'oedometer.i'
+    exodiff = 'oedometer_out.e'
+  [../]
+  [./oedometer_vp]
+    type = 'Exodiff'
+    input = 'oedometer_vp.i'
+    exodiff = 'oedometer_vp_out.e'
+  [../]
+  [./uniaxial]
+    type = 'Exodiff'
+    input = 'uniaxial.i'
+    exodiff = 'uniaxial_out.e'
+  [../]
+  [./uniaxial_vp]
+    type = 'Exodiff'
+    input = 'uniaxial_vp.i'
+    exodiff = 'uniaxial_vp_out.e'
+  [../]
+  [./uniaxial_hardening]
+    type = 'Exodiff'
+    input = 'uniaxial_hardening.i'
+    exodiff = 'uniaxial_hardening_out.e'
+  [../]
+  [./uniaxial_hardening_vp]
+    type = 'Exodiff'
+    input = 'uniaxial_hardening_vp.i'
+    exodiff = 'uniaxial_hardening_vp_out.e'
+  [../]
+[]

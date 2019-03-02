@@ -18,24 +18,30 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXHEATCONDUCTION_H
+#define LYNXHEATCONDUCTION_H
 
-#include "MooseApp.h"
+#include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxApp;
+class LynxHeatConduction;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxHeatConduction>();
 
-class LynxApp : public MooseApp
+class LynxHeatConduction : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxHeatConduction(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  // virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  const MaterialProperty<Real> & _thermal_diff;
+  const MaterialProperty<Real> & _rho;
+  const MaterialProperty<Real> & _dinvrho_dtemp;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXHEATCONDUCTION_H

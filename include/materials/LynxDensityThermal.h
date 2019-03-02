@@ -18,24 +18,33 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#ifndef LYNXDENSITYTHERMAL_H
+#define LYNXDENSITYTHERMAL_H
 
-#include "MooseApp.h"
+#include "LynxDensityBase.h"
+#include "Function.h"
 
-class LynxApp;
+class LynxDensityThermal;
 
 template <>
-InputParameters validParams<LynxApp>();
+InputParameters validParams<LynxDensityThermal>();
 
-class LynxApp : public MooseApp
+class LynxDensityThermal : public LynxDensityBase
 {
 public:
-  LynxApp(InputParameters parameters);
-  virtual ~LynxApp();
+  LynxDensityThermal(const InputParameters & parameters);
 
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+protected:
+  virtual void computeQpProperties() override;
+
+  const VariableValue & _temperature;
+
+  MaterialProperty<Real> & _drho_dtemp;
+  MaterialProperty<Real> & _dinvrho_dtemp;
+  // const std::vector<Real> _beta_fluid;
+  const std::vector<Real> _beta_solid;
+  Real _temp_ref;
+  Function * const _temp_ref_fct;
 };
 
-#endif /* LYNXAPP_H */
+#endif // LYNXDENSITYTHERMAL_H
