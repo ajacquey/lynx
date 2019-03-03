@@ -35,7 +35,10 @@ public:
   virtual ~LynxDamageDeformation() {}
 
 protected:
-  virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev);
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpDeformation() override;
+  virtual void elasticModuli() override;
+  virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) override;
   virtual void convexPlasticCorrection(Real & pressure, RankTwoTensor & stress_dev);
   virtual Real convexReferencePressure(const Real & p_tr, const Real & q_tr);
   virtual Real convexPlasticYield2(const Real & rho);
@@ -44,7 +47,7 @@ protected:
   virtual Real dConvexPlasticYield2_dp(const Real & pressure, const Real & eqv_stress);
   virtual Real dConvexPlasticYield2_dq(const Real & pressure, const Real & eqv_stress);
   virtual Real getConvexProjection(const Real & x1, const Real & x2);
-
+  virtual Real strainRatio(const RankTwoTensor & elastic_strain);
   // Coupled variables
   bool _coupled_dam;
   const VariableValue & _damage;
@@ -53,10 +56,10 @@ protected:
   const VariableValue & _porosity;
 
   // Strain parameters
-  
+
   // Elastic moduli parameters
   const std::vector<Real> _damage_modulus;
-  
+
   // Creep parameters
 
   // Plastic parameters
@@ -77,6 +80,8 @@ protected:
   Real _p_k;
 
   // Strain properties
+  MaterialProperty<RankTwoTensor> & _elastic_strain;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
   // Viscous properties
 

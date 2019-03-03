@@ -60,13 +60,79 @@ LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
     // Plastic parameters
     _critical_pressure((_has_plasticity && isParamValid("critical_pressure"))
                            ? getLynxParam<Real>("critical_pressure")
-                           : std::vector<Real>(_n_composition, 0.0))
-// Rheology boolean
-// Strain properties
+                           : std::vector<Real>(_n_composition, 0.0)),
+    // Rheology boolean
+    // Strain properties
+    _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
+    _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("elastic_strain"))
 // Viscous properties
 // Plastic properties
 // Stress properties
 {
+}
+
+void
+LynxDamageDeformation::initQpStatefulProperties()
+{
+  _elastic_strain[_qp].zero();
+  LynxDeformation::initQpStatefulProperties();
+}
+
+void
+LynxDamageDeformation::computeQpDeformation()
+{
+  // Update elastic moduli
+  elasticModuli();
+
+  // Update the volumetric part of the deformation
+  Real pressure = -_stress_old[_qp].trace() / 3.0;
+  volumetricDeformation(pressure);
+
+  // Update the deviatoric part of the deformation
+  RankTwoTensor stress_dev = spinRotation(_stress_old[_qp].deviatoric());
+  deviatoricDeformation(pressure, stress_dev);
+
+  // Plastic correction
+  if (_has_plasticity && _G[_qp] != 0.0)
+    plasticCorrection(pressure, stress_dev);
+
+  // Form the total stress tensor
+  _stress[_qp] = stress_dev;
+  _stress[_qp].addIa(-pressure);
+
+  // Update tangent operator modulus
+  if (_fe_problem.currentlyComputingJacobian())
+    tangentOperator();
+}
+
+void
+LynxDamageDeformation::elasticModuli()
+{
+  // Elastic strain ratio
+  const Real xi_old = strainRatio(_elastic_strain_old[_qp]);
+
+  // Critical strain strain ratio
+  _xi0 =
+
+  // Bulk modulus
+  _K[_qp] = _has_bulk_modulus ? averageProperty(_bulk_modulus) : 0.0;
+
+  // Shear modulus
+  _G[_qp] = _has_shear_modulus ? averageProperty(_shear_modulus) : 0.0;
+
+  // Initialize inelastic increment
+  _viscous_strain_incr[_qp].zero();
+  _plastic_strain_incr[_qp].zero();
+
+  // Initialize stuff
+  _stress_corr_v = 1.0;
+  _dq_dq_tr_v = 1.0;
+  _stress_corr_p = 1.0;
+  _dp_dp_tr_p = 1.0;
+  _dp_dq_tr_p = 0.0;
+  _dq_dp_tr_p = 0.0;
+  _dq_dq_tr_p = 1.0;
+  _plastic_yield_function[_qp] = -1.0;
 }
 
 void
@@ -137,7 +203,7 @@ LynxDamageDeformation::convexPlasticCorrection(Real & pressure, RankTwoTensor & 
     // Plastic strain
     Real vol_strain_p = (_p_tr - p_0) / _K[_qp];
     Real eqv_strain_p = (_q_tr - q_0) / (3.0 * _G[_qp]);
-    
+
     // Viscoplastic correction
     if (one_on_eta != 0.0)
     {
@@ -145,14 +211,14 @@ LynxDamageDeformation::convexPlasticCorrection(Real & pressure, RankTwoTensor & 
       Real delta_p = std::sqrt(Utility::pow<2>(vol_strain_p) + Utility::pow<2>(eqv_strain_p));
 
       vp_correction = (F_tr * one_on_eta * _dt / delta_p) / (1.0 + F_tr * one_on_eta * _dt / delta_p);
-      
+
       vol_strain_p *= vp_correction;
       eqv_strain_p *= vp_correction;
     }
 
     _plastic_strain_incr[_qp] = 1.5 * eqv_strain_p * flow_dir;
     _plastic_strain_incr[_qp].addIa(-vol_strain_p / 3.0);
-    pressure -= _K[_qp] * vol_strain_p; 
+    pressure -= _K[_qp] * vol_strain_p;
     stress_dev -= 3.0 * _G[_qp] * eqv_strain_p * flow_dir;
     eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
     _plastic_yield_function[_qp] =
@@ -268,10 +334,6 @@ LynxDamageDeformation::dConvexPlasticYield2_dq(const Real & pressure, const Real
   Real xi_cr =
       (pressure > 0.0) ? _xi0 - (std::sqrt(3.0) + _xi0) * pressure / _p_cr * pq_term : _xi0;
   Real dxi_cr_dq = (eqv_stress != 0.0) ? 2.0 * (_xi0 - xi_cr) / eqv_stress * (1.0 - pq_term) : 0.0;
-
-  Real mu2 = (xi_cr != 0.0) ? 2.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) *
-                                  (3.0 - Utility::pow<2>(xi_cr)) / Utility::pow<2>(xi_cr)
-                            : 0.0;
   Real dmu2_dxi_cr =
       (xi_cr != 0.0) ? -12.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) / Utility::pow<3>(xi_cr) : 0.0;
 
@@ -371,4 +433,16 @@ LynxDamageDeformation::getConvexProjection(const Real & x1, const Real & x2)
   }
   throw MooseException(
       "LynxDamageDeformation: maximum number of iterations exceeded in solveBrent!");
+}
+
+Real
+LynxDamageDeformation::strainRatio(const RankTwoTensor & elastic_strain)
+{
+  const Real strain_v = elastic_strain.trace();
+  const Real strain_norm = elastic_strain.L2norm();
+
+  if (strain_norm != 0.0)
+    return strain_v / strain_norm;
+  else
+    return -std::sqrt(3.0);
 }
