@@ -27,274 +27,367 @@ template <>
 InputParameters
 validParams<LynxDamageDeformation>()
 {
-  InputParameters params = validParams<LynxDeformation>();
+  InputParameters params = validParams<LynxDeformationBase>();
   params.addClassDescription("Class calculating the deformation of a material following a "
                              "damage viscoelasto-(visco)plastic rheology.");
   // Coupled variables
   params.addCoupledVar("damage", "The damage variable.");
   params.addCoupledVar("porosity", "The porosity variable.");
-  // Strain parameters
   // Elastic moduli parameters
   params.addParam<std::vector<Real>>("damage_modulus",
-                                     "The third elastic damage modulus for the damage heology.");
-  // Creep parameters
-  // Plastic parameters
-  params.addParam<std::vector<Real>>("critical_pressure",
-                                     "The critical pressure for capped plastic models.");
+                                     "The third elastic damage modulus for the damage rheology.");
+  // Damage-Plasticity parameters
+  params.addParam<std::vector<Real>>(
+      "friction_angle",
+      "The friction angle of the material for the pressure-dependant part of the yield stress.");
+  params.addParam<std::vector<Real>>(
+      "porous_coeff",
+      "The porous coefficient controlling the capped yield in the damage rheology.");
+  params.addParam<std::vector<Real>>(
+      "porous_coeff_linear", "The linear dependency of the porous coefficient to porosity.");
+  params.addParam<std::vector<Real>>(
+      "plastic_viscosity",
+      "The reference viscosity in the generalized Duvaut-Lions viscoplastic formulation.");
+  params.addParam<std::vector<Real>>("damage_viscosity",
+                                     "The reference viscosity in the damage rheology.");
   return params;
 }
 
 LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
-  : LynxDeformation(parameters),
+  : LynxDeformationBase(parameters),
     // Coupled variables
     _coupled_dam(isCoupled("damage")),
     _damage(_coupled_dam ? coupledValue("damage") : _zero),
     _damage_old(_coupled_dam ? coupledValueOld("damage") : _zero),
     _coupled_phi(isCoupled("porosity")),
     _porosity(_coupled_phi ? coupledValue("porosity") : _zero),
-    // Strain parameters
     // Elastic moduli parameters
     _damage_modulus(isParamValid("damage_modulus") ? getLynxParam<Real>("damage_modulus")
                                                    : std::vector<Real>(_n_composition, 0.0)),
-    // Creep parameters
-    // Plastic parameters
-    _critical_pressure((_has_plasticity && isParamValid("critical_pressure"))
-                           ? getLynxParam<Real>("critical_pressure")
-                           : std::vector<Real>(_n_composition, 0.0)),
-    // Rheology boolean
+
+    // Damage-Plasticity parameters
+    _friction_angle(isParamValid("friction_angle") ? getLynxParam<Real>("friction_angle")
+                                                   : std::vector<Real>(_n_composition, 0.0)),
+    _porous_coeff(isParamValid("porous_coeff") ? getLynxParam<Real>("porous_coeff")
+                                               : std::vector<Real>(_n_composition, 0.0)),
+    _porous_coeff_linear(isParamValid("porous_coeff_linear")
+                             ? getLynxParam<Real>("porous_coeff_linear")
+                             : std::vector<Real>(_n_composition, 0.0)),
+    _one_on_plastic_eta(isParamValid("plastic_viscosity") ? getLynxParam<Real>("plastic_viscosity")
+                                                          : std::vector<Real>(_n_composition, 0.0)),
+    _one_on_damage_eta(isParamValid("damage_viscosity") ? getLynxParam<Real>("damage_viscosity")
+                                                        : std::vector<Real>(_n_composition, 0.0)),
     // Strain properties
     _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
     _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("elastic_strain"))
-// Viscous properties
-// Plastic properties
-// Stress properties
 {
+  _has_plasticity = isParamValid("friction_angle");
+
+  // Grabing the inverse of plastic and damage viscosities
+  for (unsigned int i = 0; i < _n_composition; ++i)
+  {
+    if (_one_on_plastic_eta[i] < 0.0)
+      mooseError("LynxDamageDeformation: 'plastic_viscosity' cannot be negative!");
+    else if (_one_on_plastic_eta[i] > 0.0)
+      _one_on_plastic_eta[i] = 1.0 / _one_on_plastic_eta[i];
+
+    if (_one_on_damage_eta[i] < 0.0)
+      mooseError("LynxDamageDeformation: 'damage_viscosity' cannot be negative!");
+    else if (_one_on_damage_eta[i] > 0.0)
+      _one_on_damage_eta[i] = 1.0 / _one_on_damage_eta[i];
+  }
+
+  // Damage-Plasticity structure
+  if (_has_plasticity)
+    _damage_plasticity = new damage_plasticity();
 }
 
 void
 LynxDamageDeformation::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
-  LynxDeformation::initQpStatefulProperties();
-}
-
-void
-LynxDamageDeformation::computeQpDeformation()
-{
-  // Update elastic moduli
-  elasticModuli();
-
-  // Update the volumetric part of the deformation
-  Real pressure = -_stress_old[_qp].trace() / 3.0;
-  volumetricDeformation(pressure);
-
-  // Update the deviatoric part of the deformation
-  RankTwoTensor stress_dev = spinRotation(_stress_old[_qp].deviatoric());
-  deviatoricDeformation(pressure, stress_dev);
-
-  // Plastic correction
-  if (_has_plasticity && _G[_qp] != 0.0)
-    plasticCorrection(pressure, stress_dev);
-
-  // Form the total stress tensor
-  _stress[_qp] = stress_dev;
-  _stress[_qp].addIa(-pressure);
-
-  // Update tangent operator modulus
-  if (_fe_problem.currentlyComputingJacobian())
-    tangentOperator();
+  LynxDeformationBase::initQpStatefulProperties();
 }
 
 void
 LynxDamageDeformation::elasticModuli()
 {
-  // Elastic strain ratio
-  const Real xi_old = strainRatio(_elastic_strain_old[_qp]);
-
-  // Critical strain strain ratio
-  _xi0 =
-
   // Bulk modulus
   _K[_qp] = _has_bulk_modulus ? averageProperty(_bulk_modulus) : 0.0;
 
   // Shear modulus
   _G[_qp] = _has_shear_modulus ? averageProperty(_shear_modulus) : 0.0;
-
-  // Initialize inelastic increment
-  _viscous_strain_incr[_qp].zero();
-  _plastic_strain_incr[_qp].zero();
-
-  // Initialize stuff
-  _stress_corr_v = 1.0;
-  _dq_dq_tr_v = 1.0;
-  _stress_corr_p = 1.0;
-  _dp_dp_tr_p = 1.0;
-  _dp_dq_tr_p = 0.0;
-  _dq_dp_tr_p = 0.0;
-  _dq_dq_tr_p = 1.0;
-  _plastic_yield_function[_qp] = -1.0;
 }
 
 void
 LynxDamageDeformation::plasticCorrection(Real & pressure, RankTwoTensor & stress_dev)
 {
-  // Check if yield is capped
-  _p_cr = averageProperty(_critical_pressure);
-  if (_p_cr > 0.0)
-    convexPlasticCorrection(pressure, stress_dev);
-  else if (_p_cr < 0.0)
-    mooseError("LynxDamageDeformation: 'critical_pressure' must be positive!");
-  else
+  Real eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
+  RankTwoTensor flow_dir = (eqv_stress != 0.0) ? stress_dev / eqv_stress : RankTwoTensor();
+
+  computeDamageProperties(pressure, eqv_stress);
+
+  // Check wether the yield is capped
+  if (_damage_plasticity->_p_cr == 0.0)
   {
-    Real eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
-    RankTwoTensor flow_dir = (eqv_stress != 0.0) ? stress_dev / eqv_stress : RankTwoTensor();
+    // No capped yield - only deviatoric correction
+    _plastic_yield_function[_qp] = computePlasticityYield(pressure, eqv_stress);
 
     // Plastic correction
-    Real plastic_incr = plasticIncrement(pressure, eqv_stress);
+    if (_plastic_yield_function[_qp] > 0.0)
+    {
+      Real plastic_incr = plasticIncrement(pressure, eqv_stress);
 
-    _plastic_strain_incr[_qp] = 1.5 * plastic_incr * flow_dir;
-    _plastic_strain_incr[_qp].addIa(_plasticity->_beta * plastic_incr);
-    stress_dev -= 3.0 * _G[_qp] * plastic_incr * flow_dir;
-    pressure += _K[_qp] * _plasticity->_beta * plastic_incr;
+      _plastic_strain_incr[_qp] = 1.5 * plastic_incr * flow_dir;
+      stress_dev -= 3.0 * _G[_qp] * plastic_incr * flow_dir;
+      // Update yield
+      _plastic_yield_function[_qp] -= 3.0 * _G[_qp] * plastic_incr;
+    }
+  }
+  else
+  {
+    // Capped yield
+    Real yield_squared = computeConvexPlasticityYield2(pressure, eqv_stress);
+    _plastic_yield_function[_qp] =
+        (yield_squared > 0.0) ? std::sqrt(yield_squared) : -std::sqrt(-yield_squared);
+
+    if (_plastic_yield_function[_qp] > 0.0)
+    {
+      Real vol_plastic_incr = 0.0, eqv_plastic_incr = 0.0;
+      Real rho_0 = convexPlasticIncrement(vol_plastic_incr, eqv_plastic_incr);
+
+      _plastic_strain_incr[_qp] = 1.5 * eqv_plastic_incr * flow_dir;
+      _plastic_strain_incr[_qp].addIa(-vol_plastic_incr / 3.0);
+
+      pressure -= _K[_qp] * vol_plastic_incr;
+      stress_dev -= 3.0 * _G[_qp] * eqv_plastic_incr * flow_dir;
+      eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
+      // Update yield
+      _plastic_yield_function[_qp] =
+          std::sqrt(Utility::pow<2>(pressure - _damage_plasticity->_p_r) +
+                    Utility::pow<2>(eqv_stress - _damage_plasticity->_q_r)) -
+          rho_0;
+    }
+  }
+}
+
+Real
+LynxDamageDeformation::computePlasticityYield(const Real & pressure, const Real & eqv_stress)
+{
+  return eqv_stress - _damage_plasticity->_alpha0 * pressure;
+}
+
+Real
+LynxDamageDeformation::plasticIncrement(const Real & /*pressure*/, const Real & eqv_stress)
+{
+  Real eqv_p_strain_incr = 0.0;
+
+  Real vp_correction = 1.0;
+  eqv_p_strain_incr = _plastic_yield_function[_qp] / (3.0 * _G[_qp]);
+
+  // Viscoplastic correction
+  if (_damage_plasticity->_eta_p != 0.0)
+  {
+    vp_correction = (3.0 * _G[_qp]) * _dt * _damage_plasticity->_eta_p /
+                    (1.0 + (3.0 * _G[_qp]) * _dt * _damage_plasticity->_eta_p);
+    eqv_p_strain_incr *= vp_correction;
+  }
+
+  // Update yield
+  _plastic_yield_function[_qp] -= (3.0 * _G[_qp]) * eqv_p_strain_incr;
+
+  _stress_corr_p =
+      (eqv_stress != 0.0) ? (eqv_stress - 3.0 * _G[_qp] * eqv_p_strain_incr) / eqv_stress : 1.0;
+  _dp_dp_tr_p = 1.0;
+  _dp_dq_tr_p = 0.0;
+  _dq_dp_tr_p = _damage_plasticity->_alpha0 * vp_correction;
+  _dq_dq_tr_p = 1.0 - vp_correction;
+
+  return eqv_p_strain_incr;
+}
+
+Real
+LynxDamageDeformation::computeConvexPlasticityYield2(const Real & pressure, const Real & eqv_stress)
+{
+  if ((pressure == 0.0) && (eqv_stress == 0.0))
+    return 0.0;
+
+  updateDamageConvexParameters(pressure, eqv_stress);
+
+  return Utility::pow<2>(eqv_stress) - _damage_plasticity->_alpha2 * Utility::pow<2>(pressure) *
+                                           ((0.0 < pressure) - (pressure < 0.0));
+}
+
+Real
+LynxDamageDeformation::computeConvexPlasticityYield2(const Real & rho)
+{
+  Real p = _damage_plasticity->_p_r + rho * _damage_plasticity->_rp;
+  Real q = _damage_plasticity->_q_r + rho * _damage_plasticity->_rq;
+
+  return computeConvexPlasticityYield2(p, q);
+}
+
+Real
+LynxDamageDeformation::convexPlasticIncrement(Real & vol_plastic_incr, Real & eqv_plastic_incr)
+{
+  Real vp_correction = 1.0;
+
+  // Find projection on convex yield
+  Real rho_neg = 0.0;
+  Real rho_pos = _damage_plasticity->_rho_tr;
+  Real rho_0 = getConvexProjection(rho_neg, rho_pos);
+
+  // Update projections
+  Real p_0 = _damage_plasticity->_p_r + rho_0 * _damage_plasticity->_rp;
+  Real q_0 = _damage_plasticity->_q_r + rho_0 * _damage_plasticity->_rq;
+
+  // Plastic strain
+  vol_plastic_incr = (_damage_plasticity->_p_tr - p_0) / _K[_qp];
+  eqv_plastic_incr = (_damage_plasticity->_q_tr - q_0) / (3.0 * _G[_qp]);
+
+  // Viscoplastic correction
+  if (_damage_plasticity->_eta_p != 0.0)
+  {
+    Real F_tr = _damage_plasticity->_rho_tr - rho_0;
+    Real delta_p = std::sqrt(Utility::pow<2>(vol_plastic_incr) + Utility::pow<2>(eqv_plastic_incr));
+
+    vp_correction = (F_tr * _damage_plasticity->_eta_p * _dt / delta_p) /
+                    (1.0 + F_tr * _damage_plasticity->_eta_p * _dt / delta_p);
+
+    vol_plastic_incr *= vp_correction;
+    eqv_plastic_incr *= vp_correction;
+  }
+
+  // Tangent operator
+  _stress_corr_p =
+      (_damage_plasticity->_q_tr != 0.0)
+          ? _damage_plasticity->_q_tr - 3.0 * _G[_qp] * eqv_plastic_incr / _damage_plasticity->_q_tr
+          : 1.0;
+  Real dF2_dp0 = dConvexPlasticYield2_dp(p_0, q_0) / dConvexPlasticYield2(rho_0);
+  Real dF2_dq0 = dConvexPlasticYield2_dq(p_0, q_0) / dConvexPlasticYield2(rho_0);
+
+  // _dp_dp_tr_p =
+  //     _dp_r_dp_tr + (1.0 - vp_correction) + vp_correction * rho_0 / _rho_tr * dF2_dq0 * _rq;
+  // _dp_dq_tr_p = _dp_r_dq_tr - vp_correction * rho_0 / _rho_tr * dF2_dq0 * _rp;
+  // _dq_dp_tr_p = -vp_correction * rho_0 / _rho_tr * dF2_dp0 * _rq;
+  // _dq_dq_tr_p = (1.0 - vp_correction) + vp_correction * rho_0 / _rho_tr * dF2_dp0 * _rp;
+  _dp_dp_tr_p = (1.0 - vp_correction) + vp_correction * rho_0 / _damage_plasticity->_rho_tr *
+                                            dF2_dq0 * _damage_plasticity->_rq;
+  _dp_dq_tr_p =
+      -vp_correction * rho_0 / _damage_plasticity->_rho_tr * dF2_dq0 * _damage_plasticity->_rp;
+  _dq_dp_tr_p =
+      -vp_correction * rho_0 / _damage_plasticity->_rho_tr * dF2_dp0 * _damage_plasticity->_rq;
+  _dq_dq_tr_p = (1.0 - vp_correction) + vp_correction * rho_0 / _damage_plasticity->_rho_tr *
+                                            dF2_dp0 * _damage_plasticity->_rp;
+
+  return rho_0;
+}
+
+void
+LynxDamageDeformation::computeDamageProperties(const Real & pressure, const Real & eqv_stress)
+{
+  updateDamageParameters();
+
+  _damage_plasticity->_alpha0 = std::sqrt(2.0) * _G[_qp] / _K[_qp] *
+                                std::sqrt((3.0 - Utility::pow<2>(_damage_plasticity->_xi0)) /
+                                          Utility::pow<2>(_damage_plasticity->_xi0));
+
+  // Properties for convex yield
+  if (_damage_plasticity->_p_cr != 0.0)
+  {
+    // Trial pressure - deviatoric stress
+    _damage_plasticity->_p_tr = pressure;
+    _damage_plasticity->_q_tr = eqv_stress;
+
+    // Reference point for convex yield
+    _damage_plasticity->_p_r = convexReferencePressure();
+    _damage_plasticity->_q_r = 0.0;
+
+    // Trial distance
+    _damage_plasticity->_rho_tr = std::sqrt(Utility::pow<2>(pressure - _damage_plasticity->_p_r) +
+                                            Utility::pow<2>(eqv_stress - _damage_plasticity->_q_r));
+
+    // Projection direction
+    _damage_plasticity->_rp =
+        (_damage_plasticity->_p_tr - _damage_plasticity->_p_r) / _damage_plasticity->_rho_tr;
+    _damage_plasticity->_rq =
+        (_damage_plasticity->_q_tr - _damage_plasticity->_q_r) / _damage_plasticity->_rho_tr;
   }
 }
 
 void
-LynxDamageDeformation::convexPlasticCorrection(Real & pressure, RankTwoTensor & stress_dev)
+LynxDamageDeformation::updateDamageParameters()
 {
-  RankTwoTensor stress_dev_tr = stress_dev;
-  Real eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
-  RankTwoTensor flow_dir = (eqv_stress != 0.0) ? stress_dev / eqv_stress : RankTwoTensor();
+  Real sin_phi = std::sin(averageProperty(_friction_angle) * libMesh::pi / 180.0);
+  Real xi0 = -std::sqrt(3.0) / std::sqrt(1.0 + 1.5 * Utility::pow<2>(_K[_qp] / _G[_qp] * sin_phi));
+  Real porous_coeff =
+      averageProperty(_porous_coeff) + averageProperty(_porous_coeff_linear) * _porosity[_qp];
+  Real p_cr = _K[_qp] * (std::sqrt(3.0) + xi0) / (3.0 * porous_coeff);
+  _damage_plasticity->fill(xi0,
+                           averageProperty(_damage_modulus),
+                           p_cr,
+                           averageProperty(_one_on_plastic_eta),
+                           averageProperty(_one_on_damage_eta));
+}
 
-  Real sin_phi = std::sin(averageProperty(_friction_angle_0) * libMesh::pi / 180.0);
-  _xi0 = -std::sqrt(3.0) / std::sqrt(1.0 + 1.5 * Utility::pow<2>(_K[_qp] / _G[_qp] * sin_phi));
-  Real k = std::sqrt(3.0) * averageProperty(_cohesion_0) *
-           std::cos(averageProperty(_friction_angle_0) * libMesh::pi / 180.0);
-  _p_k = -k / std::sqrt(2.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) * (3.0 - Utility::pow<2>(_xi0)) /
-                        Utility::pow<2>(_xi0));
-  Real yield_squared = convexPlasticYield2(pressure, eqv_stress);
+void
+LynxDamageDeformation::updateDamageConvexParameters(const Real & pressure, const Real & eqv_stress)
+{
+  Real pq_term =
+      (pressure != 0.0)
+          ? 1.0 / (1.0 + 0.5 * Utility::pow<2>(_K[_qp] * eqv_stress / (_G[_qp] * pressure)))
+          : 0.0;
 
-  if (yield_squared > 0.0)
-  {
-    Real vp_correction = 1.0;
-    Real one_on_eta = averageProperty(_one_on_plastic_eta);
+  _damage_plasticity->_xi_cr =
+      (pressure > 0.0)
+          ? _damage_plasticity->_xi0 - (std::sqrt(3.0) + _damage_plasticity->_xi0) * pressure /
+                                           _damage_plasticity->_p_cr * pq_term
+          : _damage_plasticity->_xi0;
 
-    // Trial state
-    _p_tr = pressure;
-    _q_tr = eqv_stress;
+  _damage_plasticity->_alpha2 = (_damage_plasticity->_xi_cr != 0.0)
+                                    ? 2.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) *
+                                          (3.0 - Utility::pow<2>(_damage_plasticity->_xi_cr)) /
+                                          Utility::pow<2>(_damage_plasticity->_xi_cr)
+                                    : 0.0;
+  _damage_plasticity->_dxi_cr_dp = (pressure != 0.0)
+                                       ? -(_damage_plasticity->_xi0 - _damage_plasticity->_xi_cr) /
+                                             pressure * (3.0 - 2.0 * pq_term)
+                                       : 0.0;
 
-    // Reference point
-    _p_r = convexReferencePressure(_p_tr, _q_tr);
-    _q_r = 0.0;
+  _damage_plasticity->_dxi_cr_dq =
+      (eqv_stress != 0.0) ? 2.0 * (_damage_plasticity->_xi0 - _damage_plasticity->_xi_cr) /
+                                eqv_stress * (1.0 - pq_term)
+                          : 0.0;
 
-    _rho_tr = std::sqrt(Utility::pow<2>(_p_tr - _p_r) + Utility::pow<2>(_q_tr - _q_r));
-    _rp = (_p_tr - _p_r) / _rho_tr;
-    _rq = (_q_tr - _q_r) / _rho_tr;
-
-    // Find projection on convex yield
-    Real rho_neg = 0.0;
-    Real rho_pos = _rho_tr;
-    Real rho_0 = getConvexProjection(rho_neg, rho_pos);
-
-    // Update projections
-    Real p_0 = _p_r + rho_0 * _rp;
-    Real q_0 = _q_r + rho_0 * _rq;
-
-    // Plastic strain
-    Real vol_strain_p = (_p_tr - p_0) / _K[_qp];
-    Real eqv_strain_p = (_q_tr - q_0) / (3.0 * _G[_qp]);
-
-    // Viscoplastic correction
-    if (one_on_eta != 0.0)
-    {
-      Real F_tr = _rho_tr - rho_0;
-      Real delta_p = std::sqrt(Utility::pow<2>(vol_strain_p) + Utility::pow<2>(eqv_strain_p));
-
-      vp_correction = (F_tr * one_on_eta * _dt / delta_p) / (1.0 + F_tr * one_on_eta * _dt / delta_p);
-
-      vol_strain_p *= vp_correction;
-      eqv_strain_p *= vp_correction;
-    }
-
-    _plastic_strain_incr[_qp] = 1.5 * eqv_strain_p * flow_dir;
-    _plastic_strain_incr[_qp].addIa(-vol_strain_p / 3.0);
-    pressure -= _K[_qp] * vol_strain_p;
-    stress_dev -= 3.0 * _G[_qp] * eqv_strain_p * flow_dir;
-    eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
-    _plastic_yield_function[_qp] =
-        std::sqrt(Utility::pow<2>(pressure - _p_r) + Utility::pow<2>(eqv_stress - _q_r)) - rho_0;
-
-    // Tangent operator
-    _stress_corr_p = (eqv_stress != 0.0) ? eqv_stress / _q_tr : 1.0;
-    Real dF2_dp0 = dConvexPlasticYield2_dp(p_0, q_0) / dConvexPlasticYield2(rho_0);
-    Real dF2_dq0 = dConvexPlasticYield2_dq(p_0, q_0) / dConvexPlasticYield2(rho_0);
-
-    _dp_dp_tr_p =
-        _dp_r_dp_tr + (1.0 - vp_correction) + vp_correction * rho_0 / _rho_tr * dF2_dq0 * _rq;
-    _dp_dq_tr_p = _dp_r_dq_tr - vp_correction * rho_0 / _rho_tr * dF2_dq0 * _rp;
-    _dq_dp_tr_p = -vp_correction * rho_0  / _rho_tr * dF2_dp0 * _rq;
-    _dq_dq_tr_p = (1.0 - vp_correction) + vp_correction * rho_0  / _rho_tr * dF2_dp0 * _rp;
-  }
+  _damage_plasticity->_dmu2_dxi_cr =
+      (_damage_plasticity->_xi_cr != 0.0)
+          ? -12.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) / Utility::pow<3>(_damage_plasticity->_xi_cr)
+          : 0.0;
 }
 
 Real
-LynxDamageDeformation::convexReferencePressure(const Real & p_tr, const Real & q_tr)
+LynxDamageDeformation::convexReferencePressure()
 {
-  Real mu0 = std::sqrt(2.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) * (3.0 - Utility::pow<2>(_xi0)) /
-                       Utility::pow<2>(_xi0));
-  Real k = std::sqrt(3.0) * averageProperty(_cohesion_0) *
-           std::cos(averageProperty(_friction_angle_0) * libMesh::pi / 180.0);
-
   Real p_proj =
-      (1.0 - Utility::pow<2>(mu0) * _K[_qp] / (3.0 * _G[_qp] + Utility::pow<2>(mu0) * _K[_qp])) *
-          p_tr +
-      mu0 * _K[_qp] * (q_tr - k) / (3.0 * _G[_qp] + Utility::pow<2>(mu0) * _K[_qp]);
+      (1.0 - Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp] /
+                 (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp])) *
+          _damage_plasticity->_p_tr +
+      _damage_plasticity->_alpha0 * _K[_qp] * _damage_plasticity->_q_tr /
+          (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp]);
 
-  // _dp_r_dp_tr = ((p_proj > 0.0) && (p_proj < _p_cr)) ? (1.0 - Utility::pow<2>(mu0) * _K[_qp] /
-  //                                            (3.0 * _G[_qp] + Utility::pow<2>(mu0) * _K[_qp]))
-  //                               : 0.0;
-  // _dp_r_dq_tr = ((p_proj > 0.0) && (p_proj < _p_cr)) ? mu0 * _K[_qp] / (3.0 * _G[_qp] +
-  // Utility::pow<2>(mu0) * _K[_qp]) : 0.0;
-  return ((p_proj > 0.0) && (p_proj < _p_cr)) ? p_proj : 2.0 * _p_cr / 3.0;
-}
-
-Real
-LynxDamageDeformation::convexPlasticYield2(const Real & rho)
-{
-  Real p = _p_r + rho * _rp;
-  Real q = _q_r + rho * _rq;
-
-  return convexPlasticYield2(p, q);
+  return ((p_proj > 0.0) && (p_proj < _damage_plasticity->_p_cr))
+             ? p_proj
+             : 2.0 * _damage_plasticity->_p_cr / 3.0;
 }
 
 Real
 LynxDamageDeformation::dConvexPlasticYield2(const Real & rho)
 {
-  Real p = _p_r + rho * _rp;
-  Real q = _q_r + rho * _rq;
+  Real p = _damage_plasticity->_p_r + rho * _damage_plasticity->_rp;
+  Real q = _damage_plasticity->_q_r + rho * _damage_plasticity->_rq;
 
-  return dConvexPlasticYield2_dp(p, q) * _rp + dConvexPlasticYield2_dq(p, q) * _rq;
-}
-
-Real
-LynxDamageDeformation::convexPlasticYield2(const Real & pressure, const Real & eqv_stress)
-{
-  if ((pressure == 0.0) && (eqv_stress == 0.0))
-    return 0.0;
-
-  Real pq_term =
-      (pressure != 0.0)
-          ? 1.0 / (1.0 + 0.5 * Utility::pow<2>(_K[_qp] * eqv_stress / (_G[_qp] * pressure)))
-          : 0.0;
-  Real xi_cr =
-      (pressure > 0.0) ? _xi0 - (std::sqrt(3.0) + _xi0) * pressure / _p_cr * pq_term : _xi0;
-
-  Real mu2 = (xi_cr != 0.0) ? 2.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) *
-                                  (3.0 - Utility::pow<2>(xi_cr)) / Utility::pow<2>(xi_cr)
-                            : 0.0;
-
-  return Utility::pow<2>(eqv_stress) - mu2 * Utility::pow<2>(pressure - _p_k) *
-                                           ((0.0 < pressure - _p_k) - (pressure - _p_k < 0.0));
+  return dConvexPlasticYield2_dp(p, q) * _damage_plasticity->_rp +
+         dConvexPlasticYield2_dq(p, q) * _damage_plasticity->_rq;
 }
 
 Real
@@ -303,22 +396,11 @@ LynxDamageDeformation::dConvexPlasticYield2_dp(const Real & pressure, const Real
   if ((pressure == 0.0) && (eqv_stress == 0.0))
     return 0.0;
 
-  Real pq_term =
-      (pressure != 0.0)
-          ? 1.0 / (1.0 + 0.5 * Utility::pow<2>(_K[_qp] * eqv_stress / (_G[_qp] * pressure)))
-          : 0.0;
-  Real xi_cr =
-      (pressure > 0.0) ? _xi0 - (std::sqrt(3.0) + _xi0) * pressure / _p_cr * pq_term : _xi0;
-  Real dxi_cr_dp = (pressure != 0.0) ? -(_xi0 - xi_cr) / pressure * (3.0 - 2.0 * pq_term) : 0.0;
+  updateDamageConvexParameters(pressure, eqv_stress);
 
-  Real mu2 = (xi_cr != 0.0) ? 2.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) *
-                                  (3.0 - Utility::pow<2>(xi_cr)) / Utility::pow<2>(xi_cr)
-                            : 0.0;
-  Real dmu2_dxi_cr =
-      (xi_cr != 0.0) ? -12.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) / Utility::pow<3>(xi_cr) : 0.0;
-
-  return -(dmu2_dxi_cr * dxi_cr_dp * (pressure - _p_k) + 2.0 * mu2) * (pressure - _p_k) *
-         ((0.0 < pressure - _p_k) - (pressure - _p_k < 0.0));
+  return -(_damage_plasticity->_dmu2_dxi_cr * _damage_plasticity->_dxi_cr_dp * pressure +
+           2.0 * _damage_plasticity->_alpha2) *
+         pressure * ((0.0 < pressure) - (pressure < 0.0));
 }
 
 Real
@@ -327,21 +409,12 @@ LynxDamageDeformation::dConvexPlasticYield2_dq(const Real & pressure, const Real
   if ((pressure == 0.0) && (eqv_stress == 0.0))
     return 0.0;
 
-  Real pq_term =
-      (pressure != 0.0)
-          ? 1.0 / (1.0 + 0.5 * Utility::pow<2>(_K[_qp] * eqv_stress / (_G[_qp] * pressure)))
-          : 0.0;
-  Real xi_cr =
-      (pressure > 0.0) ? _xi0 - (std::sqrt(3.0) + _xi0) * pressure / _p_cr * pq_term : _xi0;
-  Real dxi_cr_dq = (eqv_stress != 0.0) ? 2.0 * (_xi0 - xi_cr) / eqv_stress * (1.0 - pq_term) : 0.0;
-  Real dmu2_dxi_cr =
-      (xi_cr != 0.0) ? -12.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) / Utility::pow<3>(xi_cr) : 0.0;
+  updateDamageConvexParameters(pressure, eqv_stress);
 
   return 2.0 * eqv_stress -
-         dmu2_dxi_cr * dxi_cr_dq *
-             Utility::pow<2>(pressure -
-                             _p_k); // *
-                                    // ((0.0 < pressure - _p_k) - (pressure - _p_k < 0.0));
+         _damage_plasticity->_dmu2_dxi_cr * _damage_plasticity->_dxi_cr_dq *
+             Utility::pow<2>(pressure); // *
+                                        // ((0.0 < pressure - _p_k) - (pressure - _p_k < 0.0));
 }
 
 Real
@@ -350,8 +423,8 @@ LynxDamageDeformation::getConvexProjection(const Real & x1, const Real & x2)
   // Machine floating-point precision
   const Real eps = std::numeric_limits<Real>::epsilon();
   // Declare some stuff here
-  Real a = x1, b = x2, c = x2, d, e, fa = convexPlasticYield2(a), fb = convexPlasticYield2(b), fc,
-       p, q, r, s, tol1, xm;
+  Real a = x1, b = x2, c = x2, d, e, fa = computeConvexPlasticityYield2(a),
+       fb = computeConvexPlasticityYield2(b), fc, p, q, r, s, tol1, xm;
   // Chek if x1 and x2 bracket a root
   if (fa * fb > 0.0) // fa and fb are of the same sign
     throw MooseException("LynxDamageDeformation: in Brent's method, the points x1 and x2 must "
@@ -429,7 +502,7 @@ LynxDamageDeformation::getConvexProjection(const Real & x1, const Real & x2)
       b += d;
     else
       b += (xm < 0 ? -std::abs(tol1) : std::abs(tol1));
-    fb = convexPlasticYield2(b);
+    fb = computeConvexPlasticityYield2(b);
   }
   throw MooseException(
       "LynxDamageDeformation: maximum number of iterations exceeded in solveBrent!");

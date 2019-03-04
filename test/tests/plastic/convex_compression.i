@@ -138,7 +138,8 @@
     bulk_modulus = 2.0e+09
     shear_modulus = 2.0e+09
     friction_angle = 30
-    critical_pressure = 8.0e+07
+    porous_coeff = 2.1246 # critical pressure 8.0e+07
+    # critical_pressure = 8.0e+07
   [../]
 []
 
@@ -185,4 +186,3 @@
   exodus = true
   csv = true
 []
-

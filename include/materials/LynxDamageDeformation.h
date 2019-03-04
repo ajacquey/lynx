@@ -28,7 +28,7 @@ class LynxDamageDeformation;
 template <>
 InputParameters validParams<LynxDamageDeformation>();
 
-class LynxDamageDeformation : public LynxDeformation
+class LynxDamageDeformation : public LynxDeformationBase
 {
 public:
   LynxDamageDeformation(const InputParameters & parameters);
@@ -36,18 +36,23 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeQpDeformation() override;
   virtual void elasticModuli() override;
   virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) override;
-  virtual void convexPlasticCorrection(Real & pressure, RankTwoTensor & stress_dev);
-  virtual Real convexReferencePressure(const Real & p_tr, const Real & q_tr);
-  virtual Real convexPlasticYield2(const Real & rho);
+  virtual Real computePlasticityYield(const Real & pressure, const Real & eqv_stress);
+  virtual Real plasticIncrement(const Real & /*pressure*/, const Real & eqv_stress);
+  virtual Real computeConvexPlasticityYield2(const Real & pressure, const Real & eqv_stress);
+  virtual Real computeConvexPlasticityYield2(const Real & rho);
+  virtual Real convexPlasticIncrement(Real & vol_plastic_incr, Real & eqv_plastic_incr);
+  virtual void computeDamageProperties(const Real & pressure, const Real & eqv_stress);
+  virtual void updateDamageParameters();
+  virtual void updateDamageConvexParameters(const Real & pressure, const Real & eqv_stress);
+  virtual Real convexReferencePressure();
   virtual Real dConvexPlasticYield2(const Real & rho);
-  virtual Real convexPlasticYield2(const Real & pressure, const Real & eqv_stress);
   virtual Real dConvexPlasticYield2_dp(const Real & pressure, const Real & eqv_stress);
   virtual Real dConvexPlasticYield2_dq(const Real & pressure, const Real & eqv_stress);
   virtual Real getConvexProjection(const Real & x1, const Real & x2);
   virtual Real strainRatio(const RankTwoTensor & elastic_strain);
+
   // Coupled variables
   bool _coupled_dam;
   const VariableValue & _damage;
@@ -55,39 +60,22 @@ protected:
   bool _coupled_phi;
   const VariableValue & _porosity;
 
-  // Strain parameters
-
   // Elastic moduli parameters
   const std::vector<Real> _damage_modulus;
 
-  // Creep parameters
-
   // Plastic parameters
-  const std::vector<Real> _critical_pressure;
+  const std::vector<Real> _friction_angle;
+  const std::vector<Real> _porous_coeff;
+  const std::vector<Real> _porous_coeff_linear;
+  std::vector<Real> _one_on_plastic_eta;
+  std::vector<Real> _one_on_damage_eta;
 
-  // Convex yield parameters
-  Real _p_cr;
-  Real _xi0;
-  Real _p_r;
-  Real _q_r;
-  Real _dp_r_dp_tr;
-  Real _dp_r_dq_tr;
-  Real _p_tr;
-  Real _q_tr;
-  Real _rho_tr;
-  Real _rp;
-  Real _rq;
-  Real _p_k;
+  // Damage-Plasticity structure
+  damage_plasticity * _damage_plasticity;
 
   // Strain properties
   MaterialProperty<RankTwoTensor> & _elastic_strain;
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-
-  // Viscous properties
-
-  // Plastic properties
-
-  // Stress properties
 };
 
 #endif // LYNXDAMAGEDEFORMATION_H
