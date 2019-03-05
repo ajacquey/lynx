@@ -36,8 +36,10 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
+  virtual void initializeQpDeformation() override;
   virtual void elasticModuli() override;
   virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) override;
+  virtual void damageCorrection() override;
   virtual Real computePlasticityYield(const Real & pressure, const Real & eqv_stress);
   virtual Real plasticIncrement(const Real & /*pressure*/, const Real & eqv_stress);
   virtual Real computeConvexPlasticityYield2(const Real & pressure, const Real & eqv_stress);
@@ -45,6 +47,7 @@ protected:
   virtual Real convexPlasticIncrement(Real & vol_plastic_incr, Real & eqv_plastic_incr);
   virtual void computeDamageProperties(const Real & pressure, const Real & eqv_stress);
   virtual void updateDamageParameters();
+  virtual void initializeDamageParameters();
   virtual void updateDamageConvexParameters(const Real & pressure, const Real & eqv_stress);
   virtual Real convexReferencePressure();
   virtual Real dConvexPlasticYield2(const Real & rho);
@@ -52,6 +55,7 @@ protected:
   virtual Real dConvexPlasticYield2_dq(const Real & pressure, const Real & eqv_stress);
   virtual Real getConvexProjection(const Real & x1, const Real & x2);
   virtual Real strainRatio(const RankTwoTensor & elastic_strain);
+  virtual RankTwoTensor rotatedElasticStrain(const RankTwoTensor & elastic_strain);
 
   // Coupled variables
   bool _coupled_dam;

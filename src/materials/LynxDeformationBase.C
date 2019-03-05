@@ -340,6 +340,7 @@ LynxDeformationBase::computeQpDeformation()
   reformStressTensor(pressure, stress_dev);
 
   // Additional correction
+  damageCorrection();
 
   // Update tangent operator modulus
   if (_fe_problem.currentlyComputingJacobian())
@@ -424,6 +425,11 @@ LynxDeformationBase::reformStressTensor(const Real & pressure, const RankTwoTens
 {
   _stress[_qp] = stress_dev;
   _stress[_qp].addIa(-pressure);
+}
+
+void
+LynxDeformationBase::damageCorrection()
+{
 }
 
 void

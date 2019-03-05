@@ -55,6 +55,7 @@ protected:
   virtual void deviatoricDeformation(const Real & pressure, RankTwoTensor & stress_dev);
   virtual void reformStressTensor(const Real & pressure, const RankTwoTensor & stress_dev);
   virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) = 0;
+  virtual void damageCorrection();
   virtual void tangentOperator();
   virtual void plasticTangentOperator(const RankTwoTensor & flow_direction,
                                       const RankFourTensor & flow_direction_dyad);
