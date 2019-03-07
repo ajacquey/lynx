@@ -33,10 +33,18 @@
 
 [AuxVariables]
   [./damage]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./damage_rate]
     order = CONSTANT
     family = MONOMIAL
   [../]
   [./mises_stress]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pressure]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -63,15 +71,21 @@
 []
 
 [AuxKernels]
-  [./damage_aux]
-    type = LynxDamageAux
-    variable = damage
+  [./damage_rate_aux]
+    type = MaterialRealAux
+    variable = damage_rate
+    property = damage_rate
     execute_on = 'timestep_end'
   [../]
   [./mises_stress_aux]
     type = LynxVonMisesStressAux
     variable = mises_stress
     execute_on = 'timestep_end'
+  [../]
+  [./pressure_aux]
+    type = LynxEffectivePressureAux
+    variable = pressure
+    execute_on = 'TIMESTEP_END'
   [../]
   [./eqv_strain_aux]
     type = LynxEqvStrainAux
@@ -81,13 +95,13 @@
   [./eqv_in_strain_aux]
     type = LynxEqvStrainAux
     variable = eqv_in_strain
-    strain_type = plastic
+    strain_type = inelastic
     execute_on = 'timestep_end'
   [../]
   [./eqv_in_strain_rate_aux]
     type = LynxEqvStrainRateAux
     variable = eqv_in_strain_rate
-    strain_type = plastic
+    strain_type = inelastic
     execute_on = 'timestep_end'
   [../]
   [./strain_ratio_aux]
@@ -131,7 +145,7 @@
 
 [Materials]
   [./deformation]
-    type = LynxDamageDeformation
+    type = LynxDamageDeformationNew
     displacements = 'disp_x disp_y'
     damage = 'damage'
     bulk_modulus = 1.0e+10
@@ -144,6 +158,38 @@
   [../]
 []
 
+[MultiApps]
+  [./sub]
+    type = TransientMultiApp
+    input_files = 'sub.i'
+    execute_on = 'TIMESTEP_END'
+    sub_cycling = true
+    detect_steady_state = true
+    steady_state_tol = 1.0e-8
+  [../]
+[]
+
+[Transfers]
+  # To the multi app
+  [.damage_rate_to_sub]
+    type = MultiAppCopyTransfer
+    source_variable = damage_rate
+    variable = damage_rate
+    direction = to_multiapp
+    multi_app = sub
+    execute_on = SAME_AS_MULTIAPP
+  [../]
+  # From the Multi app
+  [./damage_from_sub]
+    type = MultiAppCopyTransfer
+    source_variable = damage
+    variable = damage
+    direction = from_multiapp
+    multi_app = sub
+    execute_on = SAME_AS_MULTIAPP
+  [../]
+[]
+  
 [Postprocessors]
   [./D]
     type = ElementAverageValue
@@ -153,6 +199,11 @@
   [./Se]
     type = ElementAverageValue
     variable = mises_stress
+    outputs = csv
+  [../]
+  [./P]
+    type = ElementAverageValue
+    variable = pressure
     outputs = csv
   [../]
   [./E_eqv]
@@ -195,7 +246,7 @@
                            -pc_hypre_boomeramg_P_max -pc_hypre_boomeramg_truncfactor
                            -snes_linesearch_type'
                            # -ksp_view_pmat -draw_pause'
-    petsc_options_value = 'fgmres 1.0e-00 1.0e-05 1000 100
+    petsc_options_value = 'fgmres 1.0e-00 1.0e-10 1000 100
                            hypre boomeramg 0.7
                            4 5
                            25
@@ -213,8 +264,9 @@
   solve_type = NEWTON
   start_time = 0.0
   end_time = 3.1536e+11
-  # dt = 6.3072e+09
-  num_steps = 100
+  num_steps = 50
+  # picard_max_its = 3
+  # picard_abs_tol = 1e-1
   # end_time = 6.3072e+11
   # num_steps = 50
   # abort_on_solve_fail = true

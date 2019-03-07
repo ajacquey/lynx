@@ -18,26 +18,26 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXDAMAGEDEFORMATION_H
-#define LYNXDAMAGEDEFORMATION_H
+#ifndef LYNXDAMAGEDEFORMATIONNEW_H
+#define LYNXDAMAGEDEFORMATIONNEW_H
 
 #include "LynxDeformation.h"
 
-class LynxDamageDeformation;
+class LynxDamageDeformationNew;
 
 template <>
-InputParameters validParams<LynxDamageDeformation>();
+InputParameters validParams<LynxDamageDeformationNew>();
 
-class LynxDamageDeformation : public LynxDeformationBase
+class LynxDamageDeformationNew : public LynxDeformationBase
 {
 public:
-  LynxDamageDeformation(const InputParameters & parameters);
-  virtual ~LynxDamageDeformation() {}
+  LynxDamageDeformationNew(const InputParameters & parameters);
+  virtual ~LynxDamageDeformationNew() {}
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void initializeQpDeformation() override;
-  virtual void elasticModuli() override;
+  // virtual void elasticModuli() override;
   virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) override;
   virtual void damageCorrection() override;
   virtual RankFourTensor damageTangentOperator(const RankTwoTensor & flow_direction,
@@ -81,10 +81,10 @@ protected:
   damage_plasticity * _damage_plasticity;
 
   // Damage-Plasticity utilities
-  Real _dyield_dp_tr;
-  Real _dyield_dq_tr;
-  RankTwoTensor _damaged_stress;
-  RankFourTensor _damaged_tensor;
+  // Real _dyield_dp_tr;
+  // Real _dyield_dq_tr;
+  // RankTwoTensor _damaged_stress;
+  // RankFourTensor _damaged_tensor;
 
   // Strain properties
   MaterialProperty<RankTwoTensor> & _elastic_strain;
@@ -97,4 +97,4 @@ protected:
   MaterialProperty<Real> & _damage_rate;
 };
 
-#endif // LYNXDAMAGEDEFORMATION_H
+#endif // LYNXDAMAGEDEFORMATIONNEW_H

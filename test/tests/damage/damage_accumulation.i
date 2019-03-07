@@ -77,19 +77,18 @@
   [./eqv_in_strain_aux]
     type = LynxEqvStrainAux
     variable = eqv_in_strain
-    strain_type = inelastic
+    strain_type = plastic
     execute_on = 'timestep_end'
   [../]
   [./eqv_in_strain_rate_aux]
     type = LynxEqvStrainRateAux
     variable = eqv_in_strain_rate
-    strain_type = inelastic
+    strain_type = plastic
     execute_on = 'timestep_end'
   [../]
   [./strain_ratio_aux]
     type = LynxStrainRatioAux
     variable = strain_ratio
-    strain_type = elastic
     execute_on = 'timestep_end'
   [../]
 []
@@ -116,7 +115,7 @@
   [./no_uy]
     type = PresetBC
     variable = disp_y
-    boundary = bottom 
+    boundary = bottom
     value = 0.0
   [../]
 []
@@ -130,7 +129,8 @@
     shear_modulus = 1.0e+10
     friction_angle = 30
     cohesion = 10.0e+06
-    #plastic_viscosity = 1.0e+22
+    # plastic_viscosity = 1.0e+22
+    plastic_viscosity = 1.0e+50
     damage_viscosity = 1.0e+19
   [../]
 []

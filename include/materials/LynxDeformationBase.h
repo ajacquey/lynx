@@ -57,8 +57,11 @@ protected:
   virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) = 0;
   virtual void damageCorrection();
   virtual void tangentOperator();
-  virtual void plasticTangentOperator(const RankTwoTensor & flow_direction,
-                                      const RankFourTensor & flow_direction_dyad);
+  virtual RankFourTensor viscousTangentOperator(const RankFourTensor & flow_direction_dyad);
+  virtual RankFourTensor plasticTangentOperator(const RankTwoTensor & flow_direction,
+                                                const RankFourTensor & flow_direction_dyad);
+  virtual RankFourTensor damageTangentOperator(const RankTwoTensor & /*flow_direction*/,
+                                               const RankFourTensor & /*tme*/);
   virtual void finiteTangentOperator();
   virtual Real computeStokeEffectiveViscosity(const Real & pressure);
   virtual RankTwoTensor computeStokeEffectiveViscosityDerivative();

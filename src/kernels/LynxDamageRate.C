@@ -18,33 +18,55 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#include "LynxStrainRatioAux.h"
+#include "LynxDamageRate.h"
 
-registerMooseObject("LynxApp", LynxStrainRatioAux);
+registerMooseObject("LynxApp", LynxDamageRate);
 
 template <>
 InputParameters
-validParams<LynxStrainRatioAux>()
+validParams<LynxDamageRate>()
 {
-  InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription(
-      "Access the strain ratio (volumetric strain on norm of the elastic strain).");
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Damage rate for damage rheology.");
+  params.addCoupledVar("damage_rate", "The damage rate auxiliary variable");
   return params;
 }
 
-LynxStrainRatioAux::LynxStrainRatioAux(const InputParameters & parameters)
-  : DerivativeMaterialInterface<AuxKernel>(parameters),
-    _elastic_strain(getDefaultMaterialProperty<RankTwoTensor>("elastic_strain"))
+LynxDamageRate::LynxDamageRate(const InputParameters & parameters)
+  : Kernel(parameters),
+    _u_old(valueOld()),
+    _coupled_dam(isCoupled("damage_rate")),
+    _damage_rate(_coupled_dam ? coupledValue("damage_rate") : _zero)
 {
 }
 
-Real
-LynxStrainRatioAux::computeValue()
-{
-  Real strain_norm = _elastic_strain[_qp].L2norm();
+/******************************************************************************/
+/*                                  RESIDUALS                                 */
+/******************************************************************************/
 
-  if (strain_norm != 0.0)
-    return _elastic_strain[_qp].trace() / strain_norm;
-  else
-    return -std::sqrt(3.0);
+Real
+LynxDamageRate::computeQpResidual()
+{
+  Real rate = std::min(_damage_rate[_qp], (1.0 - _u_old[_qp]) / _dt);
+  return -rate * _test[_i][_qp];
+}
+
+/******************************************************************************/
+/*                                  JACOBIAN                                  */
+/******************************************************************************/
+
+Real
+LynxDamageRate::computeQpJacobian()
+{
+  return 0.0;
+}
+
+/******************************************************************************/
+/*                              OFF-DIAG JACOBIAN                             */
+/******************************************************************************/
+
+Real
+LynxDamageRate::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  return 0.0;
 }

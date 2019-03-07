@@ -449,17 +449,17 @@ LynxDeformationBase::tangentOperator()
   _tangent_modulus[_qp] += _K[_qp] * _volumetric_four;
 
   // Viscous correction
-  _tangent_modulus[_qp] -= (_eta_eff[_qp] != 0.0 && _G[_qp] != 0.0)
-                               ? 2.0 * _G[_qp] *
-                                     ((1.0 - _stress_corr_v) * _deviatoric_four +
-                                      1.5 * (_stress_corr_v - _dq_dq_tr_v) * flow_direction_dyad)
-                               : RankFourTensor();
+  RankFourTensor viscous_operator = viscousTangentOperator(flow_direction_dyad);
+  _tangent_modulus[_qp] -= 2.0 * _G[_qp] * viscous_operator;
 
   // Plastic correction
-  if (_has_plasticity && (_G[_qp] != 0.0) && (_K[_qp] != 0.0))
-    plasticTangentOperator(flow_direction, flow_direction_dyad);
+  RankFourTensor plastic_operator = plasticTangentOperator(flow_direction, flow_direction_dyad);
+  _tangent_modulus[_qp] = _tangent_modulus[_qp] * (_identity_four - plastic_operator);
 
   // Additional correction
+  RankFourTensor tme = (_identity_four - viscous_operator) * (_identity_four - plastic_operator);
+  RankFourTensor damage_operator = damageTangentOperator(flow_direction, tme);
+  _tangent_modulus[_qp] -= damage_operator;
 
   // Spin correction
   updateSpinTangentModulus();
@@ -469,18 +469,41 @@ LynxDeformationBase::tangentOperator()
     finiteTangentOperator();
 }
 
-void
+RankFourTensor
+LynxDeformationBase::viscousTangentOperator(const RankFourTensor & flow_direction_dyad)
+{
+  if ((_eta_eff[_qp] != 0.0) && (_G[_qp] != 0.0))
+    return (1.0 - _stress_corr_v) * _deviatoric_four +
+           1.5 * (_stress_corr_v - _dq_dq_tr_v) * flow_direction_dyad;
+  else
+    return RankFourTensor();
+}
+
+RankFourTensor
 LynxDeformationBase::plasticTangentOperator(const RankTwoTensor & flow_direction,
                                             const RankFourTensor & flow_direction_dyad)
 {
-  RankFourTensor plastic_operator = (1.0 - _stress_corr_p) * _deviatoric_four +
-                                    1.5 * (_stress_corr_p - _dq_dq_tr_p) * flow_direction_dyad;
-  plastic_operator +=
-      0.5 * _K[_qp] / _G[_qp] * _dq_dp_tr_p * flow_direction.outerProduct(_identity_two);
-  plastic_operator += (1.0 - _dp_dp_tr_p) * _volumetric_four / 3.0;
-  plastic_operator +=
-      3.0 * _G[_qp] / _K[_qp] * _dp_dq_tr_p * _identity_two.outerProduct(flow_direction) / 3.0;
-  _tangent_modulus[_qp] = _tangent_modulus[_qp] * (_identity_four - plastic_operator);
+  if (_has_plasticity && (_G[_qp] != 0.0) && (_K[_qp] != 0.0))
+  {
+    RankFourTensor plastic_operator = (1.0 - _stress_corr_p) * _deviatoric_four +
+                                      1.5 * (_stress_corr_p - _dq_dq_tr_p) * flow_direction_dyad;
+    plastic_operator +=
+        0.5 * _K[_qp] / _G[_qp] * _dq_dp_tr_p * flow_direction.outerProduct(_identity_two);
+    plastic_operator += (1.0 - _dp_dp_tr_p) * _volumetric_four / 3.0;
+    plastic_operator +=
+        3.0 * _G[_qp] / _K[_qp] * _dp_dq_tr_p * _identity_two.outerProduct(flow_direction) / 3.0;
+
+    return plastic_operator;
+  }
+  else
+    return RankFourTensor();
+}
+
+RankFourTensor
+LynxDeformationBase::damageTangentOperator(const RankTwoTensor & /*flow_direction*/,
+                                           const RankFourTensor & /*tme*/)
+{
+  return RankFourTensor();
 }
 
 void
@@ -622,9 +645,13 @@ LynxDeformationBase::viscousIncrement(const Real & pressure, const Real & eqv_st
     eqv_v_strain_incr =
         (_dt / maxwell_time) / (1.0 + (_dt / maxwell_time)) * eqv_stress / (3.0 * _G[_qp]);
 
-    _stress_corr_v =
-        (eqv_stress != 0.0) ? (eqv_stress - 3.0 * _G[_qp] * eqv_v_strain_incr) / eqv_stress : 1.0;
-    _dq_dq_tr_v = 1.0 / (1.0 + _dt / maxwell_time);
+    // Tangent Operator
+    if (_fe_problem.currentlyComputingJacobian())
+    {
+      _stress_corr_v =
+          (eqv_stress != 0.0) ? (eqv_stress - 3.0 * _G[_qp] * eqv_v_strain_incr) / eqv_stress : 1.0;
+      _dq_dq_tr_v = 1.0 / (1.0 + _dt / maxwell_time);
+    }
   }
 
   return eqv_v_strain_incr;

@@ -18,33 +18,29 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#include "LynxStrainRatioAux.h"
+#ifndef LYNXDAMAGERATE_H
+#define LYNXDAMAGERATE_H
 
-registerMooseObject("LynxApp", LynxStrainRatioAux);
+#include "Kernel.h"
+
+class LynxDamageRate;
 
 template <>
-InputParameters
-validParams<LynxStrainRatioAux>()
-{
-  InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription(
-      "Access the strain ratio (volumetric strain on norm of the elastic strain).");
-  return params;
-}
+InputParameters validParams<LynxDamageRate>();
 
-LynxStrainRatioAux::LynxStrainRatioAux(const InputParameters & parameters)
-  : DerivativeMaterialInterface<AuxKernel>(parameters),
-    _elastic_strain(getDefaultMaterialProperty<RankTwoTensor>("elastic_strain"))
+class LynxDamageRate : public Kernel
 {
-}
+public:
+  LynxDamageRate(const InputParameters & parameters);
 
-Real
-LynxStrainRatioAux::computeValue()
-{
-  Real strain_norm = _elastic_strain[_qp].L2norm();
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  if (strain_norm != 0.0)
-    return _elastic_strain[_qp].trace() / strain_norm;
-  else
-    return -std::sqrt(3.0);
-}
+  const VariableValue & _u_old;
+  bool _coupled_dam;
+  const VariableValue & _damage_rate;
+};
+
+#endif // LYNXDAMAGERATE_H

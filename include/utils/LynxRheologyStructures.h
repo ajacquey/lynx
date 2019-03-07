@@ -208,12 +208,14 @@ struct plasticity
 
 struct damage_plasticity
 {
-  Real _xi0;
-  Real _gamma;
-  Real _p_cr;
-  Real _eta_p; // actually one on eta
-  Real _eta_d; // actually one on eta
-  Real _alpha0;
+  Real _xi0;         // critical strain ratio
+  Real _gamma;       // third elastic modulus
+  Real _p_cr;        // critical pressure for capped yield
+  Real _k0;          // coefficient for cohesion
+  Real _eta_p;       // actually one on eta
+  Real _eta_d;       // actually one on eta
+  Real _alpha0;      // coefficient for friction
+  Real _p_k;         // coefficient to fake cohesion for capped yield
   Real _p_tr;        // trial pressure
   Real _q_tr;        // trial eqv_stress
   Real _p_r;         // reference pressure for convex yield
@@ -230,9 +232,11 @@ struct damage_plasticity
     : _xi0(-std::sqrt(3.0)),
       _gamma(0.0),
       _p_cr(0.0),
+      _k0(0.0),
       _eta_p(0.0),
       _eta_d(0.0),
       _alpha0(0.0),
+      _p_k(0.0),
       _p_tr(0.0),
       _q_tr(0.0),
       _p_r(0.0),
@@ -247,11 +251,17 @@ struct damage_plasticity
       _dmu2_dxi_cr(0.0)
   {
   }
-  void fill(const Real xi0, const Real gamma, const Real p_cr, const Real eta_p, const Real eta_d)
+  void fill(const Real xi0,
+            const Real gamma,
+            const Real p_cr,
+            const Real k0,
+            const Real eta_p,
+            const Real eta_d)
   {
     _xi0 = xi0;
     _gamma = gamma;
     _p_cr = p_cr;
+    _k0 = k0;
     _eta_p = eta_p;
     _eta_d = eta_d;
   }
