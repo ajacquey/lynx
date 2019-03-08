@@ -45,17 +45,13 @@
                            -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_interp_type
                            -pc_hypre_boomeramg_P_max -pc_hypre_boomeramg_truncfactor
                            -snes_linesearch_type'
-                           # -ksp_view_pmat -draw_pause'
-    petsc_options_value = 'fgmres 1.0e-25 1.0e-05 1000 100
+    petsc_options_value = 'fgmres 1.0e-25 1.0e-10 1000 100
                            hypre boomeramg 0.7
                            4 5
                            25
                            HMIS ext+i
                            2 0.3
                            bt'
-                           # draw -1'
-    #petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
-    #petsc_options_value = 'gmres asm 1E-00 1E-04 50 500 ilu NONZERO'
   [../]
 []
 
@@ -64,10 +60,7 @@
   solve_type = NEWTON
   start_time = 0.0
   end_time = 3.1536e+11
-  num_steps = 50
-  # end_time = 6.3072e+11
-  # num_steps = 50
-  # abort_on_solve_fail = true
+  dt = 6.3072e+09
 []
 
 [Outputs]

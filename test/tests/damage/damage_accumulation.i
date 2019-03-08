@@ -14,6 +14,8 @@
   [../]
   [./disp_y]
   [../]
+  [./damage]
+  [../]
 []
 
 [Kernels]
@@ -22,20 +24,27 @@
     variable = disp_x
     component = 0
     displacements = 'disp_x disp_y'
+    damage = 'damage'
   [../]
   [./mech_y]
     type = LynxSolidMomentum
     variable = disp_y
     component = 1
     displacements = 'disp_x disp_y'
+    damage = 'damage'
+  [../]
+  [./damage_time]
+    type = TimeDerivative
+    variable = damage
+  [../]
+  [./damage_rate]
+    type = LynxDamageRate
+    variable = damage
+    displacements = 'disp_x disp_y'
   [../]
 []
 
 [AuxVariables]
-  [./damage]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./mises_stress]
     order = CONSTANT
     family = MONOMIAL
@@ -56,14 +65,13 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./shear_modulus]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
-  [./damage_aux]
-    type = LynxDamageAux
-    variable = damage
-    #execute_on = 'timestep_end'
-  [../]
   [./mises_stress_aux]
     type = LynxVonMisesStressAux
     variable = mises_stress
@@ -90,6 +98,11 @@
     type = LynxStrainRatioAux
     variable = strain_ratio
     execute_on = 'timestep_end'
+  [../]
+  [./shear_modulus_aux]
+    type = MaterialRealAux
+    variable = shear_modulus
+    property = shear_modulus
   [../]
 []
 
@@ -127,9 +140,9 @@
     damage = 'damage'
     bulk_modulus = 1.0e+10
     shear_modulus = 1.0e+10
+    damage_modulus = 0.0
     friction_angle = 30
     cohesion = 10.0e+06
-    # plastic_viscosity = 1.0e+22
     plastic_viscosity = 1.0e+50
     damage_viscosity = 1.0e+19
   [../]
@@ -166,6 +179,11 @@
     variable = strain_ratio
     outputs = csv
   [../]
+  [./G]
+    type = ElementAverageValue
+    variable = shear_modulus
+    outputs = csv
+  [../]
 []
 
 [Preconditioning]
@@ -173,8 +191,20 @@
     type = SMP
     full = true
     petsc_options = '-snes_ksp_ew'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = 'gmres asm 1E-10 1E-12 50 50 ilu NONZERO'
+    petsc_options_iname = '-ksp_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it
+                           -pc_type -pc_hypre_type -pc_hypre_boomeramg_strong_threshold
+                           -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_agg_num_paths
+                           -pc_hypre_boomeramg_max_levels
+                           -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_interp_type
+                           -pc_hypre_boomeramg_P_max -pc_hypre_boomeramg_truncfactor
+                           -snes_linesearch_type'
+    petsc_options_value = 'fgmres 1.0e-00 1.0e-10 1000 100
+                           hypre boomeramg 0.7
+                           4 5
+                           25
+                           HMIS ext+i
+                           2 0.3
+                           basic'
   [../]
 []
 

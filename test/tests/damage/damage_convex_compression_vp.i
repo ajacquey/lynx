@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 4
-  ny = 4
-  nz = 4
+  nx = 2
+  ny = 2
+  nz = 2
   xmin = 0
   xmax = 1
   ymin = 0
@@ -25,6 +25,10 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./damage]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [Kernels]
@@ -33,17 +37,29 @@
     variable = disp_x
     component = 0
     displacements = 'disp_x disp_y disp_z'
+    damage = 'damage'
   [../]
   [./mech_y]
     type = LynxSolidMomentum
     variable = disp_y
     component = 1
     displacements = 'disp_x disp_y disp_z'
+    damage = 'damage'
   [../]
   [./mech_z]
     type = LynxSolidMomentum
     variable = disp_z
     component = 2
+    displacements = 'disp_x disp_y disp_z'
+    damage = 'damage'
+  [../]
+  [./damage_time]
+    type = TimeDerivative
+    variable = damage
+  [../]
+  [./damage_rate]
+    type = LynxDamageRate
+    variable = damage
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
@@ -57,26 +73,14 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vol_inelastic_strain]
+  [./vol_plastic_strain]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vol_inelastic_strain_rate]
+  [./yield]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_ratio]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./damage_yield]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-#  [./porosity_yield]
-#    order = CONSTANT
-#    family = MONOMIAL
-#  [../]
 []
 
 [AuxKernels]
@@ -90,40 +94,25 @@
     variable = vol_strain
     execute_on = 'timestep_end'
   [../]
-  [./vol_inelastic_strain_aux]
+  [./vol_plastic_strain_aux]
     type = LynxVolStrainAux
-    variable = vol_inelastic_strain
-    strain_type = inelastic
+    variable = vol_plastic_strain
+    strain_type = plastic
     execute_on = 'timestep_end'
   [../]
-  [./vol_inelastic_strain_rate_aux]
-    type = LynxVolStrainRateAux
-    variable = vol_inelastic_strain_rate
-    strain_type = inelastic
-    execute_on = 'timestep_end'
-  [../]
-  [./strain_ratio_aux]
-    type = LynxStrainRatioAux
-    variable = strain_ratio
-    execute_on = 'timestep_end'
-  [../]
-  [./damage_yield_aux]
+  [./yield_aux]
     type = MaterialRealAux
-    variable = damage_yield
-    property = damage_yield_function
+    variable = yield
+    property = plastic_yield_function
+    execute_on = 'timestep_end'
   [../]
-#  [./porosity_yield_aux]
-#    type = MaterialRealAux
-#    variable = porosity_yield
-#    property = porosity_yield_function
-#  [../]
 []
 
 [BCs]
   [./no_x_left]
     type = PresetBC
     variable = disp_x
-    boundary = 'left'
+    boundary = left
     value = 0.0
   [../]
   [./no_y_bottom]
@@ -138,23 +127,23 @@
     boundary = 'back'
     value = 0.0
   [../]
-  [./compression_x]
+  [./vx_comp]
     type = LynxVelocityBC
     variable = disp_x
     boundary = 'right'
-    value = -1.0e-12
+    value = -1.6e-04
   [../]
-  [./compression_y]
+  [./vy_comp]
     type = LynxVelocityBC
     variable = disp_y
     boundary = 'top'
-    value = -1.0e-12
+    value = -1.6e-04
   [../]
-  [./compression_z]
+  [./vz_comp]
     type = LynxVelocityBC
     variable = disp_z
     boundary = 'front'
-    value = -1.0e-12
+    value = -1.6e-04
   [../]
 []
 
@@ -162,16 +151,23 @@
   [./deformation]
     type = LynxDamageDeformation
     displacements = 'disp_x disp_y disp_z'
-    bulk_modulus = 1.0e+10
-    shear_modulus = 1.0e+10
-    damage_modulus = 0.0
+    damage = 'damage'
+    bulk_modulus = 2.0e+09
+    shear_modulus = 2.0e+09
+    damage_modulus = 1.0e+09
     friction_angle = 30
-    porous_coupling = 10.0
-    plastic_viscosity = 5.0e+20
-    [../]
+    porous_coeff = 2.1246 # critical_pressure 8.0e+07
+    plastic_viscosity = 5.0e+10
+    damage_viscosity = 1.0e+09
+  [../]
 []
 
 [Postprocessors]
+  [./D]
+    type = ElementAverageValue
+    variable = damage
+    outputs = csv
+  [../]
   [./P]
     type = ElementAverageValue
     variable = pressure
@@ -182,31 +178,11 @@
     variable = vol_strain
     outputs = csv
   [../]
-  [./Ev_in]
+  [./Ev_p]
     type = ElementAverageValue
-    variable = vol_inelastic_strain
+    variable = vol_plastic_strain
     outputs = csv
   [../]
-  [./E_dot_v_in]
-    type = ElementAverageValue
-    variable = vol_inelastic_strain_rate
-    outputs = csv
-  [../]
-  [./Xi]
-    type = ElementAverageValue
-    variable = strain_ratio
-    outputs = csv
-  [../]
-  [./F]
-    type = ElementAverageValue
-    variable = damage_yield
-    outputs = csv
-  [../]
-#  [./Fp]
-#    type = ElementAverageValue
-#    variable = porosity_yield
-#    outputs = csv
-#  [../]
 []
 
 [Preconditioning]
@@ -215,21 +191,21 @@
     full = true
     petsc_options = '-snes_ksp_ew'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = 'gmres asm 1E-00 1E-15 200 500 ilu NONZERO'
+    petsc_options_value = 'gmres asm 1E-05 1E-10 200 500 lu NONZERO'
   [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
+  solve_type = 'NEWTON'
   start_time = 0.0
-  end_time = 3.1536e+11
-  dt = 6.3072e+09
+  end_time = 250
+  dt = 2.5
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  print_linear_residuals = false
+  print_linear_residuals = true
   perf_graph = true
   exodus = true
   csv = true

@@ -154,6 +154,8 @@ LynxDeformationBase::LynxDeformationBase(const InputParameters & parameters)
         (_has_dislocation_creep && (_A_dislocation != std::vector<Real>(_n_composition, 0.0)))),
     _has_plasticity(false),
     // Strain properties
+    _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
+    _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("elastic_strain")),
     _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
     _spin_tensor(declareProperty<RankTwoTensor>("spin_tensor")),
     _thermal_strain_incr(getDefaultMaterialProperty<RankTwoTensor>("thermal_strain_increment")),
@@ -165,7 +167,6 @@ LynxDeformationBase::LynxDeformationBase(const InputParameters & parameters)
     _plastic_yield_function(declareProperty<Real>("plastic_yield_function")),
     // Stress properties
     _stress(declareProperty<RankTwoTensor>("stress")),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
     _K(declareProperty<Real>("bulk_modulus")),
     _G(declareProperty<Real>("shear_modulus")),
     _tangent_modulus(declareProperty<RankFourTensor>("tangent_modulus")),
@@ -224,7 +225,7 @@ LynxDeformationBase::viscousUpdate()
 void
 LynxDeformationBase::initQpStatefulProperties()
 {
-  _stress[_qp].zero();
+  _elastic_strain[_qp].zero();
 }
 
 void
@@ -325,12 +326,10 @@ LynxDeformationBase::computeQpDeformation()
   elasticModuli();
 
   // Update the volumetric part of the deformation
-  Real pressure = -_stress_old[_qp].trace() / 3.0;
-  volumetricDeformation(pressure);
+  Real pressure = volumetricDeformation();
 
   // Update the deviatoric part of the deformation
-  RankTwoTensor stress_dev = spinRotation(_stress_old[_qp].deviatoric());
-  deviatoricDeformation(pressure, stress_dev);
+  RankTwoTensor stress_dev = deviatoricDeformation(pressure);
 
   // Plastic correction
   if (_has_plasticity && (_G[_qp] != 0.0) && (_K[_qp] != 0.0))
@@ -350,6 +349,10 @@ LynxDeformationBase::computeQpDeformation()
 void
 LynxDeformationBase::initializeQpDeformation()
 {
+  // Initialze elastic strain
+  _elastic_strain[_qp] =
+      spinRotation(_elastic_strain_old[_qp]) + _strain_increment[_qp] - _thermal_strain_incr[_qp];
+
   // Initialize inelastic increment
   _viscous_strain_incr[_qp].zero();
   _plastic_strain_incr[_qp].zero();
@@ -374,29 +377,27 @@ LynxDeformationBase::elasticModuli()
   _G[_qp] = _has_shear_modulus ? averageProperty(_shear_modulus) : 0.0;
 }
 
-void
-LynxDeformationBase::volumetricDeformation(Real & pressure)
+Real
+LynxDeformationBase::volumetricDeformation()
 {
   if (_coupled_pdyn)
-    pressure = _plith[_qp] + _pdyn[_qp];
+    return _plith[_qp] + _pdyn[_qp];
   else
   {
-    // Elastic increment
-    pressure -= _K[_qp] * (_strain_increment[_qp].trace() - _thermal_strain_incr[_qp].trace());
+    Real pressure = -_K[_qp] * _elastic_strain[_qp].trace();
     // Lithostatic pressure
-    pressure += _plith[_qp] - _plith_old[_qp];
+    pressure += _plith[_qp];
+    return pressure;
   }
 }
 
-void
-LynxDeformationBase::deviatoricDeformation(const Real & pressure, RankTwoTensor & stress_dev)
+RankTwoTensor
+LynxDeformationBase::deviatoricDeformation(const Real & pressure)
 {
   // Update if elasticity is provided
   if (_G[_qp] != 0.0)
   {
-    // Trial elastic strain increment
-    stress_dev += 2.0 * _G[_qp] * _strain_increment[_qp].deviatoric();
-
+    RankTwoTensor stress_dev = 2.0 * _G[_qp] * _elastic_strain[_qp].deviatoric();
     Real eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
     RankTwoTensor flow_dir = (eqv_stress != 0.0) ? stress_dev / eqv_stress : RankTwoTensor();
 
@@ -405,6 +406,9 @@ LynxDeformationBase::deviatoricDeformation(const Real & pressure, RankTwoTensor 
 
     _viscous_strain_incr[_qp] = 1.5 * eqv_v_strain_incr * flow_dir;
     stress_dev -= 3.0 * _G[_qp] * eqv_v_strain_incr * flow_dir;
+    _elastic_strain[_qp] -= _viscous_strain_incr[_qp];
+
+    return stress_dev;
   }
   else
   {
@@ -416,7 +420,7 @@ LynxDeformationBase::deviatoricDeformation(const Real & pressure, RankTwoTensor 
     _viscous_strain_incr[_qp] = _strain_increment[_qp].deviatoric();
     _eta_eff[_qp] = computeStokeEffectiveViscosity(pressure);
     // Here calculate stress_dev based on Stoke flow.
-    stress_dev = 2.0 * _eta_eff[_qp] * _strain_increment[_qp].deviatoric() / _dt;
+    return 2.0 * _eta_eff[_qp] * _strain_increment[_qp].deviatoric() / _dt;
   }
 }
 
@@ -458,7 +462,7 @@ LynxDeformationBase::tangentOperator()
 
   // Additional correction
   RankFourTensor tme = (_identity_four - viscous_operator) * (_identity_four - plastic_operator);
-  RankFourTensor damage_operator = damageTangentOperator(flow_direction, tme);
+  RankFourTensor damage_operator = damageTangentOperator(tme);
   _tangent_modulus[_qp] -= damage_operator;
 
   // Spin correction
@@ -500,8 +504,7 @@ LynxDeformationBase::plasticTangentOperator(const RankTwoTensor & flow_direction
 }
 
 RankFourTensor
-LynxDeformationBase::damageTangentOperator(const RankTwoTensor & /*flow_direction*/,
-                                           const RankFourTensor & /*tme*/)
+LynxDeformationBase::damageTangentOperator(const RankFourTensor & /*tme*/)
 {
   return RankFourTensor();
 }
@@ -666,13 +669,13 @@ LynxDeformationBase::spinRotation(const RankTwoTensor & tensor)
 void
 LynxDeformationBase::updateSpinTangentModulus()
 {
-  RankTwoTensor stress_dev_old = _stress_old[_qp].deviatoric();
+  RankTwoTensor strain_el_dev_old = _elastic_strain_old[_qp].deviatoric();
   RankTwoTensor Id = RankTwoTensor(RankTwoTensor::initIdentity);
 
   _tangent_modulus[_qp] +=
-      0.5 * (Id.mixedProductIkJl(stress_dev_old.transpose()) -
-             Id.mixedProductIlJk(stress_dev_old.transpose())) -
-      0.5 * (stress_dev_old.mixedProductIkJl(Id) - stress_dev_old.mixedProductIlJk(Id));
+      _G[_qp] * (Id.mixedProductIkJl(strain_el_dev_old.transpose()) -
+                 Id.mixedProductIlJk(strain_el_dev_old.transpose())) -
+      _G[_qp] * (strain_el_dev_old.mixedProductIkJl(Id) - strain_el_dev_old.mixedProductIlJk(Id));
 }
 
 void

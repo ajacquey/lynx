@@ -38,7 +38,6 @@ protected:
   virtual Real computeDT() override;
 
 private:
-
   const Real _log_dt;
   const Real _first_dt;
   const Real _max_dt;

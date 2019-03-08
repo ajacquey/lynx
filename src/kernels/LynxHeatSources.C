@@ -34,7 +34,7 @@ validParams<LynxHeatSources>()
   params.addParam<Real>(
       "coeff_shear_heating", 0.0, "The coefficient in front of the shear heating generation.");
   params.addCoupledVar("displacements",
-                               "The string of displacements suitable for the problem statement");
+                       "The string of displacements suitable for the problem statement");
   return params;
 }
 

@@ -82,11 +82,9 @@ LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
                                                           : std::vector<Real>(_n_composition, 0.0)),
     _one_on_damage_eta(isParamValid("damage_viscosity") ? getLynxParam<Real>("damage_viscosity")
                                                         : std::vector<Real>(_n_composition, 0.0)),
-    // Strain properties
-    _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
-    _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("elastic_strain")),
     // Stress properties
-    // _dstress_ddamage(declareProperty<RankTwoTensor>("dstress_ddamage")),
+    _dstress_ddamage(declareProperty<RankTwoTensor>("dstress_ddamage")),
+    _ddamage_rate_dstrain(declareProperty<RankTwoTensor>("ddamage_rate_dstrain")),
     // Damage properties
     _damage_rate(declareProperty<Real>("damage_rate"))
 {
@@ -112,13 +110,6 @@ LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
 }
 
 void
-LynxDamageDeformation::initQpStatefulProperties()
-{
-  _elastic_strain[_qp].zero();
-  LynxDeformationBase::initQpStatefulProperties();
-}
-
-void
 LynxDamageDeformation::initializeQpDeformation()
 {
   // Need to get _xi0
@@ -129,25 +120,6 @@ LynxDamageDeformation::initializeQpDeformation()
   _dyield_dq_tr = 0.0;
 
   LynxDeformationBase::initializeQpDeformation();
-}
-
-void
-LynxDamageDeformation::elasticModuli()
-{
-  // Strain ratio
-  const Real xi = strainRatio(_elastic_strain_old[_qp]);
-
-  // Bulk modulus
-  _K[_qp] = _has_bulk_modulus ? averageProperty(_bulk_modulus) -
-                                    2.0 / 3.0 * _damage_old[_qp] * _damage_plasticity->_gamma *
-                                        (xi / 2.0 - _damage_plasticity->_xi0)
-                              : 0.0;
-
-  // Shear modulus
-  _G[_qp] = _has_shear_modulus
-                ? averageProperty(_shear_modulus) - _damage_old[_qp] * _damage_plasticity->_gamma *
-                                                        (xi / 2.0 - _damage_plasticity->_xi0)
-                : 0.0;
 }
 
 void
@@ -171,6 +143,7 @@ LynxDamageDeformation::plasticCorrection(Real & pressure, RankTwoTensor & stress
 
       _plastic_strain_incr[_qp] = 1.5 * plastic_incr * flow_dir;
       stress_dev -= 3.0 * _G[_qp] * plastic_incr * flow_dir;
+      _elastic_strain[_qp] -= _plastic_strain_incr[_qp];
       // Update yield
       _plastic_yield_function[_qp] -= 3.0 * _G[_qp] * plastic_incr;
     }
@@ -189,10 +162,10 @@ LynxDamageDeformation::plasticCorrection(Real & pressure, RankTwoTensor & stress
 
       _plastic_strain_incr[_qp] = 1.5 * eqv_plastic_incr * flow_dir;
       _plastic_strain_incr[_qp].addIa(-vol_plastic_incr / 3.0);
-
       pressure -= _K[_qp] * vol_plastic_incr;
       stress_dev -= 3.0 * _G[_qp] * eqv_plastic_incr * flow_dir;
       eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
+      _elastic_strain[_qp] -= _plastic_strain_incr[_qp];
       // Update yield
       _plastic_yield_function[_qp] =
           std::sqrt(Utility::pow<2>(pressure - _damage_plasticity->_p_r) +
@@ -200,61 +173,59 @@ LynxDamageDeformation::plasticCorrection(Real & pressure, RankTwoTensor & stress
           rho_0;
     }
   }
-
-  // Update elastic strain
-  _elastic_strain[_qp] = spinRotation(_elastic_strain_old[_qp].deviatoric());
-  _elastic_strain[_qp].addIa(_elastic_strain_old[_qp].trace() / 3.0);
-
-  _elastic_strain[_qp] +=
-      _strain_increment[_qp] - _viscous_strain_incr[_qp] - _plastic_strain_incr[_qp];
 }
 
 void
 LynxDamageDeformation::damageCorrection()
 {
-  // Rotate old elastic strain
-  RankTwoTensor strain_el = spinRotation(_elastic_strain_old[_qp].deviatoric());
-  strain_el.addIa(_elastic_strain_old[_qp].trace() / 3.0);
-  Real xi = strainRatio(_elastic_strain_old[_qp]);
+  // Get flow direction
+  RankTwoTensor stress_dev = _stress[_qp].deviatoric();
+  Real eqv_stress = std::sqrt(1.5) * stress_dev.doubleContraction(stress_dev);
+  RankTwoTensor flow_direction = (eqv_stress != 0.0) ? stress_dev / eqv_stress : RankTwoTensor();
 
-  // Build damage correction to the elasticity tensor
-  RankTwoTensor e = (strain_el.L2norm() != 0.0) ? strain_el / strain_el.L2norm() : RankTwoTensor();
-  _damaged_tensor =
-      _damage_plasticity->_gamma *
-      (e.outerProduct(_identity_two) + _identity_two.outerProduct(e) - xi * e.outerProduct(e));
+  Real xi = strainRatio(_elastic_strain[_qp]);
 
   // Damage stress
-  _damaged_stress = _damage_plasticity->_gamma * (xi - 2.0 * _damage_plasticity->_xi0) * strain_el;
-  _damaged_stress.addIa(_damage_plasticity->_gamma * _elastic_strain_old[_qp].L2norm());
-
-  // _dstress_ddamage[_qp] = -damaged_stress;
+  RankTwoTensor damaged_stress =
+      _damage_plasticity->_gamma * (xi - 2.0 * _damage_plasticity->_xi0) * _elastic_strain[_qp];
+  damaged_stress.addIa(_damage_plasticity->_gamma * _elastic_strain[_qp].L2norm());
 
   // Correct stress
-  _stress[_qp] -=
-      _damage_old[_qp] * _damaged_tensor *
-          (_strain_increment[_qp] - _viscous_strain_incr[_qp] - _plastic_strain_incr[_qp]) +
-      _damaged_stress * (_damage[_qp] - _damage_old[_qp]);
+  _stress[_qp] -= _damage[_qp] * damaged_stress;
 
   // Damage rate
   if ((_plastic_yield_function[_qp] > 0.0))
     _damage_rate[_qp] = _damage_plasticity->_eta_d * _plastic_yield_function[_qp];
   else
     _damage_rate[_qp] = 0.0;
+
+  // Off diagonal components
+  _dstress_ddamage[_qp] = -damaged_stress;
+  _ddamage_rate_dstrain[_qp] =
+      _damage_plasticity->_eta_d * 3.0 * _G[_qp] * _dyield_dq_tr * flow_direction;
+  _ddamage_rate_dstrain[_qp].addIa(-_damage_plasticity->_eta_d * _K[_qp] * _dyield_dp_tr);
 }
 
 RankFourTensor
-LynxDamageDeformation::damageTangentOperator(const RankTwoTensor & flow_direction,
-                                             const RankFourTensor & tme)
+LynxDamageDeformation::damageTangentOperator(const RankFourTensor & tme)
 {
-  RankTwoTensor dyield_dstrain_tr = RankTwoTensor();
-  if ((_damage_rate[_qp] > 0.0) && (_damage_old[_qp] > 0.0) && (_damage[_qp] != _damage_old[_qp]))
-  {
-    dyield_dstrain_tr = 3.0 * _G[_qp] * _dyield_dq_tr * flow_direction;
-    dyield_dstrain_tr.addIa(-_K[_qp] * _dyield_dp_tr);
-  }
+  // Build damage correction to the elasticity tensor
+  Real xi = strainRatio(_elastic_strain[_qp]);
+  RankTwoTensor e = (_elastic_strain[_qp].L2norm() != 0.0)
+                        ? _elastic_strain[_qp] / _elastic_strain[_qp].L2norm()
+                        : RankTwoTensor();
+  RankFourTensor damaged_tensor =
+      _damage_plasticity->_gamma *
+      ((xi - 2.0 * _damage_plasticity->_xi0) * _identity_four + e.outerProduct(_identity_two) +
+       _identity_two.outerProduct(e) - xi * e.outerProduct(e));
 
-  return _damage_old[_qp] * _damaged_tensor * tme +
-         _damage_plasticity->_eta_d * _damaged_stress.outerProduct(dyield_dstrain_tr) * _dt;
+  RankFourTensor damage_operator = _damage[_qp] * damaged_tensor * tme;
+
+  if ((_damage_rate[_qp] > 0.0) && (_damage_old[_qp] != 1.0) &&
+      (_damage_rate[_qp] < (1.0 - _damage_old[_qp]) / _dt))
+    damage_operator -= _dstress_ddamage[_qp].outerProduct(_ddamage_rate_dstrain[_qp]) * _dt;
+
+  return damage_operator;
 }
 
 Real
@@ -285,7 +256,6 @@ LynxDamageDeformation::plasticIncrement(const Real & /*pressure*/, const Real & 
   // Tangent operator
   if (_fe_problem.currentlyComputingJacobian())
   {
-
     _stress_corr_p =
         (eqv_stress != 0.0) ? (eqv_stress - 3.0 * _G[_qp] * eqv_p_strain_incr) / eqv_stress : 1.0;
     _dp_dp_tr_p = 1.0;
@@ -293,11 +263,9 @@ LynxDamageDeformation::plasticIncrement(const Real & /*pressure*/, const Real & 
     _dq_dp_tr_p = _damage_plasticity->_alpha0 * vp_correction;
     _dq_dq_tr_p = 1.0 - vp_correction;
 
-    // Update yield derivative
+    // Update yield derivatives
     _dyield_dp_tr = _dq_dp_tr_p - _damage_plasticity->_alpha0 * _dp_dp_tr_p;
     _dyield_dq_tr = _dq_dq_tr_p - _damage_plasticity->_alpha0 * _dp_dq_tr_p;
-    // _dyield_dp_tr = -_damage_plasticity->_alpha0;
-    // _dyield_dq_tr = 1.0;
   }
 
   return eqv_p_strain_incr;
@@ -381,10 +349,13 @@ LynxDamageDeformation::convexPlasticIncrement(Real & vol_plastic_incr, Real & eq
         -vp_correction * rho_0 / _damage_plasticity->_rho_tr * dF2_dp0 * _damage_plasticity->_rq;
     _dq_dq_tr_p = (1.0 - vp_correction) + vp_correction * rho_0 / _damage_plasticity->_rho_tr *
                                               dF2_dp0 * _damage_plasticity->_rp;
-    // Update yield derivative
-    // MISSING calculations
-    _dyield_dp_tr = 0.0;
-    _dyield_dq_tr = 0.0;
+
+    // Update yield derivatives
+    Real rho = (1.0 - vp_correction) * _damage_plasticity->_rho_tr + vp_correction * rho_0;
+    _dyield_dp_tr = _damage_plasticity->_rp * (1.0 - rho_0 / rho * dF2_dp0) * _dp_dp_tr_p +
+                    _damage_plasticity->_rq * (1.0 - rho_0 / rho * dF2_dq0) * _dq_dp_tr_p;
+    _dyield_dq_tr = _damage_plasticity->_rp * (1.0 - rho_0 / rho * dF2_dp0) * _dp_dq_tr_p +
+                    _damage_plasticity->_rq * (1.0 - rho_0 / rho * dF2_dq0) * _dq_dq_tr_p;
   }
 
   return rho_0;

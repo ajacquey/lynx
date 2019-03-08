@@ -32,7 +32,8 @@ validParams<LynxDensityCompressible>()
   params.addCoupledVar("lithostatic_pressure", "The lithostatic pressure.");
   params.addParam<std::vector<Real>>("beta_solid", "The solid thermal expansion coefficient.");
   // params.addParam<bool>(
-  //     "temperature_from_multiapp", false, "Is the temperature obtained from a multiapp staging?");
+  //     "temperature_from_multiapp", false, "Is the temperature obtained from a multiapp
+  //     staging?");
   return params;
 }
 
@@ -79,13 +80,13 @@ LynxDensityCompressible::computeQpProperties()
 
   // if (!_temperature_from_multiapp)
   // {
-    Real drho_s_dtemp = -averageProperty(_solid_density) * averageProperty(_beta_solid);
-    Real drho_s_dev = averageProperty(_solid_density);
-    _drho_dtemp[_qp] = drho_s_dtemp;
-    _drho_dev[_qp] = drho_s_dev;
-    _dinvrho_dtemp[_qp] =
-        (_rho_b[_qp] != 0.0) ? -1.0 / Utility::pow<2>(_rho_b[_qp]) * _drho_dtemp[_qp] : 0.0;
-    _dinvrho_dev[_qp] =
-        (_rho_b[_qp] != 0.0) ? -1.0 / Utility::pow<2>(_rho_b[_qp]) * _drho_dev[_qp] : 0.0;
+  Real drho_s_dtemp = -averageProperty(_solid_density) * averageProperty(_beta_solid);
+  Real drho_s_dev = averageProperty(_solid_density);
+  _drho_dtemp[_qp] = drho_s_dtemp;
+  _drho_dev[_qp] = drho_s_dev;
+  _dinvrho_dtemp[_qp] =
+      (_rho_b[_qp] != 0.0) ? -1.0 / Utility::pow<2>(_rho_b[_qp]) * _drho_dtemp[_qp] : 0.0;
+  _dinvrho_dev[_qp] =
+      (_rho_b[_qp] != 0.0) ? -1.0 / Utility::pow<2>(_rho_b[_qp]) * _drho_dev[_qp] : 0.0;
   // }
 }

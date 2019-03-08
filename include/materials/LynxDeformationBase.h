@@ -51,8 +51,8 @@ protected:
   virtual void computeQpDeformation();
   virtual void initializeQpDeformation();
   virtual void elasticModuli();
-  virtual void volumetricDeformation(Real & pressure);
-  virtual void deviatoricDeformation(const Real & pressure, RankTwoTensor & stress_dev);
+  virtual Real volumetricDeformation();
+  virtual RankTwoTensor deviatoricDeformation(const Real & pressure);
   virtual void reformStressTensor(const Real & pressure, const RankTwoTensor & stress_dev);
   virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) = 0;
   virtual void damageCorrection();
@@ -60,8 +60,7 @@ protected:
   virtual RankFourTensor viscousTangentOperator(const RankFourTensor & flow_direction_dyad);
   virtual RankFourTensor plasticTangentOperator(const RankTwoTensor & flow_direction,
                                                 const RankFourTensor & flow_direction_dyad);
-  virtual RankFourTensor damageTangentOperator(const RankTwoTensor & /*flow_direction*/,
-                                               const RankFourTensor & /*tme*/);
+  virtual RankFourTensor damageTangentOperator(const RankFourTensor & /*tme*/);
   virtual void finiteTangentOperator();
   virtual Real computeStokeEffectiveViscosity(const Real & pressure);
   virtual RankTwoTensor computeStokeEffectiveViscosityDerivative();
@@ -150,6 +149,8 @@ protected:
   Real _dq_dq_tr_p;
 
   // Strain properties
+  MaterialProperty<RankTwoTensor> & _elastic_strain;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
   MaterialProperty<RankTwoTensor> & _strain_increment;
   MaterialProperty<RankTwoTensor> & _spin_tensor;
   const MaterialProperty<RankTwoTensor> & _thermal_strain_incr;
@@ -164,7 +165,6 @@ protected:
 
   // Stress properties
   MaterialProperty<RankTwoTensor> & _stress;
-  const MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<Real> & _K;
   MaterialProperty<Real> & _G;
   MaterialProperty<RankFourTensor> & _tangent_modulus;

@@ -27,15 +27,13 @@ InputParameters
 validParams<LynxTemperatureCelsiusAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredCoupledVar("temperature",
-                               "The temperature variable to convert to Celsius.");
+  params.addRequiredCoupledVar("temperature", "The temperature variable to convert to Celsius.");
   params.addClassDescription("Converts Kelvin to degree Celsius.");
   return params;
 }
 
 LynxTemperatureCelsiusAux::LynxTemperatureCelsiusAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _T_K(coupledValue("temperature"))
+  : AuxKernel(parameters), _T_K(coupledValue("temperature"))
 {
 }
 

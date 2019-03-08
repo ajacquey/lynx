@@ -35,13 +35,10 @@ public:
   virtual ~LynxDamageDeformation() {}
 
 protected:
-  virtual void initQpStatefulProperties() override;
   virtual void initializeQpDeformation() override;
-  virtual void elasticModuli() override;
   virtual void plasticCorrection(Real & pressure, RankTwoTensor & stress_dev) override;
   virtual void damageCorrection() override;
-  virtual RankFourTensor damageTangentOperator(const RankTwoTensor & flow_direction,
-                                               const RankFourTensor & tme) override;
+  virtual RankFourTensor damageTangentOperator(const RankFourTensor & tme) override;
   virtual Real computePlasticityYield(const Real & pressure, const Real & eqv_stress);
   virtual Real plasticIncrement(const Real & /*pressure*/, const Real & eqv_stress);
   virtual Real computeConvexPlasticityYield2(const Real & pressure, const Real & eqv_stress);
@@ -83,15 +80,10 @@ protected:
   // Damage-Plasticity utilities
   Real _dyield_dp_tr;
   Real _dyield_dq_tr;
-  RankTwoTensor _damaged_stress;
-  RankFourTensor _damaged_tensor;
-
-  // Strain properties
-  MaterialProperty<RankTwoTensor> & _elastic_strain;
-  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
   // Stress properties
-  // MaterialProperty<RankTwoTensor> & _dstress_ddamage;
+  MaterialProperty<RankTwoTensor> & _dstress_ddamage;
+  MaterialProperty<RankTwoTensor> & _ddamage_rate_dstrain;
 
   // Damage properties
   MaterialProperty<Real> & _damage_rate;

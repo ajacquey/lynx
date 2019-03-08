@@ -123,6 +123,7 @@ LynxDeformation::plasticCorrection(Real & pressure, RankTwoTensor & stress_dev)
     _plastic_strain_incr[_qp].addIa(_plasticity->_beta * plastic_incr);
     stress_dev -= 3.0 * _G[_qp] * plastic_incr * flow_dir;
     pressure += _K[_qp] * _plasticity->_beta * plastic_incr;
+    _elastic_strain[_qp] -= _plastic_strain_incr[_qp];
     // Update yield
     _plastic_yield_function[_qp] -= (3.0 * _G[_qp] + _plasticity->_H) * plastic_incr;
   }
