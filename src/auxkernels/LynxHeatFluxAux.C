@@ -27,13 +27,12 @@ InputParameters
 validParams<LynxHeatFluxAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription(
-    "Calculates the heat flux in each element for the given direction.");
+  params.addClassDescription("Calculates the heat flux in each element for the given direction.");
   params.addRequiredCoupledVar("temperature", "The temperature variable.");
   params.addRequiredRangeCheckedParam<unsigned int>(
-    "component",
-    "component >= 0 & component <= 2",
-    "Integer corresponding to direction of the heat flux (0, 1, 2.");
+      "component",
+      "component >= 0 & component <= 2",
+      "Integer corresponding to direction of the heat flux (0, 1, 2.");
   return params;
 }
 
@@ -54,5 +53,5 @@ LynxHeatFluxAux::computeValue()
   else
     _cond_bulk = _thermal_diff[_qp] * _rhoC_b[_qp];
 
-  return -1*_cond_bulk*_grad_T[_qp](_component);
+  return -1 * _cond_bulk * _grad_T[_qp](_component);
 }

@@ -129,7 +129,7 @@
     shear_modulus = 2.0e+03
     friction_angle = 13.35242612
     cohesion = 0.5773502692
-    critical_pressure = 1.0e+05
+    porous_coeff = 4.358942727e-04 # critical_pressure 1.0e+05
     plastic_viscosity = 1.0e+04
   [../]
 []

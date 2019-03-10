@@ -34,8 +34,10 @@ validParams<LynxThermalConstant>()
                                              "The solid thermal conductivity.");
   params.addParam<std::vector<Real>>("fluid_heat_capacity", "The fluid heat capacity.");
   params.addParam<std::vector<Real>>("solid_heat_capacity", "The solid heat capacity.");
-  params.addParam<std::vector<Real>>("fluid_thermal_expansion", "The fluid volumetric thermal expansion coefficient.");
-  params.addParam<std::vector<Real>>("solid_thermal_expansion", "The solid volumetric thermal expansion coefficient.");
+  params.addParam<std::vector<Real>>("fluid_thermal_expansion",
+                                     "The fluid volumetric thermal expansion coefficient.");
+  params.addParam<std::vector<Real>>("solid_thermal_expansion",
+                                     "The solid volumetric thermal expansion coefficient.");
   return params;
 }
 

@@ -39,6 +39,7 @@ validParams<LynxSolidMomentum>()
   params.addCoupledVar("fluid_pressure", "The fluid pressure variable.");
   params.addCoupledVar("lithostatic_pressure", "The lithostatic pressure variable.");
   params.addCoupledVar("dynamic_pressure", "The dynamic pressure variable.");
+  params.addCoupledVar("damage", "The damage intensity variable.");
   params.set<bool>("use_displaced_mesh") = false;
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
@@ -57,6 +58,7 @@ LynxSolidMomentum::LynxSolidMomentum(const InputParameters & parameters)
     _pf(_coupled_pf ? coupledValue("fluid_pressure") : _zero),
     _coupled_plith(isCoupled("lithostatic_pressure")),
     _coupled_pdyn(isCoupled("dynamic_pressure")),
+    _coupled_dam(isCoupled("damage")),
     _component(getParam<unsigned int>("component")),
     _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
     _stress(getMaterialProperty<RankTwoTensor>("stress")),
@@ -67,13 +69,15 @@ LynxSolidMomentum::LynxSolidMomentum(const InputParameters & parameters)
     _rho_b(getDefaultMaterialProperty<Real>("bulk_density")),
     _drho_dtemp(getDefaultMaterialProperty<Real>("drho_dtemp")),
     _drho_dev(getDefaultMaterialProperty<Real>("drho_dev")),
+    _dstress_ddamage(getDefaultMaterialProperty<RankTwoTensor>("dstress_ddamage")),
     _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _disp_var(_ndisp),
     _temp_var(_coupled_temp ? coupled("temperature") : 0),
     _pf_var(_coupled_pf ? coupled("fluid_pressure") : 0),
     _plith_var(_coupled_plith ? coupled("lithostatic_pressure") : 0),
-    _pdyn_var(_coupled_pdyn ? coupled("dynamic_pressure") : 0)
+    _pdyn_var(_coupled_pdyn ? coupled("dynamic_pressure") : 0),
+    _damage_var(_coupled_dam ? coupled("damage") : 0)
 {
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
@@ -273,6 +277,9 @@ LynxSolidMomentum::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (_coupled_pdyn && jvar == _pdyn_var)
     return -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
+
+  if (_coupled_dam && jvar == _damage_var)
+    return _dstress_ddamage[_qp].row(_component) * _phi[_j][_qp] * _grad_test[_i][_qp];
 
   return 0.0;
 }

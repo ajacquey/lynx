@@ -39,7 +39,7 @@ validParams<LynxMaterialBase>()
 LynxMaterialBase::LynxMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _has_compositional_phases(isCoupled("compositional_phases")),
-    _n_composition(_has_compositional_phases ? coupledComponents("compositional_phases") :  1),
+    _n_composition(_has_compositional_phases ? coupledComponents("compositional_phases") : 1),
     _average_type(getParam<MooseEnum>("average_type")),
     _compositional_phases(_n_composition)
 {
@@ -58,7 +58,8 @@ template <typename T>
 const std::vector<T> &
 LynxMaterialBase::getLynxParam(const std::string & name) const
 {
-  const std::vector<T> & prop = InputParameters::getParamHelper(name, _pars, static_cast<std::vector<T> *>(0));
+  const std::vector<T> & prop =
+      InputParameters::getParamHelper(name, _pars, static_cast<std::vector<T> *>(0));
 
   if (prop.size() != _n_composition)
     mooseError("Size of vector \"", name, "\" must match the size of compositional phases!");

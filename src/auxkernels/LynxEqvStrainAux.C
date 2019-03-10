@@ -27,8 +27,7 @@ InputParameters
 validParams<LynxEqvStrainAux>()
 {
   InputParameters params = validParams<LynxStrainAuxBase>();
-  params.addClassDescription(
-      "Calculates the equivalent strain of the given tensor.");
+  params.addClassDescription("Calculates the equivalent strain of the given tensor.");
   return params;
 }
 

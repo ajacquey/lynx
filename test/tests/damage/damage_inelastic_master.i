@@ -14,8 +14,6 @@
   [../]
   [./disp_y]
   [../]
-  [./damage]
-  [../]
 []
 
 [Kernels]
@@ -24,28 +22,29 @@
     variable = disp_x
     component = 0
     displacements = 'disp_x disp_y'
-    damage = 'damage'
   [../]
   [./mech_y]
     type = LynxSolidMomentum
     variable = disp_y
     component = 1
     displacements = 'disp_x disp_y'
-    damage = 'damage'
-  [../]
-  [./damage_time]
-    type = TimeDerivative
-    variable = damage
-  [../]
-  [./damage_rate]
-    type = LynxDamageRate
-    variable = damage
-    displacements = 'disp_x disp_y'
   [../]
 []
 
 [AuxVariables]
+  [./damage]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./damage_rate]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./mises_stress]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pressure]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -72,10 +71,21 @@
 []
 
 [AuxKernels]
+  [./damage_rate_aux]
+    type = MaterialRealAux
+    variable = damage_rate
+    property = damage_rate
+    execute_on = 'timestep_end'
+  [../]
   [./mises_stress_aux]
     type = LynxVonMisesStressAux
     variable = mises_stress
     execute_on = 'timestep_end'
+  [../]
+  [./pressure_aux]
+    type = LynxEffectivePressureAux
+    variable = pressure
+    execute_on = 'TIMESTEP_END'
   [../]
   [./eqv_strain_aux]
     type = LynxEqvStrainAux
@@ -140,14 +150,46 @@
     damage = 'damage'
     bulk_modulus = 1.0e+10
     shear_modulus = 1.0e+10
-    damage_modulus = 0.0
+    damage_modulus = 0.5e+10
     friction_angle = 30
     cohesion = 10.0e+06
-    plastic_viscosity = 1.0e+50
+    plastic_viscosity = 1.0e+22
     damage_viscosity = 1.0e+19
   [../]
 []
 
+[MultiApps]
+  [./sub]
+    type = TransientMultiApp
+    input_files = 'damage_inelastic_sub.i'
+    execute_on = 'TIMESTEP_END'
+    sub_cycling = true
+    detect_steady_state = true
+    steady_state_tol = 1.0e-8
+  [../]
+[]
+
+[Transfers]
+  # To the multi app
+  [.damage_rate_to_sub]
+    type = MultiAppCopyTransfer
+    source_variable = damage_rate
+    variable = damage_rate
+    direction = to_multiapp
+    multi_app = sub
+    execute_on = SAME_AS_MULTIAPP
+  [../]
+  # From the Multi app
+  [./damage_from_sub]
+    type = MultiAppCopyTransfer
+    source_variable = damage
+    variable = damage
+    direction = from_multiapp
+    multi_app = sub
+    execute_on = SAME_AS_MULTIAPP
+  [../]
+[]
+  
 [Postprocessors]
   [./D]
     type = ElementAverageValue
@@ -157,6 +199,11 @@
   [./Se]
     type = ElementAverageValue
     variable = mises_stress
+    outputs = csv
+  [../]
+  [./P]
+    type = ElementAverageValue
+    variable = pressure
     outputs = csv
   [../]
   [./E_eqv]

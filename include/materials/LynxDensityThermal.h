@@ -41,7 +41,7 @@ protected:
 
   MaterialProperty<Real> & _drho_dtemp;
   MaterialProperty<Real> & _dinvrho_dtemp;
-  // const std::vector<Real> _beta_fluid;
+  const std::vector<Real> _beta_fluid;
   const std::vector<Real> _beta_solid;
   Real _temp_ref;
   Function * const _temp_ref_fct;
