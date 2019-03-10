@@ -58,6 +58,7 @@ protected:
   const VariableValue & _pf;
   bool _coupled_plith;
   bool _coupled_pdyn;
+  bool _coupled_dam;
   const unsigned int _component;
   bool _vol_locking_correction;
   const MaterialProperty<RankTwoTensor> & _stress;
@@ -68,6 +69,7 @@ protected:
   const MaterialProperty<Real> & _rho_b;
   const MaterialProperty<Real> & _drho_dtemp;
   const MaterialProperty<Real> & _drho_dev;
+  const MaterialProperty<RankTwoTensor> & _dstress_ddamage;
   // Gradient of test function averaged over the element. Used in volumetric locking correction
   // calculation.
   std::vector<std::vector<Real>> _avg_grad_test;
@@ -79,6 +81,7 @@ protected:
   unsigned int _pf_var;
   unsigned int _plith_var;
   unsigned int _pdyn_var;
+  unsigned int _damage_var;
 };
 
 #endif // LYNXSOLIDMOMENTUM_H

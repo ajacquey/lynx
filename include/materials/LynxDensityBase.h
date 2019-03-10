@@ -41,11 +41,11 @@ protected:
 
   bool _has_gravity;
   Real _g;
-  // const std::vector<Real> _fluid_density;
+  const std::vector<Real> _fluid_density;
   const std::vector<Real> _solid_density;
 
   MaterialProperty<RealVectorValue> & _gravity;
-  // MaterialProperty<Real> & _rho_f;
+  MaterialProperty<Real> & _rho_f;
   MaterialProperty<Real> & _rho_s;
   MaterialProperty<Real> & _rho_b;
   MaterialProperty<Real> & _reference_rho_b;

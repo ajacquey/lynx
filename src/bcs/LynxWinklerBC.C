@@ -28,11 +28,13 @@ InputParameters
 validParams<LynxWinklerBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addClassDescription("Applies a Winkler foundation BC on a given boundary in a given direction.");
+  params.addClassDescription(
+      "Applies a Winkler foundation BC on a given boundary in a given direction.");
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system.");
-  params.addRequiredParam<unsigned int>("component", "The component of the displacement orthogonal to the boundary.");
+  params.addRequiredParam<unsigned int>(
+      "component", "The component of the displacement orthogonal to the boundary.");
   params.addParam<Real>("value", 0.0, "Value of the reference pressure.");
   params.addParam<FunctionName>("function", "The function that describes the reference pressure.");
   params.addParam<Real>("external_density", 0.0, "The density of the external material.");

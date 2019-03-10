@@ -30,8 +30,10 @@ validParams<LynxVariableRateAux>()
   params.addClassDescription("Computes the rate of change of a coupled scalar variable.");
   params.addRequiredCoupledVar("coupled_variable", "The coupled variable.");
   params.addParam<Real>("time_scale_factor", 1.0, "Multiply the time step size by this factor.");
-  params.addParam<bool>("output_relative", false,
-                        "If true, write gradient relative to the absolute value of coupled_variable.");
+  params.addParam<bool>(
+      "output_relative",
+      false,
+      "If true, write gradient relative to the absolute value of coupled_variable.");
   return params;
 }
 
@@ -48,7 +50,7 @@ Real
 LynxVariableRateAux::computeValue()
 {
   if (_relative)
-    return (_cvar[_qp] - _cvar_old[_qp])/_cvar_old[_qp]/_dt/_tscale;
+    return (_cvar[_qp] - _cvar_old[_qp]) / _cvar_old[_qp] / _dt / _tscale;
   else
-    return (_cvar[_qp] - _cvar_old[_qp])/_dt/_tscale;
+    return (_cvar[_qp] - _cvar_old[_qp]) / _dt / _tscale;
 }

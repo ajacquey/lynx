@@ -18,31 +18,35 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#include "LynxDamageAux.h"
+#ifndef LYNXDAMAGERATE_H
+#define LYNXDAMAGERATE_H
 
-registerMooseObject("LynxApp", LynxDamageAux);
+#include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
+
+class LynxDamageRate;
 
 template <>
-InputParameters
-validParams<LynxDamageAux>()
-{
-  InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription("Updating the damage auxiliary variable.");
-  return params;
-}
+InputParameters validParams<LynxDamageRate>();
 
-LynxDamageAux::LynxDamageAux(const InputParameters & parameters)
-  : DerivativeMaterialInterface<AuxKernel>(parameters),
-    _damage_rate(getDefaultMaterialProperty<Real>("damage_rate"))
+class LynxDamageRate : public DerivativeMaterialInterface<Kernel>
 {
-}
+public:
+  LynxDamageRate(const InputParameters & parameters);
 
-Real
-LynxDamageAux::computeValue()
-{
-  Real damage_rate = _damage_rate[_qp];
-  if (damage_rate > (1.0 - _u_old[_qp]) / _dt) 
-    damage_rate = (1.0 - _u_old[_qp]) / _dt;
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  return _u_old[_qp] + damage_rate * _dt;
-}
+  const VariableValue & _u_old;
+  bool _coupled_dam;
+  bool _coupled_disp;
+  unsigned int _ndisp;
+  std::vector<unsigned> _disp_var;
+  const VariableValue & _damage_rate;
+  const MaterialProperty<Real> & _damage_rate_mat;
+  const MaterialProperty<RankTwoTensor> & _ddamage_rate_dstrain;
+};
+
+#endif // LYNXDAMAGERATE_H
