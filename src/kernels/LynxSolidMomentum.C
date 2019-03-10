@@ -120,7 +120,7 @@ Real
 LynxSolidMomentum::computeQpResidual()
 {
   RealVectorValue stress_row = _stress[_qp].row(_component);
-  stress_row(_component) += _biot[_qp] * _pf[_qp];
+  stress_row(_component) -= _biot[_qp] * _pf[_qp];
   RealVectorValue grav_term = -_rho_b[_qp] * _gravity[_qp];
 
   Real residual = stress_row * _grad_test[_i][_qp] + grav_term(_component) * _test[_i][_qp];

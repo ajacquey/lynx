@@ -27,7 +27,7 @@ InputParameters
 validParams<LynxHydroConstant>()
 {
   InputParameters params = validParams<LynxHydroBase>();
-  params.addClassDescription("Constant thermal properties.");
+  params.addClassDescription("Constant hydraulic properties.");
   params.addRequiredParam<std::vector<Real>>("permeability", "The permeability of the matrix.");
   params.addRequiredParam<std::vector<Real>>("fluid_viscosity", "The viscosity of the fluid.");
   params.addParam<std::vector<Real>>("fluid_modulus", "The bulk modulus of the fluid phase.");

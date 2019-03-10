@@ -271,6 +271,9 @@ LynxDeformationBase::computeStrainIncrement()
         mooseError("Unknown strain model. Specify 'small' or 'finite'!");
     }
 
+    // Thermal strain correction
+    _strain_increment[_qp] -= _thermal_strain_incr[_qp];
+
     if (_vol_locking_correction)
       vol_strain_incr += _strain_increment[_qp].trace() * _JxW[_qp] * _coord[_qp];
   }
@@ -351,7 +354,7 @@ LynxDeformationBase::initializeQpDeformation()
 {
   // Initialze elastic strain
   _elastic_strain[_qp] =
-      spinRotation(_elastic_strain_old[_qp]) + _strain_increment[_qp] - _thermal_strain_incr[_qp];
+      spinRotation(_elastic_strain_old[_qp]) + _strain_increment[_qp];
 
   // Initialize inelastic increment
   _viscous_strain_incr[_qp].zero();
