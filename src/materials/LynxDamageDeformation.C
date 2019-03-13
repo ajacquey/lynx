@@ -327,8 +327,8 @@ LynxDamageDeformation::convexPlasticIncrement(Real & vol_plastic_incr, Real & eq
   {
 
     _stress_corr_p = (_damage_plasticity->_q_tr != 0.0)
-                         ? _damage_plasticity->_q_tr -
-                               3.0 * _G[_qp] * eqv_plastic_incr / _damage_plasticity->_q_tr
+                         ? (_damage_plasticity->_q_tr -
+                               3.0 * _G[_qp] * eqv_plastic_incr) / _damage_plasticity->_q_tr
                          : 1.0;
     Real dF2_dp0 = dConvexPlasticYield2_dp(p_0, q_0) / dConvexPlasticYield2(rho_0);
     Real dF2_dq0 = dConvexPlasticYield2_dq(p_0, q_0) / dConvexPlasticYield2(rho_0);
@@ -386,10 +386,10 @@ LynxDamageDeformation::computeDamageProperties(const Real & pressure, const Real
                                             Utility::pow<2>(eqv_stress - _damage_plasticity->_q_r));
 
     // Projection direction
-    _damage_plasticity->_rp =
-        (_damage_plasticity->_p_tr - _damage_plasticity->_p_r) / _damage_plasticity->_rho_tr;
-    _damage_plasticity->_rq =
-        (_damage_plasticity->_q_tr - _damage_plasticity->_q_r) / _damage_plasticity->_rho_tr;
+    _damage_plasticity->_rp = (_damage_plasticity->_rho_tr != 0.0) ?
+        (_damage_plasticity->_p_tr - _damage_plasticity->_p_r) / _damage_plasticity->_rho_tr : 0.0;
+    _damage_plasticity->_rq = (_damage_plasticity->_rho_tr != 0.0) ?
+        (_damage_plasticity->_q_tr - _damage_plasticity->_q_r) / _damage_plasticity->_rho_tr : 0.0;
   }
 }
 
@@ -401,6 +401,7 @@ LynxDamageDeformation::updateDamageParameters()
   Real porous_coeff =
       averageProperty(_porous_coeff) + averageProperty(_porous_coeff_linear) * _porosity[_qp];
   Real p_cr = (porous_coeff != 0.0) ? _K[_qp] * (std::sqrt(3.0) + xi0) / (3.0 * porous_coeff) : 0.0;
+
   Real k0 = std::sqrt(3.0) * averageProperty(_cohesion) *
             std::cos(averageProperty(_friction_angle) * libMesh::pi / 180.0);
 
@@ -441,7 +442,7 @@ LynxDamageDeformation::updateDamageConvexParameters(const Real & pressure, const
                                 eqv_stress * (1.0 - pq_term)
                           : 0.0;
 
-  _damage_plasticity->_dmu2_dxi_cr =
+  _damage_plasticity->_dalpha2_dxi_cr =
       (_damage_plasticity->_xi_cr != 0.0)
           ? -12.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) / Utility::pow<3>(_damage_plasticity->_xi_cr)
           : 0.0;
@@ -450,16 +451,23 @@ LynxDamageDeformation::updateDamageConvexParameters(const Real & pressure, const
 Real
 LynxDamageDeformation::convexReferencePressure()
 {
-  Real p_proj =
-      (1.0 - Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp] /
-                 (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp])) *
-          _damage_plasticity->_p_tr +
-      _damage_plasticity->_alpha0 * _K[_qp] * _damage_plasticity->_q_tr /
-          (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp]);
+  // Real p_proj =
+  //     (1.0 - Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp] /
+  //                (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp])) *
+  //         _damage_plasticity->_p_tr +
+  //     _damage_plasticity->_alpha0 * _K[_qp] * _damage_plasticity->_q_tr /
+  //         (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp]);
 
-  return ((p_proj > 0.0) && (p_proj < _damage_plasticity->_p_cr))
-             ? p_proj
-             : 2.0 * _damage_plasticity->_p_cr / 3.0;
+  Real p_proj = _damage_plasticity->_q_tr / _damage_plasticity->_alpha0 - _damage_plasticity->_p_k;
+
+  if (_damage_plasticity->_q_tr == 0.0)
+    return _damage_plasticity->_p_tr;
+  else if (p_proj < -_damage_plasticity->_p_k)
+    return -_damage_plasticity->_p_k;
+  else if (p_proj > _damage_plasticity->_p_cr)
+    return 2.0 * _damage_plasticity->_p_cr / 3.0;
+  else
+    return p_proj;
 }
 
 Real
@@ -480,10 +488,10 @@ LynxDamageDeformation::dConvexPlasticYield2_dp(const Real & pressure, const Real
 
   updateDamageConvexParameters(pressure, eqv_stress);
 
-  return -(_damage_plasticity->_dmu2_dxi_cr * _damage_plasticity->_dxi_cr_dp *
+  return -(_damage_plasticity->_dalpha2_dxi_cr * _damage_plasticity->_dxi_cr_dp *
                (pressure + _damage_plasticity->_p_k) +
            2.0 * _damage_plasticity->_alpha2) *
-         pressure *
+         (pressure + _damage_plasticity->_p_k) *
          ((0.0 < pressure + _damage_plasticity->_p_k) -
           (pressure + _damage_plasticity->_p_k < 0.0));
 }
@@ -497,7 +505,7 @@ LynxDamageDeformation::dConvexPlasticYield2_dq(const Real & pressure, const Real
   updateDamageConvexParameters(pressure, eqv_stress);
 
   return 2.0 * eqv_stress -
-         _damage_plasticity->_dmu2_dxi_cr * _damage_plasticity->_dxi_cr_dq *
+         _damage_plasticity->_dalpha2_dxi_cr * _damage_plasticity->_dxi_cr_dq *
              Utility::pow<2>(
                  pressure +
                  _damage_plasticity->_p_k); // *
