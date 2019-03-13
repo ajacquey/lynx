@@ -46,7 +46,6 @@ protected:
   virtual Real convexPlasticIncrement(Real & vol_plastic_incr, Real & eqv_plastic_incr);
   virtual void computeDamageProperties(const Real & pressure, const Real & eqv_stress);
   virtual void updateDamageParameters();
-  virtual void initializeDamageParameters();
   virtual void updateDamageConvexParameters(const Real & pressure, const Real & eqv_stress);
   virtual Real convexReferencePressure();
   virtual Real dConvexPlasticYield2(const Real & rho);

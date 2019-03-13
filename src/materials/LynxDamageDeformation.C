@@ -112,9 +112,6 @@ LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
 void
 LynxDamageDeformation::initializeQpDeformation()
 {
-  // Need to get _xi0
-  initializeDamageParameters();
-
   // Initialize yield derivative
   _dyield_dp_tr = 0.0;
   _dyield_dq_tr = 0.0;
@@ -404,27 +401,6 @@ LynxDamageDeformation::updateDamageParameters()
   Real porous_coeff =
       averageProperty(_porous_coeff) + averageProperty(_porous_coeff_linear) * _porosity[_qp];
   Real p_cr = (porous_coeff != 0.0) ? _K[_qp] * (std::sqrt(3.0) + xi0) / (3.0 * porous_coeff) : 0.0;
-  Real k0 = std::sqrt(3.0) * averageProperty(_cohesion) *
-            std::cos(averageProperty(_friction_angle) * libMesh::pi / 180.0);
-
-  _damage_plasticity->fill(xi0,
-                           averageProperty(_damage_modulus),
-                           p_cr,
-                           k0,
-                           averageProperty(_one_on_plastic_eta),
-                           averageProperty(_one_on_damage_eta));
-}
-
-void
-LynxDamageDeformation::initializeDamageParameters()
-{
-  Real sin_phi = std::sin(averageProperty(_friction_angle) * libMesh::pi / 180.0);
-  Real xi0 = -std::sqrt(3.0) /
-             std::sqrt(1.0 + 1.5 * Utility::pow<2>(averageProperty(_bulk_modulus) /
-                                                   averageProperty(_shear_modulus) * sin_phi));
-  Real porous_coeff =
-      averageProperty(_porous_coeff) + averageProperty(_porous_coeff_linear) * _porosity[_qp];
-  Real p_cr = _K[_qp] * (std::sqrt(3.0) + xi0) / (3.0 * porous_coeff);
   Real k0 = std::sqrt(3.0) * averageProperty(_cohesion) *
             std::cos(averageProperty(_friction_angle) * libMesh::pi / 180.0);
 
