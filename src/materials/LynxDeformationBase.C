@@ -353,8 +353,7 @@ void
 LynxDeformationBase::initializeQpDeformation()
 {
   // Initialze elastic strain
-  _elastic_strain[_qp] =
-      spinRotation(_elastic_strain_old[_qp]) + _strain_increment[_qp];
+  _elastic_strain[_qp] = spinRotation(_elastic_strain_old[_qp]) + _strain_increment[_qp];
 
   // Initialize inelastic increment
   _viscous_strain_incr[_qp].zero();

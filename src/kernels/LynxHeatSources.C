@@ -35,7 +35,9 @@ validParams<LynxHeatSources>()
       "coeff_shear_heating", 0.0, "The coefficient in front of the shear heating generation.");
   params.addCoupledVar("displacements",
                        "The string of displacements suitable for the problem statement");
-  params.addCoupledVar("inelastic_heat", "The auxiliary variable holding the inelastic heat value for running in a subApp.");
+  params.addCoupledVar(
+      "inelastic_heat",
+      "The auxiliary variable holding the inelastic heat value for running in a subApp.");
   return params;
 }
 
