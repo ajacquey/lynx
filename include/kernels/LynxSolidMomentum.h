@@ -39,6 +39,7 @@ public:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  using Kernel::computeOffDiagJacobian;
 
 protected:
   virtual Real computeQpResidual() override;

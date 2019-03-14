@@ -29,6 +29,7 @@ validParams<LynxMass>()
   params.addClassDescription("Divergence of solid velocity for incompressible Stoke flow.");
   params.addRequiredCoupledVar(
       "displacements", "The string of displacements variables suitable for the problem statement.");
+  params.addParam<Real>("penalty", 0.0, "The value of the penalty.");
   MooseEnum penalty_type_options("linear=0 laplace=1", "linear");
   params.addParam<MooseEnum>(
       "penalty_type", penalty_type_options, "The type of penalty formulation.");
@@ -38,10 +39,10 @@ validParams<LynxMass>()
 
 LynxMass::LynxMass(const InputParameters & parameters)
   : DerivativeMaterialInterface<Kernel>(parameters),
+    _penalty(getParam<Real>("penalty")),
     _penalty_type((PenaltyType)(int)parameters.get<MooseEnum>("penalty_type")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
-    _penalty(getDefaultMaterialProperty<Real>("penalty")),
     _strain_increment(getDefaultMaterialProperty<RankTwoTensor>("strain_increment"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -55,7 +56,7 @@ LynxMass::LynxMass(const InputParameters & parameters)
 Real
 LynxMass::computeQpResidual()
 {
-  Real one_on_penalty = (_penalty[_qp] != 0) ? 1.0 / _penalty[_qp] : 0.0;
+  Real one_on_penalty = (_penalty != 0) ? 1.0 / _penalty : 0.0;
   Real res = -_strain_increment[_qp].trace() * _test[_i][_qp];
   switch (_penalty_type)
   {
@@ -77,7 +78,7 @@ LynxMass::computeQpResidual()
 Real
 LynxMass::computeQpJacobian()
 {
-  Real one_on_penalty = (_penalty[_qp] != 0) ? 1.0 / _penalty[_qp] : 0.0;
+  Real one_on_penalty = (_penalty != 0) ? 1.0 / _penalty : 0.0;
   Real jac = 0.0;
 
   switch (_penalty_type)

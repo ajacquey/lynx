@@ -675,10 +675,11 @@ LynxDeformationBase::updateSpinTangentModulus()
   RankTwoTensor strain_el_dev_old = _elastic_strain_old[_qp].deviatoric();
   RankTwoTensor Id = RankTwoTensor(RankTwoTensor::initIdentity);
 
-  _tangent_modulus[_qp] +=
-      _G[_qp] * (Id.mixedProductIkJl(strain_el_dev_old.transpose()) -
-                 Id.mixedProductIlJk(strain_el_dev_old.transpose())) -
-      _G[_qp] * (strain_el_dev_old.mixedProductIkJl(Id) - strain_el_dev_old.mixedProductIlJk(Id));
+  if (_G[_qp] != 0.0)
+    _tangent_modulus[_qp] +=
+        _G[_qp] * (Id.mixedProductIkJl(strain_el_dev_old.transpose()) -
+                   Id.mixedProductIlJk(strain_el_dev_old.transpose())) -
+        _G[_qp] * (strain_el_dev_old.mixedProductIkJl(Id) - strain_el_dev_old.mixedProductIlJk(Id));
 }
 
 void

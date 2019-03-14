@@ -46,7 +46,7 @@ protected:
   const MaterialProperty<Real> & _radiogenic_heat;
   const MaterialProperty<Real> & _rho_b;
   const MaterialProperty<Real> & _dinvrho_dtemp;
-  const MaterialProperty<Real> & _inelastic_heat;
+  const MaterialProperty<Real> & _inelastic_heat_mat;
   const MaterialProperty<Real> & _adiabatic_heat;
   const MaterialProperty<Real> & _damage_heat;
   // const MaterialProperty<Real> & _dinelastic_heat_dtemp;
@@ -54,6 +54,8 @@ protected:
   const bool _coupled_disp;
   unsigned int _ndisp;
   std::vector<unsigned int> _disp_var;
+  const bool _coupled_inelastic_heat;
+  const VariableValue & _inelastic_heat;
 };
 
 #endif // LYNXHEATSOURCES_H

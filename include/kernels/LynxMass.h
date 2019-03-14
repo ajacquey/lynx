@@ -45,12 +45,12 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
+  const Real _penalty;
   PenaltyType _penalty_type;
 
   unsigned _ndisp;
   std::vector<unsigned> _disp_var;
 
-  const MaterialProperty<Real> & _penalty;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
 };
 
