@@ -247,9 +247,6 @@ LynxDamageDeformation::plasticIncrement(const Real & /*pressure*/, const Real & 
     eqv_p_strain_incr *= vp_correction;
   }
 
-  // Update yield
-  _plastic_yield_function[_qp] -= (3.0 * _G[_qp]) * eqv_p_strain_incr;
-
   // Tangent operator
   if (_fe_problem.currentlyComputingJacobian())
   {
