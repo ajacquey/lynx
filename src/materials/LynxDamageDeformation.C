@@ -206,23 +206,28 @@ LynxDamageDeformation::damageCorrection()
 RankFourTensor
 LynxDamageDeformation::damageTangentOperator(const RankFourTensor & tme)
 {
-  // Build damage correction to the elasticity tensor
-  Real xi = strainRatio(_elastic_strain[_qp]);
-  RankTwoTensor e = (_elastic_strain[_qp].L2norm() != 0.0)
-                        ? _elastic_strain[_qp] / _elastic_strain[_qp].L2norm()
-                        : RankTwoTensor();
-  RankFourTensor damaged_tensor =
-      _damage_plasticity->_gamma *
-      ((xi - 2.0 * _damage_plasticity->_xi0) * _identity_four + e.outerProduct(_identity_two) +
-       _identity_two.outerProduct(e) - xi * e.outerProduct(e));
+  if (_has_plasticity && (_G[_qp] != 0.0) && (_K[_qp] != 0.0))
+  {
+    // Build damage correction to the elasticity tensor
+    Real xi = strainRatio(_elastic_strain[_qp]);
+    RankTwoTensor e = (_elastic_strain[_qp].L2norm() != 0.0)
+                          ? _elastic_strain[_qp] / _elastic_strain[_qp].L2norm()
+                          : RankTwoTensor();
+    RankFourTensor damaged_tensor =
+        _damage_plasticity->_gamma *
+        ((xi - 2.0 * _damage_plasticity->_xi0) * _identity_four + e.outerProduct(_identity_two) +
+         _identity_two.outerProduct(e) - xi * e.outerProduct(e));
 
-  RankFourTensor damage_operator = _damage[_qp] * damaged_tensor * tme;
+    RankFourTensor damage_operator = _damage[_qp] * damaged_tensor * tme;
 
-  if ((_damage_rate[_qp] > 0.0) && (_damage_old[_qp] != 1.0) &&
-      (_damage_rate[_qp] < (1.0 - _damage_old[_qp]) / _dt))
-    damage_operator -= _dstress_ddamage[_qp].outerProduct(_ddamage_rate_dstrain[_qp]) * _dt;
+    if ((_damage_rate[_qp] > 0.0) && (_damage_old[_qp] != 1.0) &&
+        (_damage_rate[_qp] < (1.0 - _damage_old[_qp]) / _dt))
+      damage_operator -= _dstress_ddamage[_qp].outerProduct(_ddamage_rate_dstrain[_qp]) * _dt;
 
-  return damage_operator;
+    return damage_operator;
+  }
+  else
+    return RankFourTensor();
 }
 
 Real

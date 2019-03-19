@@ -342,7 +342,8 @@ LynxDeformationBase::computeQpDeformation()
   reformStressTensor(pressure, stress_dev);
 
   // Additional correction
-  damageCorrection();
+  if (_has_plasticity && (_G[_qp] != 0.0) && (_K[_qp] != 0.0))
+    damageCorrection();
 
   // Update tangent operator modulus
   if (_fe_problem.currentlyComputingJacobian())
