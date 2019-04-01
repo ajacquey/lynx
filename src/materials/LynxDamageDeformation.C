@@ -115,6 +115,7 @@ LynxDamageDeformation::initializeQpDeformation()
   // Initialize yield derivative
   _dyield_dp_tr = 0.0;
   _dyield_dq_tr = 0.0;
+  _damage_rate[_qp] = 0.0;
 
   LynxDeformationBase::initializeQpDeformation();
 }
