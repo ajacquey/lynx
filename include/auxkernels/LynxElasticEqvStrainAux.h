@@ -18,23 +18,23 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXSTRAINRATIOAUX_H
-#define LYNXSTRAINRATIOAUX_H
+#ifndef LYNXELASTICEQVSTRAINAUX_H
+#define LYNXELASTICEQVSTRAINAUX_H
 
 #include "LynxElasticStrainAuxBase.h"
 
-class LynxStrainRatioAux;
+class LynxElasticEqvStrainAux;
 
 template <>
-InputParameters validParams<LynxStrainRatioAux>();
+InputParameters validParams<LynxElasticEqvStrainAux>();
 
-class LynxStrainRatioAux : public LynxElasticStrainAuxBase
+class LynxElasticEqvStrainAux : public LynxElasticStrainAuxBase
 {
 public:
-  LynxStrainRatioAux(const InputParameters & parameters);
+  LynxElasticEqvStrainAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 };
 
-#endif // LYNXSTRAINRATIOAUX_H
+#endif // LYNXELASTICEQVSTRAINAUX_H

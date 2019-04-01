@@ -18,23 +18,24 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXSTRAINRATIOAUX_H
-#define LYNXSTRAINRATIOAUX_H
+#ifndef LYNXELASTICSTRAINAUXBASE_H
+#define LYNXELASTICSTRAINAUXBASE_H
 
-#include "LynxElasticStrainAuxBase.h"
+#include "AuxKernel.h"
+#include "RankTwoTensor.h"
+#include "DerivativeMaterialInterface.h"
 
-class LynxStrainRatioAux;
+class LynxElasticStrainAuxBase;
 
 template <>
-InputParameters validParams<LynxStrainRatioAux>();
+InputParameters validParams<LynxElasticStrainAuxBase>();
 
-class LynxStrainRatioAux : public LynxElasticStrainAuxBase
+class LynxElasticStrainAuxBase : public DerivativeMaterialInterface<AuxKernel>
 {
 public:
-  LynxStrainRatioAux(const InputParameters & parameters);
+  LynxElasticStrainAuxBase(const InputParameters & parameters);
 
-protected:
-  virtual Real computeValue();
+  const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
-#endif // LYNXSTRAINRATIOAUX_H
+#endif // LYNXELASTICSTRAINAUXBASE_H

@@ -18,23 +18,27 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXSTRAINRATIOAUX_H
-#define LYNXSTRAINRATIOAUX_H
+#include "LynxElasticVolStrainAux.h"
 
-#include "LynxElasticStrainAuxBase.h"
-
-class LynxStrainRatioAux;
+registerMooseObject("LynxApp", LynxElasticVolStrainAux);
 
 template <>
-InputParameters validParams<LynxStrainRatioAux>();
-
-class LynxStrainRatioAux : public LynxElasticStrainAuxBase
+InputParameters
+validParams<LynxElasticVolStrainAux>()
 {
-public:
-  LynxStrainRatioAux(const InputParameters & parameters);
+  InputParameters params = validParams<LynxElasticStrainAuxBase>();
+  params.addClassDescription(
+      "Access the volumetric elastic strain.");
+  return params;
+}
 
-protected:
-  virtual Real computeValue();
-};
+LynxElasticVolStrainAux::LynxElasticVolStrainAux(const InputParameters & parameters)
+  : LynxElasticStrainAuxBase(parameters)
+{
+}
 
-#endif // LYNXSTRAINRATIOAUX_H
+Real
+LynxElasticVolStrainAux::computeValue()
+{
+  return _elastic_strain[_qp].trace();
+}
