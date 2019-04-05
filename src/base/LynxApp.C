@@ -46,6 +46,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("EmptyAction", "BCs/LynxPressure");
   registerSyntax("LynxPressureAction", "BCs/LynxPressure/*");
+
+  registerSyntax("EmptyAction", "BCs/LynxHoldStress");
+  registerSyntax("LynxHoldStressAction", "BCs/LynxHoldStress/*");
 }
 
 void
