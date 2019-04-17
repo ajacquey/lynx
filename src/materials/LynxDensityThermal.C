@@ -29,6 +29,7 @@ validParams<LynxDensityThermal>()
   InputParameters params = validParams<LynxDensityBase>();
   params.addClassDescription(
       "Material calculating densities as a simple linear function of temperature.");
+  params.addRequiredCoupledVar("temperature", "The temperature variable.");
   params.addParam<std::vector<Real>>("beta_fluid", "The fluid thermal expansion coefficient.");
   params.addParam<std::vector<Real>>("beta_solid", "The solid thermal expansion coefficient.");
   params.addParam<Real>("reference_temperature", 0.0, "The reference temperature.");
