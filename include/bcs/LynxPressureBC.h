@@ -39,7 +39,7 @@ protected:
 
   const int _component;
   const Real _value;
-  Function * const _function;
+  const Function * _function;
 };
 
 #endif // LYNXPRESSUREBC_H

@@ -42,7 +42,7 @@ protected:
   std::vector<const VariableValue *> _disp;
   const int _component;
   const Real _value;
-  Function * const _function;
+  const Function * _function;
   const Real _rho_ext;
   const Real _g;
   const MaterialProperty<Real> & _rho_b;

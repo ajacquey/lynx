@@ -44,7 +44,7 @@ protected:
   const std::vector<Real> _beta_fluid;
   const std::vector<Real> _beta_solid;
   Real _temp_ref;
-  Function * const _temp_ref_fct;
+  const Function * _temp_ref_fct;
 };
 
 #endif // LYNXDENSITYTHERMAL_H

@@ -39,7 +39,7 @@ protected:
 
   const VariableValue & _u_old;
   const Real & _value;
-  Function * const _function;
+  const Function * _function;
 };
 
 #endif // LYNXVELOCITYBC_H
