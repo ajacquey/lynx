@@ -54,6 +54,7 @@ protected:
   virtual Real getConvexProjection(const Real & x1, const Real & x2);
   virtual Real strainRatio(const RankTwoTensor & elastic_strain);
   virtual RankTwoTensor rotatedElasticStrain(const RankTwoTensor & elastic_strain);
+  virtual void computeQpThermalSources() override;
 
   // Coupled variables
   bool _coupled_dam;
@@ -86,6 +87,7 @@ protected:
 
   // Damage properties
   MaterialProperty<Real> & _damage_rate;
+  MaterialProperty<Real> & _damage_heat;
 };
 
 #endif // LYNXDAMAGEDEFORMATION_H

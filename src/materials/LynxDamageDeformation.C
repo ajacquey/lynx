@@ -86,7 +86,8 @@ LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
     _dstress_ddamage(declareProperty<RankTwoTensor>("dstress_ddamage")),
     _ddamage_rate_dstrain(declareProperty<RankTwoTensor>("ddamage_rate_dstrain")),
     // Damage properties
-    _damage_rate(declareProperty<Real>("damage_rate"))
+    _damage_rate(declareProperty<Real>("damage_rate")),
+    _damage_heat(declareProperty<Real>("damage_heat"))
 {
   _has_plasticity = isParamValid("friction_angle");
 
@@ -627,4 +628,20 @@ LynxDamageDeformation::rotatedElasticStrain(const RankTwoTensor & elastic_strain
   strain_rot.addIa(strain_v / 3.0);
 
   return strain_rot;
+}
+
+void
+LynxDamageDeformation::computeQpThermalSources()
+{
+  LynxDeformationBase::computeQpThermalSources();
+
+  if (_has_plasticity)
+  {
+    Real I2 = Utility::pow<2>(_elastic_strain[_qp].L2norm());
+    Real xi = strainRatio(_elastic_strain[_qp]);
+    Real dPsi_dalpha = _damage_plasticity->_gamma * I2 * (xi - _damage_plasticity->_xi0);
+    _damage_heat[_qp] = dPsi_dalpha * _damage_rate[_qp];
+  }
+  else
+    _damage_heat[_qp] = 0.0;
 }
