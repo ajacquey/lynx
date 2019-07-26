@@ -61,14 +61,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_ratio]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./shear_modulus]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [AuxKernels]
@@ -93,16 +85,6 @@
     variable = eqv_in_strain_rate
     strain_type = plastic
     execute_on = 'timestep_end'
-  [../]
-  [./strain_ratio_aux]
-    type = LynxStrainRatioAux
-    variable = strain_ratio
-    execute_on = 'timestep_end'
-  [../]
-  [./shear_modulus_aux]
-    type = MaterialRealAux
-    variable = shear_modulus
-    property = shear_modulus
   [../]
 []
 
@@ -172,16 +154,6 @@
   [./E_dot_in_eqv]
     type = ElementAverageValue
     variable = eqv_in_strain_rate
-    outputs = csv
-  [../]
-  [./Xi]
-    type = ElementAverageValue
-    variable = strain_ratio
-    outputs = csv
-  [../]
-  [./G]
-    type = ElementAverageValue
-    variable = shear_modulus
     outputs = csv
   [../]
 []

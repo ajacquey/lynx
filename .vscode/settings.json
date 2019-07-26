@@ -63,7 +63,9 @@
         "LynxHoldStressAction.C": "cpp",
         "LynxPressureAction.C": "cpp",
         "LynxTestApp.C": "cpp",
-        "bcs_Unity.C": "cpp"
+        "bcs_Unity.C": "cpp",
+        "LynxHydroBase.C": "cpp"
     },
-    "C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "python.pythonPath": "/opt/moose/miniconda/bin/python"
 }
