@@ -18,34 +18,27 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXWINKLERBC_H
-#define LYNXWINKLERBC_H
+#include "LynxElasticEqvStrainAux.h"
 
-#include "IntegratedBC.h"
-#include "DerivativeMaterialInterface.h"
-
-class LynxWinklerBC;
-class Function;
+registerMooseObject("LynxApp", LynxElasticEqvStrainAux);
 
 template <>
-InputParameters validParams<LynxWinklerBC>();
-
-class LynxWinklerBC : public DerivativeMaterialInterface<IntegratedBC>
+InputParameters
+validParams<LynxElasticEqvStrainAux>()
 {
-public:
-  LynxWinklerBC(const InputParameters & parameters);
+  InputParameters params = validParams<LynxElasticStrainAuxBase>();
+  params.addClassDescription(
+      "Access the volumetric elastic strain.");
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual();
+LynxElasticEqvStrainAux::LynxElasticEqvStrainAux(const InputParameters & parameters)
+  : LynxElasticStrainAuxBase(parameters)
+{
+}
 
-  unsigned int _ndisp;
-  std::vector<const VariableValue *> _disp;
-  const int _component;
-  const Real _value;
-  const Function * _function;
-  const Real _rho_ext;
-  const Real _g;
-  const MaterialProperty<Real> & _rho_b;
-};
-
-#endif // LYNXWINKLERBC_H
+Real
+LynxElasticEqvStrainAux::computeValue()
+{
+  return std::sqrt(2.0 / 3.0) * _elastic_strain[_qp].deviatoric().L2norm();
+}

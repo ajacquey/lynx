@@ -18,34 +18,24 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXWINKLERBC_H
-#define LYNXWINKLERBC_H
+#ifndef LYNXELASTICSTRAINAUXBASE_H
+#define LYNXELASTICSTRAINAUXBASE_H
 
-#include "IntegratedBC.h"
+#include "AuxKernel.h"
+#include "RankTwoTensor.h"
 #include "DerivativeMaterialInterface.h"
 
-class LynxWinklerBC;
-class Function;
+class LynxElasticStrainAuxBase;
 
 template <>
-InputParameters validParams<LynxWinklerBC>();
+InputParameters validParams<LynxElasticStrainAuxBase>();
 
-class LynxWinklerBC : public DerivativeMaterialInterface<IntegratedBC>
+class LynxElasticStrainAuxBase : public DerivativeMaterialInterface<AuxKernel>
 {
 public:
-  LynxWinklerBC(const InputParameters & parameters);
+  LynxElasticStrainAuxBase(const InputParameters & parameters);
 
-protected:
-  virtual Real computeQpResidual();
-
-  unsigned int _ndisp;
-  std::vector<const VariableValue *> _disp;
-  const int _component;
-  const Real _value;
-  const Function * _function;
-  const Real _rho_ext;
-  const Real _g;
-  const MaterialProperty<Real> & _rho_b;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
-#endif // LYNXWINKLERBC_H
+#endif // LYNXELASTICSTRAINAUXBASE_H

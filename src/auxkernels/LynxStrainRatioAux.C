@@ -26,15 +26,14 @@ template <>
 InputParameters
 validParams<LynxStrainRatioAux>()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = validParams<LynxElasticStrainAuxBase>();
   params.addClassDescription(
       "Access the strain ratio (volumetric strain on norm of the elastic strain).");
   return params;
 }
 
 LynxStrainRatioAux::LynxStrainRatioAux(const InputParameters & parameters)
-  : DerivativeMaterialInterface<AuxKernel>(parameters),
-    _elastic_strain(getDefaultMaterialProperty<RankTwoTensor>("elastic_strain"))
+  : LynxElasticStrainAuxBase(parameters)
 {
 }
 

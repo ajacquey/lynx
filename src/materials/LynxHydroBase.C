@@ -36,8 +36,8 @@ LynxHydroBase::LynxHydroBase(const InputParameters & parameters)
     _K(getDefaultMaterialProperty<Real>("bulk_modulus")),
     _tangent_modulus(getDefaultMaterialProperty<RankFourTensor>("tangent_modulus")),
     _strain_increment(getDefaultMaterialProperty<RankTwoTensor>("strain_increment")),
-    _inelastic_strain(getDefaultMaterialProperty<RankTwoTensor>("inelastic_strain")),
-    _inelastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("inelastic_strain")),
+    _viscous_strain_incr(getDefaultMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
+    _plastic_strain_incr(getDefaultMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
     _biot(declareProperty<Real>("biot_coefficient")),
     _C_d(declareProperty<Real>("bulk_compressibility")),
     _C_biot(declareProperty<Real>("biot_compressibility")),
@@ -97,7 +97,7 @@ LynxHydroBase::computeQpPoroMech()
 {
   Real K_cto = _tangent_modulus[_qp].sum3x3() / 9.0;
   RankTwoTensor e_tot = _strain_increment[_qp] / _dt;
-  RankTwoTensor e_in = (_inelastic_strain[_qp] - _inelastic_strain_old[_qp]) / _dt;
+  RankTwoTensor e_in = (_viscous_strain_incr[_qp] + _plastic_strain_incr[_qp]) / _dt;
   _poro_mech[_qp] = _biot[_qp] * e_tot.trace() + (1.0 - _biot[_qp]) * e_in.trace();
   _poro_mech_jac[_qp] = _biot[_qp] + (1.0 - _biot[_qp]) * (1.0 - K_cto / _K[_qp]);
 

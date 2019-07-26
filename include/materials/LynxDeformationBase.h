@@ -73,7 +73,7 @@ protected:
   virtual void updateCreepParameters();
   virtual Real rootBrent(iterative_viscous & viscous_model, const Real x1, const Real x2);
   virtual Real rootNewtonSafe(iterative_viscous & viscous_model, const Real x1, const Real x2);
-  void computeQpThermalSources();
+  virtual void computeQpThermalSources();
 
   // Coupled variables
   unsigned int _ndisp;

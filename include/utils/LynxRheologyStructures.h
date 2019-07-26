@@ -227,7 +227,7 @@ struct damage_plasticity
   Real _alpha2;      // square of alpha parameter for capped yield
   Real _dxi_cr_dp;   // derivative wrt pressure of the critical strain ratio
   Real _dxi_cr_dq;   // derivative wrt eqv_stress of the critical strain ratio
-  Real _dmu2_dxi_cr; // derivative wrt the critical strain ratio of the square of alpha parameter
+  Real _dalpha2_dxi_cr; // derivative wrt the critical strain ratio of the square of alpha parameter
   damage_plasticity()
     : _xi0(-std::sqrt(3.0)),
       _gamma(0.0),
@@ -248,7 +248,7 @@ struct damage_plasticity
       _alpha2(0.0),
       _dxi_cr_dp(0.0),
       _dxi_cr_dq(0.0),
-      _dmu2_dxi_cr(0.0)
+      _dalpha2_dxi_cr(0.0)
   {
   }
   void fill(const Real xi0,

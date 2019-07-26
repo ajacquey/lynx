@@ -42,21 +42,21 @@
     variable = disp_x
     component = 0
     displacements = 'disp_x disp_y disp_z'
-    fluid_pressure = pf
+    fluid_pressure = 'pf'
   [../]
   [./mech_y]
     type = LynxSolidMomentum
     variable = disp_y
     component = 1
     displacements = 'disp_x disp_y disp_z'
-    fluid_pressure = pf
+    fluid_pressure = 'pf'
   [../]
   [./mech_z]
     type = LynxSolidMomentum
     variable = disp_z
     component = 2
     displacements = 'disp_x disp_y disp_z'
-    fluid_pressure = pf
+    fluid_pressure = 'pf'
   [../]
 []
 
@@ -147,7 +147,7 @@
   [../]
   [./hydro_mat]
     type = LynxHydroConstant
-    porosity = porosity
+    porosity = 'porosity'
     fluid_modulus = 8
     solid_modulus = 2.5
     permeability = 1.5e-03

@@ -39,7 +39,7 @@ protected:
   virtual Real value(const Point & p) override;
   virtual RealGradient gradient(const Point & p) override;
 
-  Function & _func;
+  const Function & _func;
   Real _rand_per;
 };
 

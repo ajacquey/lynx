@@ -46,7 +46,6 @@ protected:
   virtual Real convexPlasticIncrement(Real & vol_plastic_incr, Real & eqv_plastic_incr);
   virtual void computeDamageProperties(const Real & pressure, const Real & eqv_stress);
   virtual void updateDamageParameters();
-  virtual void initializeDamageParameters();
   virtual void updateDamageConvexParameters(const Real & pressure, const Real & eqv_stress);
   virtual Real convexReferencePressure();
   virtual Real dConvexPlasticYield2(const Real & rho);
@@ -55,6 +54,7 @@ protected:
   virtual Real getConvexProjection(const Real & x1, const Real & x2);
   virtual Real strainRatio(const RankTwoTensor & elastic_strain);
   virtual RankTwoTensor rotatedElasticStrain(const RankTwoTensor & elastic_strain);
+  virtual void computeQpThermalSources() override;
 
   // Coupled variables
   bool _coupled_dam;
@@ -87,6 +87,7 @@ protected:
 
   // Damage properties
   MaterialProperty<Real> & _damage_rate;
+  MaterialProperty<Real> & _damage_heat;
 };
 
 #endif // LYNXDAMAGEDEFORMATION_H

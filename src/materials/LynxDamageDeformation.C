@@ -86,7 +86,8 @@ LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
     _dstress_ddamage(declareProperty<RankTwoTensor>("dstress_ddamage")),
     _ddamage_rate_dstrain(declareProperty<RankTwoTensor>("ddamage_rate_dstrain")),
     // Damage properties
-    _damage_rate(declareProperty<Real>("damage_rate"))
+    _damage_rate(declareProperty<Real>("damage_rate")),
+    _damage_heat(declareProperty<Real>("damage_heat"))
 {
   _has_plasticity = isParamValid("friction_angle");
 
@@ -112,12 +113,10 @@ LynxDamageDeformation::LynxDamageDeformation(const InputParameters & parameters)
 void
 LynxDamageDeformation::initializeQpDeformation()
 {
-  // Need to get _xi0
-  initializeDamageParameters();
-
   // Initialize yield derivative
   _dyield_dp_tr = 0.0;
   _dyield_dq_tr = 0.0;
+  _damage_rate[_qp] = 0.0;
 
   LynxDeformationBase::initializeQpDeformation();
 }
@@ -209,23 +208,28 @@ LynxDamageDeformation::damageCorrection()
 RankFourTensor
 LynxDamageDeformation::damageTangentOperator(const RankFourTensor & tme)
 {
-  // Build damage correction to the elasticity tensor
-  Real xi = strainRatio(_elastic_strain[_qp]);
-  RankTwoTensor e = (_elastic_strain[_qp].L2norm() != 0.0)
-                        ? _elastic_strain[_qp] / _elastic_strain[_qp].L2norm()
-                        : RankTwoTensor();
-  RankFourTensor damaged_tensor =
-      _damage_plasticity->_gamma *
-      ((xi - 2.0 * _damage_plasticity->_xi0) * _identity_four + e.outerProduct(_identity_two) +
-       _identity_two.outerProduct(e) - xi * e.outerProduct(e));
+  if (_has_plasticity && (_G[_qp] != 0.0) && (_K[_qp] != 0.0))
+  {
+    // Build damage correction to the elasticity tensor
+    Real xi = strainRatio(_elastic_strain[_qp]);
+    RankTwoTensor e = (_elastic_strain[_qp].L2norm() != 0.0)
+                          ? _elastic_strain[_qp] / _elastic_strain[_qp].L2norm()
+                          : RankTwoTensor();
+    RankFourTensor damaged_tensor =
+        _damage_plasticity->_gamma *
+        ((xi - 2.0 * _damage_plasticity->_xi0) * _identity_four + e.outerProduct(_identity_two) +
+         _identity_two.outerProduct(e) - xi * e.outerProduct(e));
 
-  RankFourTensor damage_operator = _damage[_qp] * damaged_tensor * tme;
+    RankFourTensor damage_operator = _damage[_qp] * damaged_tensor * tme;
 
-  if ((_damage_rate[_qp] > 0.0) && (_damage_old[_qp] != 1.0) &&
-      (_damage_rate[_qp] < (1.0 - _damage_old[_qp]) / _dt))
-    damage_operator -= _dstress_ddamage[_qp].outerProduct(_ddamage_rate_dstrain[_qp]) * _dt;
+    if ((_damage_rate[_qp] > 0.0) && (_damage_old[_qp] != 1.0) &&
+        (_damage_rate[_qp] < (1.0 - _damage_old[_qp]) / _dt))
+      damage_operator -= _dstress_ddamage[_qp].outerProduct(_ddamage_rate_dstrain[_qp]) * _dt;
 
-  return damage_operator;
+    return damage_operator;
+  }
+  else
+    return RankFourTensor();
 }
 
 Real
@@ -249,9 +253,6 @@ LynxDamageDeformation::plasticIncrement(const Real & /*pressure*/, const Real & 
                     (1.0 + 3.0 * _G[_qp] * _dt * _damage_plasticity->_eta_p);
     eqv_p_strain_incr *= vp_correction;
   }
-
-  // Update yield
-  _plastic_yield_function[_qp] -= (3.0 * _G[_qp]) * eqv_p_strain_incr;
 
   // Tangent operator
   if (_fe_problem.currentlyComputingJacobian())
@@ -330,8 +331,8 @@ LynxDamageDeformation::convexPlasticIncrement(Real & vol_plastic_incr, Real & eq
   {
 
     _stress_corr_p = (_damage_plasticity->_q_tr != 0.0)
-                         ? _damage_plasticity->_q_tr -
-                               3.0 * _G[_qp] * eqv_plastic_incr / _damage_plasticity->_q_tr
+                         ? (_damage_plasticity->_q_tr -
+                               3.0 * _G[_qp] * eqv_plastic_incr) / _damage_plasticity->_q_tr
                          : 1.0;
     Real dF2_dp0 = dConvexPlasticYield2_dp(p_0, q_0) / dConvexPlasticYield2(rho_0);
     Real dF2_dq0 = dConvexPlasticYield2_dq(p_0, q_0) / dConvexPlasticYield2(rho_0);
@@ -389,10 +390,10 @@ LynxDamageDeformation::computeDamageProperties(const Real & pressure, const Real
                                             Utility::pow<2>(eqv_stress - _damage_plasticity->_q_r));
 
     // Projection direction
-    _damage_plasticity->_rp =
-        (_damage_plasticity->_p_tr - _damage_plasticity->_p_r) / _damage_plasticity->_rho_tr;
-    _damage_plasticity->_rq =
-        (_damage_plasticity->_q_tr - _damage_plasticity->_q_r) / _damage_plasticity->_rho_tr;
+    _damage_plasticity->_rp = (_damage_plasticity->_rho_tr != 0.0) ?
+        (_damage_plasticity->_p_tr - _damage_plasticity->_p_r) / _damage_plasticity->_rho_tr : 0.0;
+    _damage_plasticity->_rq = (_damage_plasticity->_rho_tr != 0.0) ?
+        (_damage_plasticity->_q_tr - _damage_plasticity->_q_r) / _damage_plasticity->_rho_tr : 0.0;
   }
 }
 
@@ -404,27 +405,7 @@ LynxDamageDeformation::updateDamageParameters()
   Real porous_coeff =
       averageProperty(_porous_coeff) + averageProperty(_porous_coeff_linear) * _porosity[_qp];
   Real p_cr = (porous_coeff != 0.0) ? _K[_qp] * (std::sqrt(3.0) + xi0) / (3.0 * porous_coeff) : 0.0;
-  Real k0 = std::sqrt(3.0) * averageProperty(_cohesion) *
-            std::cos(averageProperty(_friction_angle) * libMesh::pi / 180.0);
 
-  _damage_plasticity->fill(xi0,
-                           averageProperty(_damage_modulus),
-                           p_cr,
-                           k0,
-                           averageProperty(_one_on_plastic_eta),
-                           averageProperty(_one_on_damage_eta));
-}
-
-void
-LynxDamageDeformation::initializeDamageParameters()
-{
-  Real sin_phi = std::sin(averageProperty(_friction_angle) * libMesh::pi / 180.0);
-  Real xi0 = -std::sqrt(3.0) /
-             std::sqrt(1.0 + 1.5 * Utility::pow<2>(averageProperty(_bulk_modulus) /
-                                                   averageProperty(_shear_modulus) * sin_phi));
-  Real porous_coeff =
-      averageProperty(_porous_coeff) + averageProperty(_porous_coeff_linear) * _porosity[_qp];
-  Real p_cr = _K[_qp] * (std::sqrt(3.0) + xi0) / (3.0 * porous_coeff);
   Real k0 = std::sqrt(3.0) * averageProperty(_cohesion) *
             std::cos(averageProperty(_friction_angle) * libMesh::pi / 180.0);
 
@@ -465,7 +446,7 @@ LynxDamageDeformation::updateDamageConvexParameters(const Real & pressure, const
                                 eqv_stress * (1.0 - pq_term)
                           : 0.0;
 
-  _damage_plasticity->_dmu2_dxi_cr =
+  _damage_plasticity->_dalpha2_dxi_cr =
       (_damage_plasticity->_xi_cr != 0.0)
           ? -12.0 * Utility::pow<2>(_G[_qp] / _K[_qp]) / Utility::pow<3>(_damage_plasticity->_xi_cr)
           : 0.0;
@@ -474,16 +455,23 @@ LynxDamageDeformation::updateDamageConvexParameters(const Real & pressure, const
 Real
 LynxDamageDeformation::convexReferencePressure()
 {
-  Real p_proj =
-      (1.0 - Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp] /
-                 (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp])) *
-          _damage_plasticity->_p_tr +
-      _damage_plasticity->_alpha0 * _K[_qp] * _damage_plasticity->_q_tr /
-          (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp]);
+  // Real p_proj =
+  //     (1.0 - Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp] /
+  //                (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp])) *
+  //         _damage_plasticity->_p_tr +
+  //     _damage_plasticity->_alpha0 * _K[_qp] * _damage_plasticity->_q_tr /
+  //         (3.0 * _G[_qp] + Utility::pow<2>(_damage_plasticity->_alpha0) * _K[_qp]);
 
-  return ((p_proj > 0.0) && (p_proj < _damage_plasticity->_p_cr))
-             ? p_proj
-             : 2.0 * _damage_plasticity->_p_cr / 3.0;
+  Real p_proj = _damage_plasticity->_q_tr / _damage_plasticity->_alpha0 - _damage_plasticity->_p_k;
+
+  if (_damage_plasticity->_q_tr == 0.0)
+    return _damage_plasticity->_p_tr;
+  else if (p_proj < -_damage_plasticity->_p_k)
+    return -_damage_plasticity->_p_k;
+  else if (p_proj > _damage_plasticity->_p_cr)
+    return 2.0 * _damage_plasticity->_p_cr / 3.0;
+  else
+    return p_proj;
 }
 
 Real
@@ -504,10 +492,10 @@ LynxDamageDeformation::dConvexPlasticYield2_dp(const Real & pressure, const Real
 
   updateDamageConvexParameters(pressure, eqv_stress);
 
-  return -(_damage_plasticity->_dmu2_dxi_cr * _damage_plasticity->_dxi_cr_dp *
+  return -(_damage_plasticity->_dalpha2_dxi_cr * _damage_plasticity->_dxi_cr_dp *
                (pressure + _damage_plasticity->_p_k) +
            2.0 * _damage_plasticity->_alpha2) *
-         pressure *
+         (pressure + _damage_plasticity->_p_k) *
          ((0.0 < pressure + _damage_plasticity->_p_k) -
           (pressure + _damage_plasticity->_p_k < 0.0));
 }
@@ -521,7 +509,7 @@ LynxDamageDeformation::dConvexPlasticYield2_dq(const Real & pressure, const Real
   updateDamageConvexParameters(pressure, eqv_stress);
 
   return 2.0 * eqv_stress -
-         _damage_plasticity->_dmu2_dxi_cr * _damage_plasticity->_dxi_cr_dq *
+         _damage_plasticity->_dalpha2_dxi_cr * _damage_plasticity->_dxi_cr_dq *
              Utility::pow<2>(
                  pressure +
                  _damage_plasticity->_p_k); // *
@@ -640,4 +628,20 @@ LynxDamageDeformation::rotatedElasticStrain(const RankTwoTensor & elastic_strain
   strain_rot.addIa(strain_v / 3.0);
 
   return strain_rot;
+}
+
+void
+LynxDamageDeformation::computeQpThermalSources()
+{
+  LynxDeformationBase::computeQpThermalSources();
+
+  if (_has_plasticity)
+  {
+    Real I2 = Utility::pow<2>(_elastic_strain[_qp].L2norm());
+    Real xi = strainRatio(_elastic_strain[_qp]);
+    Real dPsi_dalpha = _damage_plasticity->_gamma * I2 * (xi - _damage_plasticity->_xi0);
+    _damage_heat[_qp] = dPsi_dalpha * _damage_rate[_qp];
+  }
+  else
+    _damage_heat[_qp] = 0.0;
 }

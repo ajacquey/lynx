@@ -39,7 +39,7 @@ protected:
   virtual Real computeQpResidual() override;
 
   const Real & _value;
-  Function * const _function;
+  const Function * _function;
   Real _rand_per;
   const MaterialProperty<Real> & _rhoC_b;
 };

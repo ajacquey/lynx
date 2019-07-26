@@ -18,34 +18,26 @@
 /*    along with this program. If not, see <http://www.gnu.org/licenses/>     */
 /******************************************************************************/
 
-#ifndef LYNXWINKLERBC_H
-#define LYNXWINKLERBC_H
+#ifndef LYNXHOLDSTRESSACTION_H
+#define LYNXHOLDSTRESSACTION_H
 
-#include "IntegratedBC.h"
-#include "DerivativeMaterialInterface.h"
+#include "Action.h"
 
-class LynxWinklerBC;
-class Function;
+class LynxHoldStressAction;
 
 template <>
-InputParameters validParams<LynxWinklerBC>();
+InputParameters validParams<LynxHoldStressAction>();
 
-class LynxWinklerBC : public DerivativeMaterialInterface<IntegratedBC>
+class LynxHoldStressAction : public Action
 {
 public:
-  LynxWinklerBC(const InputParameters & parameters);
+  LynxHoldStressAction(const InputParameters & params);
+
+  virtual void act() override;
 
 protected:
-  virtual Real computeQpResidual();
-
-  unsigned int _ndisp;
-  std::vector<const VariableValue *> _disp;
-  const int _component;
-  const Real _value;
-  const Function * _function;
-  const Real _rho_ext;
-  const Real _g;
-  const MaterialProperty<Real> & _rho_b;
+  std::vector<std::vector<AuxVariableName>> _save_in_vars;
+  std::vector<bool> _has_save_in_vars;
 };
 
-#endif // LYNXWINKLERBC_H
+#endif // LYNXHOLDSTRESSACTION_H

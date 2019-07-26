@@ -49,8 +49,8 @@ protected:
   const MaterialProperty<Real> & _K;
   const MaterialProperty<RankFourTensor> & _tangent_modulus;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
-  const MaterialProperty<RankTwoTensor> & _inelastic_strain;
-  const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _viscous_strain_incr;
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_incr;
   MaterialProperty<Real> & _biot;
   MaterialProperty<Real> & _C_d;
   MaterialProperty<Real> & _C_biot;

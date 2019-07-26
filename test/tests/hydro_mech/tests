@@ -1,7 +1,7 @@
-#[Tests]
-#  [./mandel]
-#    type = 'Exodiff'
-#    input = 'mandel.i'
-#    exodiff = 'mandel_out.e'
-#  [../]
-#[]
+[Tests]
+  [./mandel]
+    type = 'Exodiff'
+    input = 'mandel.i'
+    exodiff = 'mandel_out.e'
+  [../]
+[]

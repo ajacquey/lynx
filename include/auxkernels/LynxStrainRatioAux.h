@@ -21,24 +21,20 @@
 #ifndef LYNXSTRAINRATIOAUX_H
 #define LYNXSTRAINRATIOAUX_H
 
-#include "AuxKernel.h"
-#include "RankTwoTensor.h"
-#include "DerivativeMaterialInterface.h"
+#include "LynxElasticStrainAuxBase.h"
 
 class LynxStrainRatioAux;
 
 template <>
 InputParameters validParams<LynxStrainRatioAux>();
 
-class LynxStrainRatioAux : public DerivativeMaterialInterface<AuxKernel>
+class LynxStrainRatioAux : public LynxElasticStrainAuxBase
 {
 public:
   LynxStrainRatioAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
-
-  const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
 #endif // LYNXSTRAINRATIOAUX_H

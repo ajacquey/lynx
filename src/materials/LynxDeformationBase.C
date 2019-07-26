@@ -271,6 +271,9 @@ LynxDeformationBase::computeStrainIncrement()
         mooseError("Unknown strain model. Specify 'small' or 'finite'!");
     }
 
+    // Thermal strain correction
+    _strain_increment[_qp] -= _thermal_strain_incr[_qp];
+
     if (_vol_locking_correction)
       vol_strain_incr += _strain_increment[_qp].trace() * _JxW[_qp] * _coord[_qp];
   }
@@ -339,7 +342,8 @@ LynxDeformationBase::computeQpDeformation()
   reformStressTensor(pressure, stress_dev);
 
   // Additional correction
-  damageCorrection();
+  if (_has_plasticity && (_G[_qp] != 0.0) && (_K[_qp] != 0.0))
+    damageCorrection();
 
   // Update tangent operator modulus
   if (_fe_problem.currentlyComputingJacobian())
@@ -350,8 +354,7 @@ void
 LynxDeformationBase::initializeQpDeformation()
 {
   // Initialze elastic strain
-  _elastic_strain[_qp] =
-      spinRotation(_elastic_strain_old[_qp]) + _strain_increment[_qp] - _thermal_strain_incr[_qp];
+  _elastic_strain[_qp] = spinRotation(_elastic_strain_old[_qp]) + _strain_increment[_qp];
 
   // Initialize inelastic increment
   _viscous_strain_incr[_qp].zero();
@@ -672,10 +675,11 @@ LynxDeformationBase::updateSpinTangentModulus()
   RankTwoTensor strain_el_dev_old = _elastic_strain_old[_qp].deviatoric();
   RankTwoTensor Id = RankTwoTensor(RankTwoTensor::initIdentity);
 
-  _tangent_modulus[_qp] +=
-      _G[_qp] * (Id.mixedProductIkJl(strain_el_dev_old.transpose()) -
-                 Id.mixedProductIlJk(strain_el_dev_old.transpose())) -
-      _G[_qp] * (strain_el_dev_old.mixedProductIkJl(Id) - strain_el_dev_old.mixedProductIlJk(Id));
+  if (_G[_qp] != 0.0)
+    _tangent_modulus[_qp] +=
+        _G[_qp] * (Id.mixedProductIkJl(strain_el_dev_old.transpose()) -
+                   Id.mixedProductIlJk(strain_el_dev_old.transpose())) -
+        _G[_qp] * (strain_el_dev_old.mixedProductIkJl(Id) - strain_el_dev_old.mixedProductIlJk(Id));
 }
 
 void
