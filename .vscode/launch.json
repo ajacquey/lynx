@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(lldb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/lynx-dbg",
+            "args": ["-i", "test/tests/damage/damage_inelastic.i"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "logging": {
+                "trace": true,
+                "traceResponse": true,
+                "engineLogging": true
+            }
+        }
+    ]
+}
