@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXDAMAGEDEFORMATION_H
-#define LYNXDAMAGEDEFORMATION_H
+#pragma once
 
 #include "LynxDeformation.h"
 
@@ -82,5 +81,3 @@ protected:
   MaterialProperty<Real> & _damage_rate;
   MaterialProperty<Real> & _damage_heat;
 };
-
-#endif // LYNXDAMAGEDEFORMATION_H

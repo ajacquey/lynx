@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXDENSITYCONSTANT_H
-#define LYNXDENSITYCONSTANT_H
+#pragma once
 
 #include "LynxDensityBase.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual void computeQpProperties() override;
 };
-
-#endif // LYNXDENSITYCONSTANT_H

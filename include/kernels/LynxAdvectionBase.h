@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXADVECTIONBASE_H
-#define LYNXADVECTIONBASE_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -82,5 +81,3 @@ protected:
   std::vector<Real> _residual;
   Real _artificial_viscosity;
 };
-
-#endif // LYNXADVECTIONBASE_H

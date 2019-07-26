@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXELEMENTAVERAGEVALUE_H
-#define LYNXELEMENTAVERAGEVALUE_H
+#pragma once
 
 #include "ElementAverageValue.h"
 
@@ -32,5 +31,3 @@ protected:
   const VariableValue & _value_old;
   const VariableValue & _value_older;
 };
-
-#endif // LYNXELEMENTAVERAGEVALUE_H

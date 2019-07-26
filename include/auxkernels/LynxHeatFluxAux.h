@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHEATFLUXAUX_H
-#define LYNXHEATFLUXAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -36,5 +35,3 @@ protected:
   const MaterialProperty<Real> & _thermal_diff;
   Real _cond_bulk;
 };
-
-#endif // LynxHeatFluxAux_H

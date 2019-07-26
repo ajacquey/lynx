@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHYDROBASE_H
-#define LYNXHYDROBASE_H
+#pragma once
 
 #include "LynxMaterialBase.h"
 #include "RankTwoTensor.h"
@@ -56,5 +55,3 @@ protected:
   std::vector<Real> _k;
   std::vector<Real> _eta_f;
 };
-
-#endif // LYNXHYDROBASE_H

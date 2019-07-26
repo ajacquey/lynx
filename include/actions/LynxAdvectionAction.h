@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXADVECTIONACTION_H
-#define LYNXADVECTIONACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -66,5 +65,3 @@ protected:
   std::vector<std::string> _min_entropy_pp;
   std::vector<std::string> _avg_entropy_pp;
 };
-
-#endif // LYNXADVECTIONACTION_H

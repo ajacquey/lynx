@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXFUNCTIONNOISEIC_H
-#define LYNXFUNCTIONNOISEIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -35,5 +34,3 @@ protected:
   const Function & _func;
   Real _rand_per;
 };
-
-#endif // LYNXFUNCTIONNOISEIC_H

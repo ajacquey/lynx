@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHEATSOURCES_H
-#define LYNXHEATSOURCES_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -50,5 +49,3 @@ protected:
   const bool _coupled_inelastic_heat;
   const VariableValue & _inelastic_heat;
 };
-
-#endif // LYNXHEATSOURCES_H

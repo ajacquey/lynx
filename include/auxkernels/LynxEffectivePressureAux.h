@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXEFFECTIVEPRESSUREAUX_H
-#define LYNXEFFECTIVEPRESSUREAUX_H
+#pragma once
 
 #include "LynxStressAuxBase.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual Real computeValue() override;
 };
-
-#endif // LYNXEFFECTIVEPRESSUREAUX_H

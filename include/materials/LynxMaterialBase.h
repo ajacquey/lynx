@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXMATERIALBASE_H
-#define LYNXMATERIALBASE_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -42,5 +41,3 @@ protected:
   const MooseEnum _average_type;
   std::vector<const VariableValue *> _compositional_phases;
 };
-
-#endif // LYNXSTRAINBASE_H

@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXAPP_H
-#define LYNXAPP_H
+#pragma once
 
 #include "MooseApp.h"
 
@@ -30,5 +29,3 @@ public:
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 };
-
-#endif /* LYNXAPP_H */

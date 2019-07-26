@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXVARIABLERATEAUX_H
-#define LYNXVARIABLERATEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -35,5 +34,3 @@ protected:
   Real _tscale;
   bool _relative;
 };
-
-#endif // LYNXVARIABLERATEAUX_H

@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXADVECTIONTEMPERATURE_H
-#define LYNXADVECTIONTEMPERATURE_H
+#pragma once
 
 #include "LynxAdvectionBase.h"
 
@@ -38,5 +37,3 @@ protected:
   const MaterialProperty<Real> & _radiogenic_heat;
   const MaterialProperty<Real> & _inelastic_heat;
 };
-
-#endif // LYNXADVECTIONTEMPERATURE_H

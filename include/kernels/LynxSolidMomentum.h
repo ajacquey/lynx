@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXSOLIDMOMENTUM_H
-#define LYNXSOLIDMOMENTUM_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -77,5 +76,3 @@ protected:
   unsigned int _pdyn_var;
   unsigned int _damage_var;
 };
-
-#endif // LYNXSOLIDMOMENTUM_H

@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHOLDSTRESSBC_H
-#define LYNXHOLDSTRESSBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -38,5 +37,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
   const MaterialProperty<Real> & _biot_coeff;
 };
-
-#endif // LYNXHOLDSTRESSBC_H

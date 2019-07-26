@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXDENSITYBASE_H
-#define LYNXDENSITYBASE_H
+#pragma once
 
 #include "LynxMaterialBase.h"
 
@@ -43,5 +42,3 @@ protected:
   MaterialProperty<Real> & _rho_b;
   MaterialProperty<Real> & _reference_rho_b;
 };
-
-#endif // LYNXDENSITYBASE_H

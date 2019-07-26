@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXELASTICVOLSTRAINAUX_H
-#define LYNXELASTICVOLSTRAINAUX_H
+#pragma once
 
 #include "LynxElasticStrainAuxBase.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual Real computeValue();
 };
-
-#endif // LYNXELASTICVOLSTRAINAUX_H

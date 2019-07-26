@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXSTRESSAUX_H
-#define LYNXSTRESSAUX_H
+#pragma once
 
 #include "LynxStressAuxBase.h"
 
@@ -35,5 +34,3 @@ private:
   const unsigned int _i;
   const unsigned int _j;
 };
-
-#endif // LYNXSTRESSAUX_H

@@ -10,8 +10,8 @@
 /*                       please see LICENSE for details                       */
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
-#ifndef LYNXDENSITYCOMPRESSIBLE_H
-#define LYNXDENSITYCOMPRESSIBLE_H
+
+#pragma once
 
 #include "LynxDensityBase.h"
 
@@ -43,5 +43,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<Real> & _K;
 };
-
-#endif // LYNXDENSITYCOMPRESSIBLE_H

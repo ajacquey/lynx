@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXDENSITYTHERMAL_H
-#define LYNXDENSITYTHERMAL_H
+#pragma once
 
 #include "LynxDensityBase.h"
 #include "Function.h"
@@ -39,5 +38,3 @@ protected:
   Real _temp_ref;
   const Function * _temp_ref_fct;
 };
-
-#endif // LYNXDENSITYTHERMAL_H

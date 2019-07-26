@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHYDROCONSTANT
-#define LYNXHYDROCONSTANT
+#pragma once
 
 #include "LynxHydroBase.h"
 
@@ -37,5 +36,3 @@ protected:
   std::vector<Real> _fluid_compr;
   std::vector<Real> _solid_compr;
 };
-
-#endif // LYNXHYDROCONSTANT

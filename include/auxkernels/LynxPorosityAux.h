@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXPOROSITYAUX_H
-#define LYNXPOROSITYAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
@@ -41,5 +40,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _inelastic_strain;
   const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
 };
-
-#endif // LYNXPOROSITYAUX_H

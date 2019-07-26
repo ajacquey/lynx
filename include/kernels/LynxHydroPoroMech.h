@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHYDROPOROMECH_H
-#define LYNXHYDROPOROMECH_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -37,5 +36,3 @@ protected:
   const MaterialProperty<Real> & _poro_mech_jac;
   std::vector<unsigned int> _disp_var;
 };
-
-#endif // LYNXHYDROPOROMECH_H

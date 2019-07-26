@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXMASS_H
-#define LYNXMASS_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -46,5 +45,3 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _strain_increment;
 };
-
-#endif // LYNXMASS_H

@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXELASTICSTRAINAUXBASE_H
-#define LYNXELASTICSTRAINAUXBASE_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
@@ -30,5 +29,3 @@ public:
 
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
-
-#endif // LYNXELASTICSTRAINAUXBASE_H

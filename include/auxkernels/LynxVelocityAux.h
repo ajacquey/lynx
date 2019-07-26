@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXVELOCITYAUX_H
-#define LYNXVELOCITYAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -32,5 +31,3 @@ protected:
   const VariableValue & _disp;
   const VariableValue & _disp_old;
 };
-
-#endif // LYNXVELOCITYAUX_H

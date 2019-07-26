@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXRHEOLOGYSTRUCTURES_H
-#define LYNXRHEOLOGYSTRUCTURES_H
+#pragma once
 
 struct diffusion_creep
 {
@@ -259,5 +258,3 @@ struct damage_plasticity
     _eta_d = eta_d;
   }
 };
-
-#endif // LYNXRHEOLOGYSTRUCTURES_H

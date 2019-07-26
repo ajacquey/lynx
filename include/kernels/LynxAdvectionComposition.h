@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXADVECTIONCOMPOSITION_H
-#define LYNXADVECTIONCOMPOSITION_H
+#pragma once
 
 #include "LynxAdvectionBase.h"
 
@@ -30,5 +29,3 @@ protected:
   virtual Real computeArtificialViscosity() override;
   virtual void computeEntropyResidual();
 };
-
-#endif // LYNXADVECTIONCOMPOSITION_H

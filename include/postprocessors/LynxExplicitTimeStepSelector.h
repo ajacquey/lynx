@@ -10,8 +10,8 @@
 /*                       please see LICENSE for details                       */
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
-#ifndef LYNXEXPLICITTIMESTEPSELECTOR_H
-#define LYNXEXPLICITTIMESTEPSELECTOR_H
+
+#pragma once
 
 #include "ElementPostprocessor.h"
 #include "DerivativeMaterialInterface.h"
@@ -41,5 +41,3 @@ protected:
   Real _initial_value;
   Real _maximum_value;
 };
-
-#endif // LYNXEXPLICITTIMESTEPSELECTOR_H

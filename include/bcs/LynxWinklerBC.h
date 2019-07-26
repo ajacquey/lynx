@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXWINKLERBC_H
-#define LYNXWINKLERBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 #include "DerivativeMaterialInterface.h"
@@ -40,5 +39,3 @@ protected:
   const Real _g;
   const MaterialProperty<Real> & _rho_b;
 };
-
-#endif // LYNXWINKLERBC_H

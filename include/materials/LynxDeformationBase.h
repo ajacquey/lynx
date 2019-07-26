@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXDEFORMATIONBASE_H
-#define LYNXDEFORMATIONBASE_H
+#pragma once
 
 #include "LynxMaterialBase.h"
 #include "LynxRheologyStructures.h"
@@ -164,5 +163,3 @@ protected:
   MaterialProperty<Real> & _inelastic_heat;
   MaterialProperty<RankTwoTensor> & _dinelastic_heat_dstrain;
 };
-
-#endif // LYNXDEFORMATIONBASE_H

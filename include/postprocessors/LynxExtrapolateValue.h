@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXEXTRAPOLATEVALUE_H
-#define LYNXEXTRAPOLATEVALUE_H
+#pragma once
 
 #include "ElementExtremeValue.h"
 #include "DerivativeMaterialInterface.h"
@@ -33,5 +32,3 @@ protected:
   const VariableValue & _value_old;
   const VariableValue & _value_older;
 };
-
-#endif // LYNXEXTRAPOLATEVALUE_H

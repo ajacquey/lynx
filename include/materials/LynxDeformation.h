@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXDEFORMATION_H
-#define LYNXDEFORMATION_H
+#pragma once
 
 #include "LynxDeformationBase.h"
 
@@ -53,5 +52,3 @@ protected:
   MaterialProperty<Real> * _intnl;
   const MaterialProperty<Real> * _intnl_old;
 };
-
-#endif // LYNXDEFORMATION_H

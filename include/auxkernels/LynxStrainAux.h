@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXSTRAINAUX_H
-#define LYNXSTRAINAUX_H
+#pragma once
 
 #include "LynxStrainAuxBase.h"
 
@@ -33,5 +32,3 @@ private:
   const unsigned int _i;
   const unsigned int _j;
 };
-
-#endif // LYNXSTRAINAUX_H

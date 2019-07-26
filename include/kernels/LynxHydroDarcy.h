@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHYDRODARCY_H
-#define LYNXHYDRODARCY_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -36,5 +35,3 @@ protected:
   const MaterialProperty<RealVectorValue> & _gravity;
   const MaterialProperty<Real> & _rho_f;
 };
-
-#endif // LYNXHYDRODARCY_H

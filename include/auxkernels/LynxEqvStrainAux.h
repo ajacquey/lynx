@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXEQVSTRAINAUX_H
-#define LYNXEQVSTRAINAUX_H
+#pragma once
 
 #include "LynxStrainAuxBase.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual Real computeValue() override;
 };
-
-#endif // LYNXEQVSTRAINAUX_H

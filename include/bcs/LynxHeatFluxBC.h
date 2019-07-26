@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHEATFLUXBC_H
-#define LYNXHEATFLUXBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -36,5 +35,3 @@ protected:
   Real _rand_per;
   const MaterialProperty<Real> & _rhoC_b;
 };
-
-#endif // LYNXHEATFLUXBC_H

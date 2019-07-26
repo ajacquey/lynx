@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXDAMAGERATE_H
-#define LYNXDAMAGERATE_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -41,5 +40,3 @@ protected:
   const MaterialProperty<Real> & _damage_rate_mat;
   const MaterialProperty<RankTwoTensor> & _ddamage_rate_dstrain;
 };
-
-#endif // LYNXDAMAGERATE_H

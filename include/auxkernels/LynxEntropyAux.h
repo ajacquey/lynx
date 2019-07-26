@@ -10,8 +10,8 @@
 /*                       please see LICENSE for details                       */
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
-#ifndef LYNXENTROPYAUX_H
-#define LYNXENTROPYAUX_H
+
+#pragma once
 
 #include "AuxKernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -34,5 +34,3 @@ protected:
   const PostprocessorValue & _pp_max_var;
   const PostprocessorValue & _pp_min_var;
 };
-
-#endif // LYNXENTROPY_H

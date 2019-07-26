@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXSTRESSAUXBASE_H
-#define LYNXSTRESSAUXBASE_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
@@ -31,5 +30,3 @@ public:
 protected:
   const MaterialProperty<RankTwoTensor> & _stress;
 };
-
-#endif // LYNXSTRESSAUXBASE_H

@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXLOGCONSTANTDT_H
-#define LYNXLOGCONSTANTDT_H
+#pragma once
 
 #include "TimeStepper.h"
 
@@ -37,5 +36,3 @@ private:
   const Real _dt_factor;
   const Real _growth_factor;
 };
-
-#endif // LYNXLOGCONSTANTDT_H

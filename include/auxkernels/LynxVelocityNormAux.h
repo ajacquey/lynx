@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXVELOCITYNORMAUX_H
-#define LYNXVELOCITYNORMAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -32,5 +31,3 @@ protected:
   unsigned int _n_vel;
   std::vector<const VariableValue *> _vel;
 };
-
-#endif // LYNXVELOCITYNORMAUX_H

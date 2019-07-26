@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXPRESSURELOAD_H
-#define LYNXPRESSURELOAD_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -34,5 +33,3 @@ protected:
   const MaterialProperty<Real> & _bulk_density;
   const MaterialProperty<RealVectorValue> & _gravity;
 };
-
-#endif // LYNXPRESSURELOAD_H

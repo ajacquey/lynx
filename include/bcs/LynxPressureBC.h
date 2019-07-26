@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXPRESSUREBC_H
-#define LYNXPRESSUREBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -34,5 +33,3 @@ protected:
   const Real _value;
   const Function * _function;
 };
-
-#endif // LYNXPRESSUREBC_H

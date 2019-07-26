@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXHEATCONDUCTION_H
-#define LYNXHEATCONDUCTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -36,5 +35,3 @@ protected:
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _dinvrho_dtemp;
 };
-
-#endif // LYNXHEATCONDUCTION_H

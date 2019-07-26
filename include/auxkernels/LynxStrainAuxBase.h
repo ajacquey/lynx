@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXSTRAINAUXBASE_H
-#define LYNXSTRAINAUXBASE_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
@@ -34,5 +33,3 @@ protected:
   std::string _strain_name;
   const MaterialProperty<RankTwoTensor> * _strain_incr;
 };
-
-#endif // LYNXSTRAINAUXBASE_H

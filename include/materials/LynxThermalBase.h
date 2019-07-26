@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXTHERMALBASE_H
-#define LYNXTHERMALBASE_H
+#pragma once
 
 #include "LynxMaterialBase.h"
 #include "RankTwoTensor.h"
@@ -61,5 +60,3 @@ protected:
   std::vector<Real> _beta_f;
   std::vector<Real> _beta_s;
 };
-
-#endif // LYNXTHERMALBASE_H

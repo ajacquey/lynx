@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXTHERMALCONSTANT_H
-#define LYNXTHERMALCONSTANT_H
+#pragma once
 
 #include "LynxThermalBase.h"
 
@@ -38,5 +37,3 @@ protected:
   const std::vector<Real> _fluid_thermal_exp;
   const std::vector<Real> _solid_thermal_exp;
 };
-
-#endif // LYNXTHERMALCONSTANT_H

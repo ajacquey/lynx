@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXVELOCITYROOTMEANSQUARE_H
-#define LYNXVELOCITYROOTMEANSQUARE_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 
@@ -33,5 +32,3 @@ protected:
   unsigned int _n_vel;
   std::vector<const VariableValue *> _vel;
 };
-
-#endif // LYNXVELOCITYROOTMEANSQUARE_H

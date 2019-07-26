@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXTEMPERATURECELSIUSAUX_H
-#define LYNXTEMPERATURECELSIUSAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -31,5 +30,3 @@ protected:
 
   const VariableValue & _T_K;
 };
-
-#endif // LYNXTEMPERATURECELSIUSAUX_H

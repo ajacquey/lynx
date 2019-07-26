@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXCOMBOPHASESAUX_H
-#define LYNXCOMBOPHASESAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -32,5 +31,3 @@ protected:
   unsigned _n_composition;
   std::vector<const VariableValue *> _compositional_phases;
 };
-
-#endif // LYNXCOMBOPHASESAUX_H

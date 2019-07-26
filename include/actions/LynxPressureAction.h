@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXPRESSUREACTION_H
-#define LYNXPRESSUREACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -32,5 +31,3 @@ protected:
   std::vector<std::vector<AuxVariableName>> _save_in_vars;
   std::vector<bool> _has_save_in_vars;
 };
-
-#endif // LYNXPRESSUREACTION_H

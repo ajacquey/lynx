@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXVONMISESSTRESSAUX_H
-#define LYNXVONMISESSTRESSAUX_H
+#pragma once
 
 #include "LynxStressAuxBase.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual Real computeValue() override;
 };
-
-#endif // LYNXVONMISESSTRESSAUX_H

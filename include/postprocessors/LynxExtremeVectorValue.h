@@ -10,8 +10,8 @@
 /*                       please see LICENSE for details                       */
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
-#ifndef LYNXEXTREMEVECTORVALUE_H
-#define LYNXEXTREMEVECTORVALUE_H
+
+#pragma once
 
 #include "ElementExtremeValue.h"
 #include "DerivativeMaterialInterface.h"
@@ -31,5 +31,3 @@ protected:
   const VariableValue & _v;
   const VariableValue & _w;
 };
-
-#endif // LYNXEXTREMESCALARVALUE_H

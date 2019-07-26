@@ -11,8 +11,7 @@
 /*                  or http://www.gnu.org/licenses/gpl.html                   */
 /******************************************************************************/
 
-#ifndef LYNXVELOCITYBC_H
-#define LYNXVELOCITYBC_H
+#pragma once
 
 #include "PresetNodalBC.h"
 
@@ -34,5 +33,3 @@ protected:
   const Real & _value;
   const Function * _function;
 };
-
-#endif // LYNXVELOCITYBC_H
