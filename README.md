@@ -15,10 +15,14 @@
     <img src="https://img.shields.io/badge/license-GPLv3-blue.svg"
          alt="GPL License">
   </a>
+  <a href="https://zenodo.org/record/3355376#.XUA2qi2Q1PU">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.3355376.svg"
+         alt="DOI">
+  </a>
 </p>
 
 ## About
-LYNX (Lithosphere dYnamic Numerical toolboX) is a numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes of porous rocks.
+LYNX (Lithosphere dYnamic Numerical toolboX) is a numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in the porous rocks of the lithosphere.
 The simulator is developed by [Antoine Jacquey](http://www.gfz-potsdam.de/en/staff/antoine-jacquey/) <a href="https://orcid.org/0000-0002-6259-4305" target="orcid.widget" rel="noopener noreferrer" style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a> and [Mauro Cacace](http://www.gfz-potsdam.de/en/section/basin-modeling/staff/profil/mauro-cacace/) <a href="https://orcid.org/0000-0001-6101-9918" target="orcid.widget" rel="noopener noreferrer" style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a> at the [GFZ Potsdam, German Research Centre for Geosciences](http://www.gfz-potsdam.de/en/home/) from the section [Basin Modelling](http://www.gfz-potsdam.de/en/section/basin-modeling/).
 
 
@@ -80,7 +84,7 @@ Information about the structure of the LYNX input files can be found in the docu
 
 If you use LYNX for your work please cite:
 * This repository:  
-Antoine B. Jacquey, & Mauro Cacace. (2019, July 30). LYNX: Lithosphere dYnamic Numerical toolboX, a MOOSE-based application v1.0.
+Jacquey, Antoine B., & Cacace, Mauro. (2019, July 30). LYNX: Lithosphere dYnamic Numerical toolboX, a MOOSE-based application (Version 1.0). Zenodo. http://doi.org/10.5281/zenodo.3355376
 
 
 Please read the [CITATION](https://gitext.gfz-potsdam.de/ajacquey/lynx//blob/master/CITATION) file for more information.
