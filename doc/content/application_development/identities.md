@@ -1,6 +1,6 @@
 ## Some identities
 
-In the following description, we make use of the following identities extended from [cite:dunne2005].
+In the following description, we make use of the following identities extended from [!cite](dunne2005).
 
 Stress invariants:
 

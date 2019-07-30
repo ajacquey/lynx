@@ -14,8 +14,8 @@ Here are the BibTex entries for LaTeX users:
 @misc{LYNXApp,
   author = {Jacquey, Antoine B. and Cacace, Mauro},
   title = {{LYNX: Lithosphere dYnamic Numerical toolboX, a MOOSE-based application}},
-  month = jul,
-  year = 2019,
+  month = {jul},
+  year = {2019},
   doi = {10.5281/zenodo.3355376},
   url = {https://doi.org/10.5281/zenodo.3355376}
 }

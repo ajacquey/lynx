@@ -4,7 +4,7 @@ Here we describe the base for the damage rheology implementation in LYNX.
 
 ## Stress update
 
-We rely of the elastic energy and stress formulation of [cite:lyakhovsky1997]:
+We rely of the elastic energy and stress formulation of [!cite](lyakhovsky1997):
 
 \begin{equation}
   \sigma_{ij} = \left(\lambda - \frac{\alpha \gamma}{\xi}\right) \varepsilon_{kk} \delta_{ij} + \left(2G - \alpha \gamma \left(\xi - 2\xi_{0}\right)\right) \varepsilon_{ij}.
@@ -47,7 +47,7 @@ The parameter $\xi_{0}$ represents the modified internal friction of the materia
 
 ## Inelastic model
 
-In LYNX, we rely on a different formulation as the one presented in [cite:lyakhovsky1997,lyakhovsky2015] for the inelastic update. The yield function presented in [cite:lyakhovsky2015] reads:
+In LYNX, we rely on a different formulation as the one presented in [!cite](lyakhovsky1997,lyakhovsky2015) for the inelastic update. The yield function presented in [!cite](lyakhovsky2015) reads:
 
 \begin{equation}
   f = D\varepsilon_{v}^{3} + {\lVert \varepsilon_{ij} \rVert}^{2} \left(\xi - \xi_{0}\right)
