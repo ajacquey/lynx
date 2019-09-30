@@ -51,7 +51,7 @@ Using Eq. 3, the plastic increment can be written:
 
 ## Tangent operator modulus
 
-Here we extend the tangent operator modulus given in [cite:dunne2005] to account for volumetric deformation and non-associative models.
+Here we extend the tangent operator modulus given in [!cite](dunne2005) to account for volumetric deformation and non-associative models.
 The tangent operator modulus is defined as:
 
 \begin{equation}
