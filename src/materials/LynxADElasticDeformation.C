@@ -52,7 +52,9 @@ LynxADElasticDeformation<compute_stage>::LynxADElasticDeformation(
     _elastic_strain_incr(declareADProperty<RankTwoTensor>("elastic_train_increment")),
     _K(declareADProperty<Real>("bulk_modulus")),
     _G(declareADProperty<Real>("shear_modulus")),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress"))
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
+    _viscous_strain_incr(_has_creep ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),
+    _plastic_strain_incr(_has_plastic ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr)
 {
 }
 
@@ -160,7 +162,13 @@ template <ComputeStage compute_stage>
 void
 LynxADElasticDeformation<compute_stage>::computeQpThermalSources()
 {
-  // ADRankTwoTensor inelastic_strain_incr = _viscous_strain_incr[_qp] + _plastic_strain_incr[_qp];
-  // _inelastic_heat[_qp] = _stress[_qp].doubleContraction(inelastic_strain_incr) / _dt;
-  _inelastic_heat[_qp] = 0.0;
+  ADRankTwoTensor inelastic_strain_incr = ADRankTwoTensor();
+  if (_has_creep)
+    inelastic_strain_incr += (*_viscous_strain_incr)[_qp];
+  if (_has_plastic)
+    inelastic_strain_incr += (*_plastic_strain_incr)[_qp];
+  if (_coupled_temp)
+    inelastic_strain_incr.addIa((*_thermal_exp)[_qp] * _temp_dot[_qp] * _dt / 3.0);
+
+  _inelastic_heat[_qp] = _stress[_qp].doubleContraction(inelastic_strain_incr) / _dt;
 }

@@ -19,9 +19,11 @@
   usingMaterialBaseMembers;                                                                        \
   using LynxADDeformationBase<compute_stage>::_plith;                                              \
   using LynxADDeformationBase<compute_stage>::_coupled_temp;                                       \
+  using LynxADDeformationBase<compute_stage>::_temp_dot;                                           \
   using LynxADDeformationBase<compute_stage>::_total_strain;                                       \
   using LynxADDeformationBase<compute_stage>::_strain_increment;                                   \
   using LynxADDeformationBase<compute_stage>::_spin_increment;                                     \
+  using LynxADDeformationBase<compute_stage>::_thermal_exp;                                        \
   using LynxADDeformationBase<compute_stage>::_stress;                                             \
   using LynxADDeformationBase<compute_stage>::_inelastic_heat
 

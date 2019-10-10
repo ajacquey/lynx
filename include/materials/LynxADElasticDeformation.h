@@ -53,6 +53,8 @@ protected:
   ADMaterialProperty(Real) & _K;
   ADMaterialProperty(Real) & _G;
   const MaterialProperty<RankTwoTensor> & _stress_old;
+  const ADMaterialProperty(RankTwoTensor) * _viscous_strain_incr;
+  const ADMaterialProperty(RankTwoTensor) * _plastic_strain_incr;
   // Creep Model
   LynxADCreepModel<compute_stage> * _creep_model;
   // Plastic Model
