@@ -12,11 +12,6 @@
   zmax = 1
 []
 
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-  temperature = temp
-[]
-
 [Variables]
   [./temp]
     initial_condition = 0.0
@@ -31,21 +26,21 @@
 
 [Kernels]
   [./T_diff]
-    type = LynxHeatConduction
+    type = LynxADHeatConduction
     variable = temp
   [../]
   [./mech_x]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_x
     component = 0
   [../]
   [./mech_y]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_y
     component = 1
   [../]
   [./mech_z]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_z
     component = 2
   [../]
@@ -95,12 +90,14 @@
 
 [Materials]
   [./elastic_mat]
-    type = LynxDeformation
+    type = LynxADElasticDeformation
+    displacements = 'disp_x disp_y disp_z'
+    temperature = 'temp'
     bulk_modulus = 1.0e+09
     shear_modulus = 1.0e+09
   [../]
   [./thermal]
-    type = LynxThermalConstant
+    type = LynxADThermalConstant
     solid_thermal_conductivity = 1.0
     solid_thermal_expansion = 1.0e-02
   [../]
@@ -118,7 +115,8 @@
 
 [Executioner]
   type = Transient
-  solve_type = Newton
+  solve_type = 'NEWTON'
+  automatic_scaling = true
   start_time = 0.0
   end_time = 1
   dt = 1

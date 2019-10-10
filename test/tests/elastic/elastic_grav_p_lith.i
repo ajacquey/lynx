@@ -25,28 +25,22 @@
 
 [Kernels]
   [./mech_x]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_x
-    displacements = 'disp_x disp_y disp_z'
-    lithostatic_pressure = p_lith
     component = 0
   [../]
   [./mech_y]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_y
-    displacements = 'disp_x disp_y disp_z'
-    lithostatic_pressure = p_lith
     component = 1
   [../]
   [./mech_z]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_z
-    displacements = 'disp_x disp_y disp_z'
-    lithostatic_pressure = p_lith
     component = 2
   [../]
   [./lithostatic_pressure]
-    type = LynxPressureLoad
+    type = LynxADPressureLoad
     variable = p_lith
   [../]
 []
@@ -106,14 +100,14 @@
 
 [Materials]
   [./elastic_mat]
-    type = LynxDeformation
+    type = LynxADElasticDeformation
     displacements = 'disp_x disp_y disp_z'
     lithostatic_pressure = p_lith
     bulk_modulus = 6.6666667e+09
     shear_modulus = 4.0e+09
   [../]
   [./density]
-    type = LynxDensityConstant
+    type = LynxADDensityConstant
     solid_density = 3058.104
     has_gravity = true
   [../]
@@ -131,14 +125,15 @@
 
 [Executioner]
   type = Transient
-  solve_type = Newton
+  solve_type = 'NEWTON'
+  automatic_scaling = true
   start_time = 0.0
   end_time = 1.0
   dt = 1.0
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
+  execute_on = 'TIMESTEP_END'
   print_linear_residuals = true
   perf_graph = true
   exodus = true

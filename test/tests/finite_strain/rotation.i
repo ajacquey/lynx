@@ -18,10 +18,6 @@
   file = rotation_test.e
 []
 
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
-
 [Variables]
   [./disp_x]
   [../]
@@ -33,17 +29,17 @@
 
 [Kernels]
   [./mech_x]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_x
     component = 0
   [../]
   [./mech_y]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_y
     component = 1
   [../]
   [./mech_z]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_z
     component = 2
   [../]
@@ -213,7 +209,8 @@
 
 [Materials]
   [./elastic_mat]
-    type = LynxDeformation
+    type = LynxADElasticDeformation
+    displacements = 'disp_x disp_y disp_z'
     strain_model = finite
     bulk_modulus = 1.0e+06
     shear_modulus = 0.375e+06
@@ -221,25 +218,26 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [./precond]
     type = SMP
     full = true
+    petsc_options = '-snes_ksp_ew'
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm 1E-10 1E-15 20 50 lu NONZERO'
   [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
-  petsc_options_iname = '-pc_type '
-  petsc_options_value = lu
-  nl_rel_tol = 1e-30
-  nl_abs_tol = 1e-20
-  l_max_its = 20
+  solve_type = 'NEWTON'
+  automatic_scaling = true
   start_time = 0.0
   dt = 0.01
   end_time = 2.0
 []
 
 [Outputs]
+  print_linear_residuals = true
+  perf_graph = true
   exodus = true
 []

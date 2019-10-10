@@ -36,6 +36,7 @@ static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntax("LynxAdvectionAction", "LynxAdvection");
+  registerSyntax("LynxADAdvectionAction", "LynxADAdvection");
 
   registerSyntax("EmptyAction", "BCs/LynxPressure");
   registerSyntax("LynxPressureAction", "BCs/LynxPressure/*");

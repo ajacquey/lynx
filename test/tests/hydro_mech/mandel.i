@@ -25,37 +25,37 @@
 
 [Kernels]
   [./pf_time]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = pf
   [../]
   [./pf_diffusion]
-    type = LynxHydroDarcy
+    type = LynxADHydroDarcy
     variable = pf
   [../]
   [./pf_poro]
-    type = LynxHydroPoroMech
+    type = LynxADHydroPoroMech
     variable = pf
-    displacements = 'disp_x disp_y disp_z'
+    # displacements = 'disp_x disp_y disp_z'
   [../]
   [./mech_x]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_x
     component = 0
-    displacements = 'disp_x disp_y disp_z'
+    # displacements = 'disp_x disp_y disp_z'
     fluid_pressure = 'pf'
   [../]
   [./mech_y]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_y
     component = 1
-    displacements = 'disp_x disp_y disp_z'
+    # displacements = 'disp_x disp_y disp_z'
     fluid_pressure = 'pf'
   [../]
   [./mech_z]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_z
     component = 2
-    displacements = 'disp_x disp_y disp_z'
+    # displacements = 'disp_x disp_y disp_z'
     fluid_pressure = 'pf'
   [../]
 []
@@ -140,13 +140,13 @@
 
 [Materials]
   [./poroelastic_material]
-    type = LynxDeformation
+    type = LynxADElasticDeformation
     displacements = 'disp_x disp_y disp_z'
     bulk_modulus = 1.0
     shear_modulus = 0.75
   [../]
   [./hydro_mat]
-    type = LynxHydroConstant
+    type = LynxADHydroConstant
     porosity = 'porosity'
     fluid_modulus = 8
     solid_modulus = 2.5
@@ -258,7 +258,8 @@
 
 [Executioner]
   type = Transient
-  solve_type = Newton
+  solve_type = 'NEWTON'
+  automatic_scaling = true
   start_time = 0
   end_time = 0.7
   [./TimeStepper]

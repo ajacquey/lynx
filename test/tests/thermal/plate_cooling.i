@@ -20,11 +20,11 @@
 
 [Kernels]
   [./T_time]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = temp
   [../]
   [./T_diff]
-    type = LynxHeatConduction
+    type = LynxADHeatConduction
     variable = temp
   [../]
 []
@@ -46,12 +46,11 @@
 
 [Materials]
   [./density]
-    type = LynxDensityConstant
+    type = LynxADDensityConstant
     solid_density = 1000
   [../]
   [./thermo]
-    type = LynxThermalConstant
-    temperature = temp
+    type = LynxADThermalConstant
     solid_thermal_conductivity = 1
     solid_heat_capacity = 1000
   [../]

@@ -1,0 +1,41 @@
+/******************************************************************************/
+/*                            This file is part of                            */
+/*                       LYNX, a MOOSE-based application                      */
+/*                    Lithosphere dYnamic Numerical toolboX                   */
+/*                                                                            */
+/*          Copyright (C) 2017 by Antoine B. Jacquey and Mauro Cacace         */
+/*             GFZ Potsdam, German Research Centre for Geosciences            */
+/*                                                                            */
+/*                Licensed under GNU General Public License 3,                */
+/*                       please see LICENSE for details                       */
+/*                  or http://www.gnu.org/licenses/gpl.html                   */
+/******************************************************************************/
+
+#include "LynxADHydroDarcy.h"
+
+registerADMooseObject("LynxApp", LynxADHydroDarcy);
+
+defineADValidParams(LynxADHydroDarcy,
+                    ADKernel,
+                    params.addClassDescription("Divergence of Darcy velocity kernel."););
+
+template <ComputeStage compute_stage>
+LynxADHydroDarcy<compute_stage>::LynxADHydroDarcy(const InputParameters & parameters)
+  : ADKernel<compute_stage>(parameters),
+    _fluid_mobility(getADMaterialProperty<Real>("fluid_mobility")),
+    _coupled_grav(hasMaterialProperty<Real>("fluid_density")),
+    _gravity(_coupled_grav ? &getADMaterialProperty<RealVectorValue>("gravity_vector") : nullptr),
+    _rho_f(_coupled_grav ? &getADMaterialProperty<Real>("fluid_density") : nullptr)
+{
+}
+
+template <ComputeStage compute_stage>
+ADReal
+LynxADHydroDarcy<compute_stage>::computeQpResidual()
+{
+  ADRealVectorValue grav_term = _coupled_grav ? -(*_rho_f)[_qp] * (*_gravity)[_qp] : ADRealVectorValue();
+
+  return _fluid_mobility[_qp] * (_grad_u[_qp] + grav_term) * _grad_test[_i][_qp];
+}
+
+adBaseClass(LynxADHydroDarcy);

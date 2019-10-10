@@ -1,22 +1,22 @@
-[Tests]
-  [./damage_accumulation]
-    type = 'Exodiff'
-    input = 'damage_accumulation.i'
-    exodiff = 'damage_accumulation_out.e'
-  [../]
-  [./damage_inelastic]
-    type = 'Exodiff'
-    input = 'damage_inelastic.i'
-    exodiff = 'damage_inelastic_out.e'
-  [../]
-  [./damage_inelastic_multiapp]
-    type = 'Exodiff'
-    input = 'damage_inelastic_master.i'
-    exodiff = 'damage_inelastic_master_out.e'
-  [../]
-  [./damage_convex_compression_vp]
-    type = 'Exodiff'
-    input = 'damage_convex_compression_vp.i'
-    exodiff = 'damage_convex_compression_vp_out.e'
-  [../]
-[]
+#[Tests]
+#  [./damage_accumulation]
+#    type = 'Exodiff'
+#    input = 'damage_accumulation.i'
+#    exodiff = 'damage_accumulation_out.e'
+#  [../]
+#  [./damage_inelastic]
+#    type = 'Exodiff'
+#    input = 'damage_inelastic.i'
+#    exodiff = 'damage_inelastic_out.e'
+#  [../]
+#  [./damage_inelastic_multiapp]
+#    type = 'Exodiff'
+#    input = 'damage_inelastic_master.i'
+#    exodiff = 'damage_inelastic_master_out.e'
+#  [../]
+#  [./damage_convex_compression_vp]
+#    type = 'Exodiff'
+#    input = 'damage_convex_compression_vp.i'
+#    exodiff = 'damage_convex_compression_vp_out.e'
+#  [../]
+#[]

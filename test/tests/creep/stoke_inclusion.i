@@ -25,23 +25,18 @@
 
 [Kernels]
   [./mech_x]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_x
     component = 0
-    displacements = 'disp_x disp_y'
-    dynamic_pressure = pressure
   [../]
   [./mech_y]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_y
     component = 1
-    displacements = 'disp_x disp_y'
-    dynamic_pressure = pressure
   [../]
   [./incompressibility]
-    type = LynxMass
+    type = LynxADMass
     variable = pressure
-    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -133,14 +128,14 @@
 
 [Materials]
   [./viscous_domain]
-    type = LynxDeformation
+    type = LynxADStokeDeformation
     displacements = 'disp_x disp_y'
     dynamic_pressure = pressure
     block = domain
     A_diffusion = 5.0e-01
   [../]
   [./viscous_inclusion]
-    type = LynxDeformation
+    type = LynxADStokeDeformation
     displacements = 'disp_x disp_y'
     dynamic_pressure = pressure
     block = inclusion
@@ -161,7 +156,8 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
+  solve_type = 'NEWTON'
+  automatic_scaling = true
   start_time = 0
   end_time = 1.0
   dt = 1.0

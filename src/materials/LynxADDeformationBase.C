@@ -1,0 +1,237 @@
+/******************************************************************************/
+/*                            This file is part of                            */
+/*                       LYNX, a MOOSE-based application                      */
+/*                    Lithosphere dYnamic Numerical toolboX                   */
+/*                                                                            */
+/*          Copyright (C) 2017 by Antoine B. Jacquey and Mauro Cacace         */
+/*             GFZ Potsdam, German Research Centre for Geosciences            */
+/*                                                                            */
+/*                Licensed under GNU General Public License 3,                */
+/*                       please see LICENSE for details                       */
+/*                  or http://www.gnu.org/licenses/gpl.html                   */
+/******************************************************************************/
+
+#include "LynxADDeformationBase.h"
+#include "Assembly.h"
+
+defineADValidParams(
+    LynxADDeformationBase,
+    LynxADMaterialBase,
+    params.addClassDescription("Base class calculating the deformation of a material.");
+    // Coupled variables
+    params.addRequiredCoupledVar(
+        "displacements",
+        "The displacements appropriate for the simulation geometry and coordinate system.");
+    params.addCoupledVar("lithostatic_pressure", "The lithostatic pressure variable.");
+    params.addCoupledVar("temperature", "The temperature variable.");
+    // Strain parameters
+    MooseEnum strain_model("small=0 finite=1", "small");
+    params.addParam<MooseEnum>("strain_model",
+                               strain_model,
+                               "The model to use to calculate the strain rate tensor.");
+    params.addParam<bool>("volumetric_locking_correction",
+                          false,
+                          "Flag to correct volumetric locking");
+    params.suppressParameter<bool>("use_displaced_mesh"););
+
+template <ComputeStage compute_stage>
+LynxADDeformationBase<compute_stage>::LynxADDeformationBase(const InputParameters & parameters)
+  : LynxADMaterialBase<compute_stage>(parameters),
+    // Coupled variables
+    _ndisp(coupledComponents("displacements")),
+    _grad_disp(3),
+    _grad_disp_old(3),
+    _coupled_plith(isCoupled("lithostatic_pressure")),
+    _plith(_coupled_plith ? &adCoupledValue("lithostatic_pressure") : nullptr),
+    _coupled_temp(isCoupled("temperature")),
+    _temp_dot(_coupled_temp ? &adCoupledDot("temperature") : nullptr),
+    // Strain parameters
+    _strain_model(getParam<MooseEnum>("strain_model")),
+    _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
+    _current_elem_volume(_assembly.elemVolume()),
+    // Strain properties
+    _total_strain(declareADProperty<RankTwoTensor>("total_strain")),
+    _strain_increment(declareADProperty<RankTwoTensor>("strain_increment")),
+    _spin_increment(declareADProperty<RankTwoTensor>("spin_increment")),
+    _thermal_exp(_coupled_temp ? &getADMaterialProperty<Real>("thermal_expansion_coefficient") : nullptr),
+    // Stress properties
+    _stress(declareADProperty<RankTwoTensor>("stress")),
+    _inelastic_heat(declareADProperty<Real>("inelastic_heat"))
+{
+  if (getParam<bool>("use_displaced_mesh"))
+    paramError("use_displaced_mesh",
+               "The strain and stress calculator needs to run on the undisplaced mesh.");
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::initialSetup()
+{
+  displacementIntegrityCheck();
+  // fetch coupled variables and gradients (as stateful properties if necessary)
+  for (unsigned int i = 0; i < _ndisp; ++i)
+  {
+    _grad_disp[i] = &adCoupledGradient("displacements", i);
+    if (_fe_problem.isTransient())
+      _grad_disp_old[i] = &coupledGradientOld("displacements", i);
+    else
+      _grad_disp_old[i] = &_grad_zero;
+  }
+
+  // set unused dimensions to zero
+  for (unsigned i = _ndisp; i < 3; ++i)
+  {
+    _grad_disp[i] = &adZeroGradient();
+    _grad_disp_old[i] = &_grad_zero;
+  }
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::displacementIntegrityCheck()
+{
+  // Checking for consistency between mesh size and length of the provided displacements vector
+  if (_ndisp != _mesh.dimension())
+    paramError(
+        "displacements",
+        "The number of variables supplied in 'displacements' must match the mesh dimension.");
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::computeProperties()
+{
+  computeStrainIncrement();
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    computeQpProperties();
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::computeQpProperties()
+{
+  computeQpDeformation();
+  computeQpThermalSources();
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::computeStrainIncrement()
+{
+  ADReal vol_strain_incr = 0.0;
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
+    ADRankTwoTensor grad_tensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+    RankTwoTensor grad_tensor_old(
+        (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
+
+    switch (_strain_model)
+    {
+      case 0: // SMALL STRAIN
+        calculateSmallStrain(grad_tensor, grad_tensor_old);
+        break;
+      case 1: // FINITE STRAIN
+        calculateFiniteStrain(grad_tensor, grad_tensor_old);
+        break;
+      default:
+        mooseError("Unknown strain model. Specify 'small' or 'finite'!");
+    }
+
+    // Thermal strain correction
+    if (_coupled_temp)
+      _strain_increment[_qp].addIa(-(*_thermal_exp)[_qp] * (*_temp_dot)[_qp] * _dt / 3.0);
+
+    if (_vol_locking_correction)
+      vol_strain_incr += _strain_increment[_qp].trace() * _JxW[_qp] * _coord[_qp];
+  }
+
+  if (_vol_locking_correction)
+  {
+    vol_strain_incr /= _current_elem_volume;
+
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    {
+      ADReal trace = _strain_increment[_qp].trace();
+      _strain_increment[_qp](0, 0) += (vol_strain_incr - trace) / 3.0;
+      _strain_increment[_qp](1, 1) += (vol_strain_incr - trace) / 3.0;
+      _strain_increment[_qp](2, 2) += (vol_strain_incr - trace) / 3.0;
+    }
+  }
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::calculateSmallStrain(const ADRankTwoTensor & grad_tensor,
+                                          const RankTwoTensor & grad_tensor_old)
+{
+  ADRankTwoTensor A = grad_tensor - grad_tensor_old;
+
+  _strain_increment[_qp] = 0.5 * (A + A.transpose());
+  _spin_increment[_qp] = 0.5 * (A - A.transpose());
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::calculateFiniteStrain(const ADRankTwoTensor & grad_tensor,
+                                           const RankTwoTensor & grad_tensor_old)
+{
+  ADRankTwoTensor F = grad_tensor;
+  RankTwoTensor F_old = grad_tensor_old;
+  F.addIa(1.0);
+  F_old.addIa(1.0);
+
+  // Increment gradient
+  ADRankTwoTensor L = -F_old * F.inverse();
+  L.addIa(1.0);
+
+  _strain_increment[_qp] = 0.5 * (L + L.transpose());
+  _spin_increment[_qp] = 0.5 * (L - L.transpose());
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::computeQpDeformation()
+{
+  // Initialize deformation
+  initializeQpDeformation();
+
+  // Compute Stress tensor
+  computeQpStress();
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::initializeQpDeformation()
+{
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::computeQpStress()
+{
+  // Update the volumetric part of the deformation
+  ADReal pressure = volumetricDeformation();
+
+  // Update the deviatoric part of the deformation
+  ADRankTwoTensor stress_dev = deviatoricDeformation(pressure);
+
+  // Form the total stress tensor
+  reformStressTensor(pressure, stress_dev);
+}
+
+template <ComputeStage compute_stage>
+void
+LynxADDeformationBase<compute_stage>::reformStressTensor(const ADReal & pressure, const ADRankTwoTensor & stress_dev)
+{
+  _stress[_qp] = stress_dev;
+  _stress[_qp].addIa(-pressure);
+}
+
+template <ComputeStage compute_stage>
+ADRankTwoTensor
+LynxADDeformationBase<compute_stage>::spinRotation(const ADRankTwoTensor & tensor)
+{
+  return tensor + _spin_increment[_qp] * tensor.deviatoric() - tensor.deviatoric() * _spin_increment[_qp];
+}
+
+adBaseClass(LynxADDeformationBase);

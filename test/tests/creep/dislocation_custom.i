@@ -16,10 +16,6 @@
   zmax = 0.25
 []
 
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
-
 [Variables]
   [./disp_x]
   [../]
@@ -31,17 +27,17 @@
 
 [Kernels]
   [./mech_x]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_x
     component = 0
   [../]
   [./mech_y]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_y
     component = 1
   [../]
   [./mech_z]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_z
     component = 2
   [../]
@@ -128,12 +124,17 @@
 
 [Materials]
   [./elastic_mat]
-    type = LynxDeformation
+    type = LynxADElasticDeformation
+    displacements = 'disp_x disp_y disp_z'
     bulk_modulus = 1.0e+10
     shear_modulus = 1.0e+10
+    creep_model = 'dislocation_creep'
+  [../]
+  [./dislocation_creep]
+    type = LynxADCreepModel
     A_dislocation = 5.0e-23
     n_dislocation = 1.0
-    viscous_update = newton
+    viscous_update = newton_safe
   [../]
 []
 
@@ -149,14 +150,15 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
+  solve_type = 'NEWTON'
+  automatic_scaling = true
   start_time = 0.0
   end_time = 3.1536e+13
   dt = 3.1536e+11
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
+  execute_on = 'TIMESTEP_END'
   print_linear_residuals = false
   perf_graph = true
   exodus = true

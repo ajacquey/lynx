@@ -1,0 +1,41 @@
+/******************************************************************************/
+/*                            This file is part of                            */
+/*                       LYNX, a MOOSE-based application                      */
+/*                    Lithosphere dYnamic Numerical toolboX                   */
+/*                                                                            */
+/*          Copyright (C) 2017 by Antoine B. Jacquey and Mauro Cacace         */
+/*             GFZ Potsdam, German Research Centre for Geosciences            */
+/*                                                                            */
+/*                Licensed under GNU General Public License 3,                */
+/*                       please see LICENSE for details                       */
+/*                  or http://www.gnu.org/licenses/gpl.html                   */
+/******************************************************************************/
+
+#pragma once
+
+#include "LynxADHydroBase.h"
+
+template <ComputeStage>
+class LynxADHydroConstant;
+
+declareADValidParams(LynxADHydroConstant);
+
+template <ComputeStage compute_stage>
+class LynxADHydroConstant : public LynxADHydroBase<compute_stage>
+{
+public:
+  LynxADHydroConstant(const InputParameters & parameters);
+
+protected:
+  virtual void computeQpFluidCompressibility() override;
+  virtual void computeQpSolidCompressibility() override;
+  virtual void computeQpPermeability() override;
+  virtual void computeQpFluidViscosity() override;
+
+  std::vector<Real> _perm;
+  std::vector<Real> _fluid_viscosity;
+  std::vector<Real> _fluid_compr;
+  std::vector<Real> _solid_compr;
+
+  usingHydroBaseMembers;
+};

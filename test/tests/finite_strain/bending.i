@@ -10,10 +10,6 @@
   elem_type = QUAD4
 []
 
-[GlobalParams]
-  displacements = 'disp_x disp_y'
-[]
-
 [MeshModifiers]
   [./corner]
     type = AddExtraNodeset
@@ -41,12 +37,12 @@
 
 [Kernels]
   [./mech_x]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_x
     component = 0
   [../]
   [./mech_y]
-    type = LynxSolidMomentum
+    type = LynxADSolidMomentum
     variable = disp_y
     component = 1
   [../]
@@ -81,39 +77,34 @@
 
 [Materials]
   [./elastic_mat]
-    type = LynxDeformation
+    type = LynxADElasticDeformation
+    displacements = 'disp_x disp_y'
     bulk_modulus = 6.7866666667e+04
     shear_modulus = 0.754e+05
     strain_model = finite
   [../]
 []
 
-[Executioner]
-  type = Transient
-
-  solve_type = NEWTON
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-
-  nl_rel_tol = 1e-10
-  nl_max_its = 10
-
-  l_tol  = 1e-4
-  l_max_its = 50
-
-  dt = 0.1
-  dtmin = 0.1
-
-  num_steps = 2
-[]
-
 [Preconditioning]
-  [./smp]
+  [./precond]
     type = SMP
     full = true
+    petsc_options_iname = '-pc_type -pc_hypre_type -snes_atol'
+    petsc_options_value = 'hypre boomeramg 1.0e-12'
   [../]
 []
 
+[Executioner]
+  type = Transient
+  solve_type = 'NEWTON'
+  automatic_scaling = true
+  dt = 0.1
+  dtmin = 0.1
+  num_steps = 2
+[]
+
 [Outputs]
+  print_linear_residuals = true
+  perf_graph = true
   exodus = true
 []

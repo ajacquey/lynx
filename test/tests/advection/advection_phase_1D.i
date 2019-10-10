@@ -25,12 +25,23 @@
   [../]
 []
 
-[LynxAdvection]
+[LynxADAdvection]
   velocities = 'vel_x'
   compositional_phases = 'phase'
   beta_stabilization = 0.026
   cr_stabilization = 1
 []
+# [Kernels]
+#   [./time_phase]
+#     type = ADTimeDerivative
+#     variable = phase
+#   [../]
+#   [./advection_phase]
+#     type = LynxADAdvectionComposition
+#     variable = phase
+#     velocities = 'vel_x'
+#   [../]
+# []
 
 [BCs]
   [./left_phase]
@@ -117,8 +128,9 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
+  solve_type = 'NEWTON'
   scheme = bdf2
+  automatic_scaling = true
   start_time = 0
   end_time = 15
   [./TimeStepper]
