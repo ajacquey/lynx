@@ -34,9 +34,8 @@ protected:
   virtual ADReal computeQpOneOnDislViscosity(const ADReal A, const ADReal n, const ADReal eII);
   virtual void computeQpThermalSources() override;
 
-  const bool _coupled_pdyn;
-  const ADVariableValue * _pdyn;
-  const ADVariableValue * _temp;
+  const ADVariableValue & _pdyn;
+  const ADVariableValue & _temp;
 
   // Stoke parameters
   const bool _has_diffusion_creep;

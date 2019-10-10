@@ -50,9 +50,8 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 LynxADStokeDeformation<compute_stage>::LynxADStokeDeformation(const InputParameters & parameters)
   : LynxADDeformationBase<compute_stage>(parameters),
-    _coupled_pdyn(isCoupled("dynamic_pressure")),
-    _pdyn(_coupled_pdyn ? &adCoupledValue("dynamic_pressure") : nullptr),
-    _temp(_coupled_temp ? &adCoupledValue("temperature") : nullptr),
+    _pdyn(isCoupled("dynamic_pressure")? adCoupledValue("dynamic_pressure") : adZeroValue()),
+    _temp(_coupled_temp ? adCoupledValue("temperature") : adZeroValue()),
     // Stoke parameters
     _has_diffusion_creep(isParamValid("A_diffusion")),
     _A_diffusion(_has_diffusion_creep ? this->getLynxParam("A_diffusion")
@@ -120,11 +119,7 @@ template <ComputeStage compute_stage>
 ADReal
 LynxADStokeDeformation<compute_stage>::volumetricDeformation()
 {
-  ADReal pressure = _coupled_pdyn ? (*_pdyn)[_qp] : 0.0;
-  if (_coupled_plith)
-    pressure += (*_plith)[_qp];
-
-  return pressure;
+  return _pdyn[_qp] + _plith[_qp];
 }
 
 template <ComputeStage compute_stage>
@@ -154,7 +149,7 @@ LynxADStokeDeformation<compute_stage>::computeQpEffectiveViscosity(const ADReal 
   ADReal one_on_eta_diff = 0.0, one_on_eta_disl = 0.0;
   if (_coupled_temp)
   {
-    ADReal RT = _gas_constant * (*_temp)[_qp];
+    ADReal RT = _gas_constant * _temp[_qp];
     _A_diff *= std::exp(-(_E_diff + pressure * _V_diff) / RT);
     _A_disl *= std::exp(-(_E_disl + pressure * _V_disl) / RT);
   }

@@ -60,7 +60,7 @@ template <ComputeStage compute_stage>
 LynxADCreepModel<compute_stage>::LynxADCreepModel(const InputParameters & parameters)
   : LynxADMaterialBase<compute_stage>(parameters),
     _coupled_temp(isCoupled("temperature")),
-    _temp(_coupled_temp ? &adCoupledValue("temperature") : nullptr),
+    _temp(_coupled_temp ? adCoupledValue("temperature") : adZeroValue()),
     // Creep parameters
     _has_diffusion_creep(isParamValid("A_diffusion")),
     _A_diffusion(_has_diffusion_creep ? this->getLynxParam("A_diffusion")
@@ -200,7 +200,7 @@ LynxADCreepModel<compute_stage>::initCreepParameters(const ADReal & pressure)
 
   if (_coupled_temp)
   { 
-    ADReal RT = _gas_constant * (*_temp)[_qp];
+    ADReal RT = _gas_constant * _temp[_qp];
     _A_diff *= std::exp(-(_E_diff + pressure * _V_diff) / RT);
     _A_disl *= std::exp(-(_E_disl + pressure * _V_disl) / RT);
   }

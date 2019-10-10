@@ -41,10 +41,9 @@ LynxADDeformationBase<compute_stage>::LynxADDeformationBase(const InputParameter
     _ndisp(coupledComponents("displacements")),
     _grad_disp(3),
     _grad_disp_old(3),
-    _coupled_plith(isCoupled("lithostatic_pressure")),
-    _plith(_coupled_plith ? &adCoupledValue("lithostatic_pressure") : nullptr),
+    _plith(isCoupled("lithostatic_pressure") ? adCoupledValue("lithostatic_pressure") : adZeroValue()),
     _coupled_temp(isCoupled("temperature")),
-    _temp_dot(_coupled_temp ? &adCoupledDot("temperature") : nullptr),
+    _temp_dot(_coupled_temp ? adCoupledDot("temperature") : adZeroValue()),
     // Strain parameters
     _strain_model(getParam<MooseEnum>("strain_model")),
     _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
@@ -139,7 +138,7 @@ LynxADDeformationBase<compute_stage>::computeStrainIncrement()
 
     // Thermal strain correction
     if (_coupled_temp)
-      _strain_increment[_qp].addIa(-(*_thermal_exp)[_qp] * (*_temp_dot)[_qp] * _dt / 3.0);
+      _strain_increment[_qp].addIa(-(*_thermal_exp)[_qp] * _temp_dot[_qp] * _dt / 3.0);
 
     if (_vol_locking_correction)
       vol_strain_incr += _strain_increment[_qp].trace() * _JxW[_qp] * _coord[_qp];

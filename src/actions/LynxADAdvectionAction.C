@@ -87,22 +87,20 @@ LynxADAdvectionAction::act()
 void
 LynxADAdvectionAction::createAuxVariableActions()
 {
-  const bool second_order = _problem->mesh().hasSecondOrderElements();
+  auto params = _factory.getValidParams("MooseVariable");
+  // determine necessary order
+  const bool second = _problem->mesh().hasSecondOrderElements();
+  params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
+  params.set<MooseEnum>("family") = "LAGRANGE";
   for (unsigned i = 0; i < _compositional_phases.size(); ++i)
   {
     _aux_variables.push_back("entropy_" + _compositional_phases[i]);
-    _problem->addAuxVariable(
-        _aux_variables.back(),
-        FEType(Utility::string_to_enum<Order>(second_order ? "SECOND" : "FIRST"),
-               Utility::string_to_enum<FEFamily>("LAGRANGE")));
+    _problem->addAuxVariable("MooseVariable", _aux_variables.back(), params);
   }
   for (unsigned i = 0; i < _temperature.size(); ++i)
   {
     _aux_variables.push_back("entropy_" + _temperature[i]);
-    _problem->addAuxVariable(
-        _aux_variables.back(),
-        FEType(Utility::string_to_enum<Order>(second_order ? "SECOND" : "FIRST"),
-               Utility::string_to_enum<FEFamily>("LAGRANGE")));
+    _problem->addAuxVariable("MooseVariable", _aux_variables.back(), params);
   }
 }
 

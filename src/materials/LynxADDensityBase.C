@@ -26,8 +26,7 @@ defineADValidParams(LynxADDensityBase,
 template <ComputeStage compute_stage>
 LynxADDensityBase<compute_stage>::LynxADDensityBase(const InputParameters & parameters)
   : LynxADMaterialBase<compute_stage>(parameters),
-    _coupled_porosity(isCoupled("porosity")),
-    _porosity(_coupled_porosity ? &adCoupledValue("porosity") : nullptr),
+    _porosity(isCoupled("porosity") ? adCoupledValue("porosity") : adZeroValue()),
     _has_gravity(getParam<bool>("has_gravity")),
     _g(_has_gravity ? getParam<Real>("gravity_acceleration") : 0.0),
     _fluid_density(isParamValid("fluid_density") ? this->getLynxParam("fluid_density")

@@ -48,7 +48,7 @@ LynxADElasticDeformation<compute_stage>::LynxADElasticDeformation(
     _has_creep(isParamValid("creep_model")),
     _has_plastic(isParamValid("plastic_model")),
     // Elastic properties
-    _plith_old(_coupled_plith ? &coupledValueOld("lithostatic_pressure") : nullptr),
+    _plith_old(isCoupled("lithostatic_pressure") ? coupledValueOld("lithostatic_pressure") : _zero),
     _elastic_strain_incr(declareADProperty<RankTwoTensor>("elastic_train_increment")),
     _K(declareADProperty<Real>("bulk_modulus")),
     _G(declareADProperty<Real>("shear_modulus")),
@@ -140,8 +140,7 @@ LynxADElasticDeformation<compute_stage>::volumetricDeformation()
 
   pressure -= _K[_qp] * _elastic_strain_incr[_qp].trace();
 
-  if (_coupled_plith)
-    pressure += (*_plith)[_qp] - (*_plith_old)[_qp];
+  pressure += _plith[_qp] - _plith_old[_qp];
 
   return pressure;
 }

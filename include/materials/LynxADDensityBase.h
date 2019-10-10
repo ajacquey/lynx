@@ -17,7 +17,6 @@
 
 #define usingDensityBaseMembers                                                                    \
   usingMaterialBaseMembers;                                                                        \
-  using LynxADDensityBase<compute_stage>::_coupled_porosity;                                       \
   using LynxADDensityBase<compute_stage>::_porosity;                                               \
   using LynxADDensityBase<compute_stage>::_fluid_density;                                          \
   using LynxADDensityBase<compute_stage>::_solid_density;                                          \
@@ -40,8 +39,7 @@ public:
 protected:
   virtual void computeQpGravity();
 
-  const bool _coupled_porosity;
-  const ADVariableValue * _porosity;
+  const ADVariableValue & _porosity;
 
   bool _has_gravity;
   Real _g;

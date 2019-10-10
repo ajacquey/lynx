@@ -47,7 +47,7 @@ protected:
   virtual ADReal safeNewtonRoot(const ADReal & x1, const ADReal x2);
 
   const bool _coupled_temp;
-  const ADVariableValue * _temp;
+  const ADVariableValue & _temp;
 
   // Creep parameters
   const bool _has_diffusion_creep;

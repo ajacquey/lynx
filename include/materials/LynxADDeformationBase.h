@@ -17,7 +17,6 @@
 
 #define usingDeformationBaseMembers                                                                \
   usingMaterialBaseMembers;                                                                        \
-  using LynxADDeformationBase<compute_stage>::_coupled_plith;                                      \
   using LynxADDeformationBase<compute_stage>::_plith;                                              \
   using LynxADDeformationBase<compute_stage>::_coupled_temp;                                       \
   using LynxADDeformationBase<compute_stage>::_total_strain;                                       \
@@ -64,10 +63,9 @@ protected:
   const unsigned int _ndisp;
   std::vector<const ADVariableGradient *> _grad_disp;
   std::vector<const VariableGradient *> _grad_disp_old;
-  const bool _coupled_plith;
-  const ADVariableValue * _plith;
+  const ADVariableValue & _plith;
   const bool _coupled_temp;
-  const ADVariableValue * _temp_dot;
+  const ADVariableValue & _temp_dot;
 
   // Strain parameters
   const unsigned int _strain_model;

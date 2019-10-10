@@ -46,17 +46,17 @@ LynxADAdvectionComposition<compute_stage>::computeArtificialViscosity()
     max_velocity = std::max(u.norm(), max_velocity);
   }
 
-  // If velocity is null, assume a sensible value to get back an artificial diffusion
-  // here we do: velocity ~ _diffusivity / length_scale
-  if (std::abs(_pp_max_vel) < 1e-50)
-    return (_beta_stabilization * diameter) / this->_mesh.dimension();
-
   ADReal max_viscosity = _beta_stabilization * max_velocity * diameter;
   ADReal entropy_variation =
       std::max(_pp_max_entropy - _pp_avg_entropy, _pp_avg_entropy - _pp_min_entropy);
 
   if (this->_t_step <= 1 || std::abs(entropy_variation) < 1e-50)
     return max_viscosity;
+
+  // If velocity is null, assume a sensible value to get back an artificial diffusion
+  // here we do: velocity ~ _diffusivity / length_scale
+  if (std::abs(_pp_max_vel) < 1e-50)
+    return (_beta_stabilization * diameter) / this->_mesh.dimension();
 
   ADReal entropy_viscosity =
       _cr_stabilization * diameter * diameter * max_residual / entropy_variation;

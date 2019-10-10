@@ -48,7 +48,7 @@ protected:
   const bool _has_plastic;
 
   // Elastic properties
-  const VariableValue * _plith_old;
+  const VariableValue & _plith_old;
   ADMaterialProperty(RankTwoTensor) & _elastic_strain_incr;
   ADMaterialProperty(Real) & _K;
   ADMaterialProperty(Real) & _G;

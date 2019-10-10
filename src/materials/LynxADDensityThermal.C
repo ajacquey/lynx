@@ -55,12 +55,7 @@ LynxADDensityThermal<compute_stage>::computeQpProperties()
                 (1.0 - this->averageProperty(_beta_fluid) * (_temp[_qp] - temp_ref));
   _rho_s[_qp] = this->averageProperty(_solid_density) *
                 (1.0 - this->averageProperty(_beta_solid) * (_temp[_qp] - temp_ref));
-
-  if (_coupled_porosity)
-    _rho_b[_qp] = (*_porosity)[_qp] * _rho_f[_qp] + (1.0 - (*_porosity)[_qp]) * _rho_s[_qp];
-  else
-    _rho_b[_qp] = _rho_s[_qp];
-
+  _rho_b[_qp] = _porosity[_qp] * _rho_f[_qp] + (1.0 - _porosity[_qp]) * _rho_s[_qp];
   _reference_rho_b[_qp] = _rho_b[_qp];
 }
 
