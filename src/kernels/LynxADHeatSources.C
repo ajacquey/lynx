@@ -51,7 +51,7 @@ LynxADHeatSources<compute_stage>::computeQpResidual()
   else if (_has_inelastic_heat_mat)
     Hs *= (*_inelastic_heat_mat)[_qp];
   else
-    mooseError("LynxADHeatSources: you need to provide the 'inelastic_heat' via a material property or coupled auxialiary variable!");
+    Hs *= 0.0;
 
   ADReal heat_sources = Hr + Hs;
   if (_rhoC_b[_qp] != 0.0)

@@ -167,8 +167,10 @@ LynxADElasticDeformation<compute_stage>::computeQpThermalSources()
     inelastic_strain_incr += (*_viscous_strain_incr)[_qp];
   if (_has_plastic)
     inelastic_strain_incr += (*_plastic_strain_incr)[_qp];
-  if (_coupled_temp)
+  if (_coupled_temp && !_coupled_temp_aux) 
     inelastic_strain_incr.addIa((*_thermal_exp)[_qp] * _temp_dot[_qp] * _dt / 3.0);
+  else if (_coupled_temp_aux && !_coupled_temp)
+    inelastic_strain_incr.addIa((*_thermal_exp)[_qp] * _temp_dot_aux[_qp] * _dt / 3.0);
 
   _inelastic_heat[_qp] = _stress[_qp].doubleContraction(inelastic_strain_incr) / _dt;
 }

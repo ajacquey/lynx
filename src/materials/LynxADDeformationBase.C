@@ -24,6 +24,7 @@ defineADValidParams(
         "The displacements appropriate for the simulation geometry and coordinate system.");
     params.addCoupledVar("lithostatic_pressure", "The lithostatic pressure variable.");
     params.addCoupledVar("temperature", "The temperature variable.");
+    params.addCoupledVar("temperature_dot", "The time derivative of the temperature auxialiary variable.");
     // Strain parameters
     MooseEnum strain_model("small=0 finite=1", "small");
     params.addParam<MooseEnum>("strain_model",
@@ -44,6 +45,8 @@ LynxADDeformationBase<compute_stage>::LynxADDeformationBase(const InputParameter
     _plith(isCoupled("lithostatic_pressure") ? adCoupledValue("lithostatic_pressure") : adZeroValue()),
     _coupled_temp(isCoupled("temperature")),
     _temp_dot(_coupled_temp ? adCoupledDot("temperature") : adZeroValue()),
+    _coupled_temp_aux(isCoupled("temperature_dot")),
+    _temp_dot_aux(_coupled_temp_aux ? adCoupledValue("temperature_dot") : adZeroValue()),
     // Strain parameters
     _strain_model(getParam<MooseEnum>("strain_model")),
     _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
@@ -52,7 +55,7 @@ LynxADDeformationBase<compute_stage>::LynxADDeformationBase(const InputParameter
     _total_strain(declareADProperty<RankTwoTensor>("total_strain")),
     _strain_increment(declareADProperty<RankTwoTensor>("strain_increment")),
     _spin_increment(declareADProperty<RankTwoTensor>("spin_increment")),
-    _thermal_exp(_coupled_temp ? &getADMaterialProperty<Real>("thermal_expansion_coefficient") : nullptr),
+    _thermal_exp(_coupled_temp || _coupled_temp_aux ? &getADMaterialProperty<Real>("thermal_expansion_coefficient") : nullptr),
     // Stress properties
     _stress(declareADProperty<RankTwoTensor>("stress")),
     _inelastic_heat(declareADProperty<Real>("inelastic_heat"))
@@ -60,6 +63,9 @@ LynxADDeformationBase<compute_stage>::LynxADDeformationBase(const InputParameter
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "The strain and stress calculator needs to run on the undisplaced mesh.");
+
+  if (_coupled_temp && _coupled_temp_aux)
+    mooseWarning("LynxADDeformationBase: you provided both 'temperature' and 'temperature_dot'!");
 }
 
 template <ComputeStage compute_stage>
@@ -137,8 +143,10 @@ LynxADDeformationBase<compute_stage>::computeStrainIncrement()
     }
 
     // Thermal strain correction
-    if (_coupled_temp)
+    if (_coupled_temp && !_coupled_temp_aux) 
       _strain_increment[_qp].addIa(-(*_thermal_exp)[_qp] * _temp_dot[_qp] * _dt / 3.0);
+    else if (_coupled_temp_aux && !_coupled_temp)
+      _strain_increment[_qp].addIa(-(*_thermal_exp)[_qp] * _temp_dot_aux[_qp] * _dt / 3.0);
 
     if (_vol_locking_correction)
       vol_strain_incr += _strain_increment[_qp].trace() * _JxW[_qp] * _coord[_qp];

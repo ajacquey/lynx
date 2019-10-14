@@ -20,6 +20,8 @@
   using LynxADDeformationBase<compute_stage>::_plith;                                              \
   using LynxADDeformationBase<compute_stage>::_coupled_temp;                                       \
   using LynxADDeformationBase<compute_stage>::_temp_dot;                                           \
+  using LynxADDeformationBase<compute_stage>::_coupled_temp_aux;                                   \
+  using LynxADDeformationBase<compute_stage>::_temp_dot_aux;                                       \
   using LynxADDeformationBase<compute_stage>::_total_strain;                                       \
   using LynxADDeformationBase<compute_stage>::_strain_increment;                                   \
   using LynxADDeformationBase<compute_stage>::_spin_increment;                                     \
@@ -68,6 +70,8 @@ protected:
   const ADVariableValue & _plith;
   const bool _coupled_temp;
   const ADVariableValue & _temp_dot;
+  const bool _coupled_temp_aux;
+  const ADVariableValue & _temp_dot_aux;
 
   // Strain parameters
   const unsigned int _strain_model;
