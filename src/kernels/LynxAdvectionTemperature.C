@@ -61,17 +61,17 @@ LynxAdvectionTemperature::computeArtificialViscosity()
     max_rho_cp = std::max(_rhoC[_qp], max_rho_cp);
   }
 
-  // If velocity is null, assume a sensible value to get back an artificial diffusion
-  // here we do: velocity ~ _diffusivity / length_scale
-  if (std::abs(_pp_max_vel) < 1e-50)
-    return _beta_stabilization * (max_diffusivity / max_rho_cp) / _mesh.dimension() * diameter;
-
   Real max_viscosity = _beta_stabilization * max_rho_cp * max_velocity * diameter;
   Real entropy_variation =
       std::max(_pp_max_entropy - _pp_avg_entropy, _pp_avg_entropy - _pp_min_entropy);
 
   if (_t_step <= 1 || std::abs(entropy_variation) < 1e-50)
     return max_viscosity;
+
+  // If velocity is null, assume a sensible value to get back an artificial diffusion
+  // here we do: velocity ~ _diffusivity / length_scale
+  if (std::abs(_pp_max_vel) < 1e-50)
+    return _beta_stabilization * (max_diffusivity / max_rho_cp) / _mesh.dimension() * diameter;
 
   Real entropy_viscosity =
       _cr_stabilization * diameter * diameter * max_residual / entropy_variation;
