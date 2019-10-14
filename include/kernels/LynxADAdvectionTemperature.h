@@ -34,8 +34,11 @@ protected:
 
   const ADMaterialProperty(Real) & _thermal_diff;
   const ADMaterialProperty(Real) & _rhoC;
-  const ADMaterialProperty(Real) & _radiogenic_heat;
-  const ADMaterialProperty(Real) & _inelastic_heat;
+  const bool _has_inelastic_heat_mat;
+  const ADMaterialProperty(Real) * _radiogenic_heat;
+  const ADMaterialProperty(Real) * _inelastic_heat_mat;
+  const bool _coupled_inelastic_heat;
+  const ADVariableValue & _inelastic_heat;
 
   usingAdvectionBaseMembers;
 };

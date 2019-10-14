@@ -36,6 +36,9 @@ validParams<LynxADAdvectionAction>()
       "compositional_phases", "The name of the compositional phases to be advected.");
   params.addParam<std::vector<VariableName>>(
       "temperature", "The name of the temperature variable to be advected.");
+  params.addParam<std::vector<VariableName>>(
+        "inelastic_heat",
+        "The auxiliary variable holding the inelastic heat value for running in a subApp.");
   MooseEnum element_length_type_options("min=0 max=1 average=2", "min");
   params.addParam<MooseEnum>(
       "element_length_type", element_length_type_options, "The diameter of a single cell.");
@@ -65,6 +68,9 @@ LynxADAdvectionAction::LynxADAdvectionAction(InputParameters params)
     _temperature = getParam<std::vector<VariableName>>("temperature");
   if (!isParamValid("temperature") && !isParamValid("compositional_phases"))
     mooseError("LynxAdvectionAction: no advected quantities are set.");
+  _has_inelastic_heat_var = isParamValid("inelastic_heat");
+  if (_has_inelastic_heat_var)
+    _inelastic_heat = getParam<std::vector<VariableName>>("inelastic_heat");
 }
 
 void
@@ -441,6 +447,8 @@ LynxADAdvectionAction::createKernelActions()
     params.set<NonlinearVariableName>("variable") = _temperature[i];
     params.set<std::vector<VariableName>>("entropy") = tmp;
     params.set<std::vector<VariableName>>("velocities") = _velocities;
+    if (_has_inelastic_heat_var)
+      params.set<std::vector<VariableName>>("inelastic_heat") = _inelastic_heat;
     params.set<MooseEnum>("element_length_type") = _element_length_type;
     params.set<Real>("beta_stabilization") = _beta_stabilization;
     params.set<Real>("cr_stabilization") = _cr_stabilization;

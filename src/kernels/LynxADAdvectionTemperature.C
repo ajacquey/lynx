@@ -18,7 +18,10 @@ registerADMooseObject("LynxApp", LynxADAdvectionTemperature);
 defineADValidParams(LynxADAdvectionTemperature, LynxADAdvectionBase,
   params.addClassDescription("Temperature advection kernel.");
   params.addParam<Real>(
-      "coeff_shear_heating", 0.0, "The coefficient in front of the shear heating generation."););
+      "coeff_shear_heating", 0.0, "The coefficient in front of the shear heating generation.");
+  params.addCoupledVar(
+        "inelastic_heat",
+        "The auxiliary variable holding the inelastic heat value for running in a subApp."););
 
 template <ComputeStage compute_stage>
 LynxADAdvectionTemperature<compute_stage>::LynxADAdvectionTemperature(const InputParameters & parameters)
@@ -26,8 +29,11 @@ LynxADAdvectionTemperature<compute_stage>::LynxADAdvectionTemperature(const Inpu
     _coeff_Hs(getParam<Real>("coeff_shear_heating")),
     _thermal_diff(getADMaterialProperty<Real>("thermal_diffusivity")),
     _rhoC(getADMaterialProperty<Real>("bulk_specific_heat")),
-    _radiogenic_heat(getADMaterialProperty<Real>("radiogenic_heat_production")),
-    _inelastic_heat(getADMaterialProperty<Real>("inelastic_heat"))
+    _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),
+    _radiogenic_heat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("radiogenic_heat_production") : nullptr),
+    _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat") : nullptr),
+    _coupled_inelastic_heat(isCoupled("inelastic_heat")),
+    _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : adZeroValue())
 {
 }
 
@@ -94,9 +100,18 @@ LynxADAdvectionTemperature<compute_stage>::computeEntropyResidual()
     Real laplace = 0.5 * (_second_old[_qp].tr() + _second_older[_qp].tr());
     ADReal kappa_laplace_var = _thermal_diff[_qp] * laplace;
 
-    ADReal Hr = _radiogenic_heat[_qp];
-    ADReal Hs = _coeff_Hs * _inelastic_heat[_qp];
+    ADReal Hr = _has_inelastic_heat_mat ? (*_radiogenic_heat)[_qp] : 0.0;
+    ADReal Hs = _coeff_Hs;
+    if (_coupled_inelastic_heat)
+      Hs *= _inelastic_heat[_qp];
+    else if (_has_inelastic_heat_mat)
+      Hs *= (*_inelastic_heat_mat)[_qp];
+    else
+      mooseError("LynxADAdvectionTemperature: you need to provide the 'inelastic_heat' via a "
+                 "material property or coupled auxialiary variable!");
+
     ADReal heat_sources = Hr + Hs;
+
     if (_rhoC[_qp] != 0.0)
       heat_sources /= _rhoC[_qp];
 

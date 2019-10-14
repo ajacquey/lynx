@@ -54,6 +54,8 @@ protected:
   std::vector<VariableName> _velocities;
   std::vector<VariableName> _compositional_phases;
   std::vector<VariableName> _temperature;
+  bool _has_inelastic_heat_var;
+  std::vector<VariableName> _inelastic_heat;
 
   std::vector<std::string> _aux_variables;
   std::vector<std::string> _aux_kernels;

@@ -32,8 +32,9 @@ LynxADHeatSources<compute_stage>::LynxADHeatSources(const InputParameters & para
   : ADKernel<compute_stage>(parameters),
     _coeff_Hs(getParam<Real>("coeff_shear_heating")),
     _rhoC_b(getADMaterialProperty<Real>("bulk_specific_heat")),
-    _radiogenic_heat(getADMaterialProperty<Real>("radiogenic_heat_production")),
-    _inelastic_heat_mat(getADMaterialProperty<Real>("inelastic_heat")),
+    _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),
+    _radiogenic_heat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("radiogenic_heat_production") : nullptr),
+    _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat") : nullptr),
     _coupled_inelastic_heat(isCoupled("inelastic_heat")),
     _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : adZeroValue())
 {
@@ -43,12 +44,14 @@ template <ComputeStage compute_stage>
 ADReal
 LynxADHeatSources<compute_stage>::computeQpResidual()
 {
-  ADReal Hr = _radiogenic_heat[_qp];
+  ADReal Hr = _has_inelastic_heat_mat ? (*_radiogenic_heat)[_qp] : 0.0;
   ADReal Hs = _coeff_Hs;
   if (_coupled_inelastic_heat)
     Hs *= _inelastic_heat[_qp];
+  else if (_has_inelastic_heat_mat)
+    Hs *= (*_inelastic_heat_mat)[_qp];
   else
-    Hs *= _inelastic_heat_mat[_qp];
+    mooseError("LynxADHeatSources: you need to provide the 'inelastic_heat' via a material property or coupled auxialiary variable!");
 
   ADReal heat_sources = Hr + Hs;
   if (_rhoC_b[_qp] != 0.0)
