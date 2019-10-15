@@ -31,7 +31,7 @@ protected:
   virtual void computeEntropyResidual();
 
   const Real _coeff_Hs;
-
+  const ADVariableGradient & _grad_pressure; 
   const ADMaterialProperty(Real) & _thermal_diff;
   const ADMaterialProperty(Real) & _rhoC;
   const bool _has_inelastic_heat_mat;
@@ -39,6 +39,7 @@ protected:
   const ADMaterialProperty(Real) * _inelastic_heat_mat;
   const bool _coupled_inelastic_heat;
   const ADVariableValue & _inelastic_heat;
+  const ADMaterialProperty(Real) & _thermal_exp;
 
   usingAdvectionBaseMembers;
 };

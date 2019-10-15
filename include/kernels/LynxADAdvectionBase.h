@@ -21,6 +21,7 @@
   using LynxADAdvectionBase<compute_stage>::_cr_stabilization;                                     \
   using LynxADAdvectionBase<compute_stage>::_value_old;                                            \
   using LynxADAdvectionBase<compute_stage>::_value_older;                                          \
+  using LynxADAdvectionBase<compute_stage>::_vel;                                                  \
   using LynxADAdvectionBase<compute_stage>::_vel_old;                                              \
   using LynxADAdvectionBase<compute_stage>::_vel_older;                                            \
   using LynxADAdvectionBase<compute_stage>::_entropy_old;                                          \

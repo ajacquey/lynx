@@ -21,19 +21,23 @@ defineADValidParams(LynxADAdvectionTemperature, LynxADAdvectionBase,
       "coeff_shear_heating", 0.0, "The coefficient in front of the shear heating generation.");
   params.addCoupledVar(
         "inelastic_heat",
-        "The auxiliary variable holding the inelastic heat value for running in a subApp."););
+        "The auxiliary variable holding the inelastic heat value for running in a subApp.");
+  params.addCoupledVar("pressure",
+                       "The pressure variable"););
 
 template <ComputeStage compute_stage>
 LynxADAdvectionTemperature<compute_stage>::LynxADAdvectionTemperature(const InputParameters & parameters)
   : LynxADAdvectionBase<compute_stage>(parameters),
     _coeff_Hs(getParam<Real>("coeff_shear_heating")),
+    _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : adZeroGradient()),
     _thermal_diff(getADMaterialProperty<Real>("thermal_diffusivity")),
     _rhoC(getADMaterialProperty<Real>("bulk_specific_heat")),
     _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),
     _radiogenic_heat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("radiogenic_heat_production") : nullptr),
     _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat") : nullptr),
     _coupled_inelastic_heat(isCoupled("inelastic_heat")),
-    _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : adZeroValue())
+    _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : adZeroValue()),
+    _thermal_exp(getADMaterialProperty<Real>("thermal_expansion_coefficient"))
 {
 }
 
@@ -109,7 +113,10 @@ LynxADAdvectionTemperature<compute_stage>::computeEntropyResidual()
     else
       Hs *= 0.0;
 
-    ADReal heat_sources = Hr + Hs;
+    ADRealVectorValue vel((*_vel[0])[_qp], (*_vel[1])[_qp], (*_vel[2])[_qp]);
+    ADReal Ha = _thermal_exp[_qp] * _u[_qp] * vel * _grad_pressure[_qp];
+
+    ADReal heat_sources = Hr + Hs + Ha;
 
     if (_rhoC[_qp] != 0.0)
       heat_sources /= _rhoC[_qp];

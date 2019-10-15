@@ -56,6 +56,8 @@ protected:
   std::vector<VariableName> _temperature;
   bool _has_inelastic_heat_var;
   std::vector<VariableName> _inelastic_heat;
+  bool _has_pressure_var;
+  std::vector<VariableName> _pressure;
 
   std::vector<std::string> _aux_variables;
   std::vector<std::string> _aux_kernels;

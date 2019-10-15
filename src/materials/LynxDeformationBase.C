@@ -897,7 +897,7 @@ LynxDeformationBase::rootNewtonSafe(iterative_viscous & viscous_model, const Rea
 void
 LynxDeformationBase::computeQpThermalSources()
 {
-  RankTwoTensor inelastic_strain_incr = _viscous_strain_incr[_qp] + _plastic_strain_incr[_qp] + _thermal_strain_incr[_qp];
+  RankTwoTensor inelastic_strain_incr = _viscous_strain_incr[_qp] + _plastic_strain_incr[_qp];
   _inelastic_heat[_qp] = _stress[_qp].doubleContraction(inelastic_strain_incr) / _dt;
 
   // if (_fe_problem.currentlyComputingJacobian())
