@@ -131,6 +131,13 @@ LynxADPlasticModel<compute_stage>::plasticIncrement(const ADReal & eqv_stress, c
   // Map plastic parameters
   initPlasticParameters(pressure, K);
 
+  // If no friction and cohesion are provided, there is no plastic update
+  if (_alpha == 0.0 && _k == 0.0)
+  {
+    _plastic_yield_function[_qp] = -1.0;
+    return 0.0;
+  }
+    
   // Yield function
   _plastic_yield_function[_qp] = plasticYieldFunction(eqv_stress, pressure);
 

@@ -52,7 +52,6 @@ LynxADDeformationBase<compute_stage>::LynxADDeformationBase(const InputParameter
     _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
     _current_elem_volume(_assembly.elemVolume()),
     // Strain properties
-    _total_strain(declareADProperty<RankTwoTensor>("total_strain")),
     _strain_increment(declareADProperty<RankTwoTensor>("strain_increment")),
     _spin_increment(declareADProperty<RankTwoTensor>("spin_increment")),
     _thermal_exp(_coupled_temp || _coupled_temp_aux ? &getADMaterialProperty<Real>("thermal_expansion_coefficient") : nullptr),

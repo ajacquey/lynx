@@ -111,10 +111,10 @@ LynxADCreepModel<compute_stage>::creepUpdate(ADRankTwoTensor & stress_dev,
                                                  const ADReal & G,
                                                  ADRankTwoTensor & elastic_strain_incr)
 {
-  const ADReal tau_II = std::sqrt(0.5) * stress_dev.L2norm();
-  const ADRankTwoTensor flow_dir = (tau_II != 0.0) ? stress_dev / tau_II : ADRankTwoTensor();
+  const ADReal tau_II_tr = std::sqrt(0.5) * stress_dev.L2norm();
+  const ADRankTwoTensor flow_dir = (tau_II_tr != 0.0) ? stress_dev / tau_II_tr : ADRankTwoTensor();
 
-  ADReal delta_e_II = viscousIncrement(pressure, tau_II, G);
+  ADReal delta_e_II = viscousIncrement(pressure, tau_II_tr, G);
 
   _viscous_strain_incr[_qp] = delta_e_II * flow_dir;
   stress_dev -= 2.0 * G * delta_e_II * flow_dir;
@@ -123,9 +123,9 @@ LynxADCreepModel<compute_stage>::creepUpdate(ADRankTwoTensor & stress_dev,
 
 template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::viscousIncrement(const ADReal & pressure, const ADReal & tau_II, const ADReal & G)
+LynxADCreepModel<compute_stage>::viscousIncrement(const ADReal & pressure, const ADReal & tau_II_tr, const ADReal & G)
 {
-  if (tau_II == 0.0)
+  if (tau_II_tr == 0.0)
   {
     _eta_eff[_qp] = 0.0;
     return 0.0;
@@ -141,44 +141,46 @@ LynxADCreepModel<compute_stage>::viscousIncrement(const ADReal & pressure, const
     
     ADReal maxwell_time = _eta_eff[_qp] / G;
 
-    return _dt / maxwell_time / (1.0 + _dt / maxwell_time) * tau_II / (2.0 * G);
+    return _dt / maxwell_time / (1.0 + _dt / maxwell_time) * tau_II_tr / (2.0 * G);
   }
   else // ITERATIVE update
   {
-    _tau_II_tr = tau_II;
+    _tau_II_tr = tau_II_tr;
     _G = G;
 
-    ADReal delta_e_II = 0.0;
+    ADReal tau_II = 0.0;
     switch (_viscous_update)
     {
       case 0: // NEWTON
-        delta_e_II = newtonRoot();
+        tau_II = newtonRoot();
         break;
       case 1: // BRENT
       {
-        ADReal xneg = _tau_II_tr / (2.0 * _G);
+        ADReal xneg = _tau_II_tr;
         ADReal xpos = 0.0;
-        delta_e_II = brentRoot(xneg, xpos);
+        tau_II = brentRoot(xneg, xpos);
         break;
       }
       case 2: // NEWTON SAFE
       {
-        ADReal xneg = _tau_II_tr / (2.0 * _G);
+        ADReal xneg = _tau_II_tr;
         ADReal xpos = 0.0;
-        delta_e_II = safeNewtonRoot(xneg, xpos);
+        tau_II = safeNewtonRoot(xneg, xpos);
         break;
       }
       default:
         mooseError("LynxCreepModel: unknown viscous_update method. Available ones are 'newton', 'brent' or 'newton_safe'!");
     }
 
-    _eta_eff[_qp] = (delta_e_II != 0.0) ? (_tau_II_tr - 2.0 * _G * delta_e_II) * _dt / (2.0 * delta_e_II) : 0.0;
+    _eta_eff[_qp] = (tau_II != _tau_II_tr) ? _G * _dt * tau_II / (_tau_II_tr - tau_II) : 0.0;
+    ADReal maxwell_time = _eta_eff[_qp] / _G;
+    ADReal delta_e_II = _dt / maxwell_time / (1.0 + _dt / maxwell_time) * _tau_II_tr / (2.0 * _G);
 
     if ((_eta_eff[_qp] < this->averageProperty(_eta_min)) || (_eta_eff[_qp] > this->averageProperty(_eta_max)))
     {
       _eta_eff[_qp] = std::min(std::max(_eta_eff[_qp], this->averageProperty(_eta_min)), this->averageProperty(_eta_max));
-      ADReal maxwell_time = _eta_eff[_qp] / G;
-      delta_e_II = _dt / maxwell_time / (1.0 + _dt / maxwell_time) * tau_II / (2.0 * G);
+      maxwell_time = _eta_eff[_qp] / _G;
+      delta_e_II = _dt / maxwell_time / (1.0 + _dt / maxwell_time) * _tau_II_tr / (2.0 * G);
     }
     
     return delta_e_II;
@@ -210,14 +212,14 @@ template <ComputeStage compute_stage>
 ADReal
 LynxADCreepModel<compute_stage>::iterativeResidual(const ADReal & x)
 {
-  return _A_diff * (_tau_II_tr - 2.0 * _G * x) * _dt + _A_disl * std::pow(_tau_II_tr - 2.0 * _G * x, _n_disl) * _dt - x;
+  return 2.0 * _G * (_A_diff * x + _A_disl * std::pow(x, _n_disl)) * _dt - (_tau_II_tr - x);
 }
 
 template <ComputeStage compute_stage>
 ADReal
 LynxADCreepModel<compute_stage>::iterativeResidualDerivative(const ADReal & x)
 {
-  return -2.0 * _G * _A_diff * _dt - 2.0 * _n_disl * _G * _A_disl * std::pow(_tau_II_tr - 2.0 * _G * x, _n_disl - 1.0) * _dt - 1.0;
+  return 2.0 * _G * (_A_diff + _n_disl * _A_disl * std::pow(x, _n_disl - 1.0)) * _dt + 1.0;
 }
 
 
@@ -245,7 +247,7 @@ LynxADCreepModel<compute_stage>::brentRoot(const ADReal & x1, const ADReal x2)
   // Chek if x1 and x2 bracket a root
   if (fa * fb > 0.0) // fa and fb are of the same sign
     throw MooseException("LynxCreepModel: in Brent's method, the points x1 and x2 must "
-                         "bracket a root of the function!\n");
+                         "bracket a root of the function!\nx1 = ", x1, " and f(x1) = ", fa, "\nx2 = ", x2, " and f(x2) = ", fb, "\n");
   for (unsigned int iter = 0; iter < _itmax; ++iter)
   {
     if (fb * fc > 0.0) // fb and fc are of the same sign
@@ -338,7 +340,7 @@ LynxADCreepModel<compute_stage>::safeNewtonRoot(const ADReal & x1, const ADReal 
   ADReal fh = iterativeResidual(x2);
   if (fl * fh > 0.0) // fl and fh are of the same sign
     throw MooseException("LynxCreepModel: in 'safeNewtonRoot', the points x1 and x2 "
-                         "must bracket a root of the function!\n");
+                         "must bracket a root of the function!\nx1 = ", x1, " and f(x1) = ", fl, "\nx2 = ", x2, " and f(x2) = ", fh, "\n");
 
   if (fl == 0.0)
     return x1;

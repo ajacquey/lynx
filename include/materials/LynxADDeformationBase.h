@@ -22,7 +22,6 @@
   using LynxADDeformationBase<compute_stage>::_temp_dot;                                           \
   using LynxADDeformationBase<compute_stage>::_coupled_temp_aux;                                   \
   using LynxADDeformationBase<compute_stage>::_temp_dot_aux;                                       \
-  using LynxADDeformationBase<compute_stage>::_total_strain;                                       \
   using LynxADDeformationBase<compute_stage>::_strain_increment;                                   \
   using LynxADDeformationBase<compute_stage>::_spin_increment;                                     \
   using LynxADDeformationBase<compute_stage>::_thermal_exp;                                        \
@@ -79,7 +78,6 @@ protected:
   const Real & _current_elem_volume;
 
   // Strain properties
-  ADMaterialProperty(RankTwoTensor) & _total_strain;
   ADMaterialProperty(RankTwoTensor) & _strain_increment;
   ADMaterialProperty(RankTwoTensor) & _spin_increment;
   const ADMaterialProperty(Real) * _thermal_exp;

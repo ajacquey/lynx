@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/lynx-dbg",
-            "args": ["-i", "test/tests/hydro_mech/mandel.i"],
+            "args": ["-i", "test/tests/creep/dislocation_custom.i"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
