@@ -94,6 +94,7 @@ void
 LynxADElasticDeformation<compute_stage>::initQpStatefulProperties()
 {
   _stress[_qp].zero();
+  _stress[_qp].addIa(-_plith[_qp]);
 }
 
 template <ComputeStage compute_stage>
