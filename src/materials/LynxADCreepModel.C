@@ -174,7 +174,7 @@ LynxADCreepModel<compute_stage>::viscousIncrement(const ADReal & pressure, const
 
     _eta_eff[_qp] = (tau_II != _tau_II_tr) ? _G * _dt * tau_II / (_tau_II_tr - tau_II) : 0.0;
     ADReal maxwell_time = _eta_eff[_qp] / _G;
-    ADReal delta_e_II = _dt / maxwell_time / (1.0 + _dt / maxwell_time) * _tau_II_tr / (2.0 * _G);
+    ADReal delta_e_II = (maxwell_time != 0.0) ? _dt / maxwell_time / (1.0 + _dt / maxwell_time) * _tau_II_tr / (2.0 * _G) : 0.0;
 
     if ((_eta_eff[_qp] < this->averageProperty(_eta_min)) || (_eta_eff[_qp] > this->averageProperty(_eta_max)))
     {
