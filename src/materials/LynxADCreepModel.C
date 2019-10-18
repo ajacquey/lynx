@@ -39,6 +39,10 @@ defineADValidParams(
                                        "List of power law exponents for dislocation creep.");
     params.addParam<Real>("gas_constant", 8.3144621, "The universal gas constant");
     params.addParam<std::vector<Real>>(
+        "initial_viscosity", "The vector of initial viscosity for purely viscous deformation.");
+    params.addParam<Real>("background_strain_rate",
+                          "The background strain rate for purely viscous deformation.");
+    params.addParam<std::vector<Real>>(
         "eta_min",
         "The lower threshold for the effective viscosity for purely viscous deformation.");
     params.addParam<std::vector<Real>>(
@@ -84,6 +88,13 @@ LynxADCreepModel<compute_stage>::LynxADCreepModel(const InputParameters & parame
                        ? this->getLynxParam("V_dislocation")
                        : std::vector<Real>(_n_composition, 0.0)),
     _gas_constant(getParam<Real>("gas_constant")),
+    _has_background_strain_rate(isParamValid("background_strain_rate")),
+    _has_initial_viscosity(_has_background_strain_rate ? false
+                                                       : isParamValid("_has_initial_viscosity")),
+    _initial_viscosity(_has_initial_viscosity ? this->getLynxParam("initial_viscosity")
+                                              : std::vector<Real>(_n_composition, 0.0)),
+    _background_strain_rate(_has_background_strain_rate ? getParam<Real>("background_strain_rate")
+                                                        : 0.0),
     _eta_min(isParamValid("eta_min") ? this->getLynxParam("eta_min")
                                      : std::vector<Real>(_n_composition, 0.0)),
     _eta_max(isParamValid("eta_max") ? this->getLynxParam("eta_max")
@@ -111,14 +122,25 @@ LynxADCreepModel<compute_stage>::creepUpdate(ADRankTwoTensor & stress_dev,
                                                  const ADReal & G,
                                                  ADRankTwoTensor & elastic_strain_incr)
 {
-  const ADReal tau_II_tr = std::sqrt(0.5) * stress_dev.L2norm();
-  const ADRankTwoTensor flow_dir = (tau_II_tr != 0.0) ? stress_dev / tau_II_tr : ADRankTwoTensor();
+  if (G != 0.0) // Visco elastic update
+  {
+    const ADReal tau_II_tr = std::sqrt(0.5) * stress_dev.L2norm();
+    const ADRankTwoTensor flow_dir = (tau_II_tr != 0.0) ? stress_dev / tau_II_tr : ADRankTwoTensor();
 
-  ADReal delta_e_II = viscousIncrement(pressure, tau_II_tr, G);
+    ADReal delta_e_II = viscousIncrement(pressure, tau_II_tr, G);
 
-  _viscous_strain_incr[_qp] = delta_e_II * flow_dir;
-  stress_dev -= 2.0 * G * delta_e_II * flow_dir;
-  elastic_strain_incr -= _viscous_strain_incr[_qp];
+    _viscous_strain_incr[_qp] = delta_e_II * flow_dir;
+    stress_dev -= 2.0 * G * delta_e_II * flow_dir;
+    elastic_strain_incr -= _viscous_strain_incr[_qp];
+  }
+  else // Stoke
+  {
+    _viscous_strain_incr[_qp] = elastic_strain_incr;
+    // Compute effective viscosity
+    _eta_eff[_qp] = computeQpEffectiveViscosity(pressure);
+
+    stress_dev =  2.0 * _eta_eff[_qp] * _viscous_strain_incr[_qp].deviatoric() / _dt;
+  }
 }
 
 template <ComputeStage compute_stage>
@@ -185,6 +207,53 @@ LynxADCreepModel<compute_stage>::viscousIncrement(const ADReal & pressure, const
     
     return delta_e_II;
   }  
+}
+
+template <ComputeStage compute_stage>
+ADReal
+LynxADCreepModel<compute_stage>::computeQpEffectiveViscosity(const ADReal & pressure)
+{
+  // Map creep parameters
+  initCreepParameters(pressure);
+
+  ADReal strain_rate_II = std::sqrt(0.5) * _viscous_strain_incr[_qp].deviatoric().L2norm() / _dt;
+
+  if (_t_step <= 1 && strain_rate_II == 0.0 && _has_initial_viscosity)
+    return std::min(std::max(this->averageProperty(_initial_viscosity), this->averageProperty(_eta_min)),
+                    this->averageProperty(_eta_max));
+
+  strain_rate_II = (_has_background_strain_rate && _t_step <= 1 && strain_rate_II == 0.0)
+                       ? _background_strain_rate
+                       : strain_rate_II;
+
+  ADReal one_on_eta_diff = 0.0, one_on_eta_disl = 0.0;
+  
+  if (_has_diffusion_creep)
+    one_on_eta_diff = computeQpOneOnDiffViscosity(_A_diff);
+  if (_has_dislocation_creep)
+    one_on_eta_disl = computeQpOneOnDislViscosity(_A_disl, _n_disl, strain_rate_II);
+
+  ADReal eta = 1.0 / (one_on_eta_diff + one_on_eta_disl);
+
+  return std::min(std::max(eta, this->averageProperty(_eta_min)), this->averageProperty(_eta_max));
+}
+
+template <ComputeStage compute_stage>
+ADReal
+LynxADCreepModel<compute_stage>::computeQpOneOnDiffViscosity(const ADReal A)
+{
+  return 2.0 * A;
+}
+
+template <ComputeStage compute_stage>
+ADReal
+LynxADCreepModel<compute_stage>::computeQpOneOnDislViscosity(
+    const ADReal A, const ADReal n, const ADReal eII)
+{
+  if ((eII == 0.0) && (n == 1.0))
+    return 2.0;
+  else
+    return 2.0 * std::pow(A, 1.0 / n) * std::pow(eII, 1.0 - 1.0 / n);
 }
 
 template <ComputeStage compute_stage>

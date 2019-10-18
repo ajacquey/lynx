@@ -23,7 +23,7 @@ defineADValidParams(
     params.addClassDescription("Class calculating strain and stress for an elastic rheology.");
     // Elastic moduli parameters
     params.addRequiredRangeCheckedParam<std::vector<Real>>("bulk_modulus",
-                                                   "bulk_modulus >= 0.0",
+                                                   "bulk_modulus > 0.0",
                                                    "The drained bulk modulus of the material.");
     params.addRequiredRangeCheckedParam<std::vector<Real>>("shear_modulus",
                                                    "shear_modulus >= 0.0",

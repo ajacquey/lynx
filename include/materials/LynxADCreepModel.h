@@ -39,6 +39,9 @@ public:
 
 protected:
   virtual ADReal viscousIncrement(const ADReal & pressure, const ADReal & eqv_stress, const ADReal & G);
+  virtual ADReal computeQpEffectiveViscosity(const ADReal & pressure);
+  virtual ADReal computeQpOneOnDiffViscosity(const ADReal A);
+  virtual ADReal computeQpOneOnDislViscosity(const ADReal A, const ADReal n, const ADReal eII);
   virtual void initCreepParameters(const ADReal & pressure);
   virtual ADReal iterativeResidual(const ADReal & x);
   virtual ADReal iterativeResidualDerivative(const ADReal & x);
@@ -60,6 +63,10 @@ protected:
   const std::vector<Real> _E_dislocation;
   const std::vector<Real> _V_dislocation;
   const Real _gas_constant;
+  const bool _has_background_strain_rate;
+  const bool _has_initial_viscosity;
+  const std::vector<Real> _initial_viscosity;
+  const Real _background_strain_rate;
   const std::vector<Real> _eta_min;
   const std::vector<Real> _eta_max;
   const unsigned int _viscous_update;

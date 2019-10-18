@@ -111,7 +111,7 @@ LynxADPlasticModel<compute_stage>::plasticUpdate(ADRankTwoTensor & stress_dev,
   ADReal delta_e_eqv = plasticIncrement(eqv_stress, pressure, G, K);
 
   _plastic_strain_incr[_qp] = 1.5 * delta_e_eqv * flow_dir;
-  _plastic_strain_incr[_qp].addIa(_beta * delta_e_eqv);
+  _plastic_strain_incr[_qp].addIa(_beta * delta_e_eqv / 3.0);
   stress_dev -= 3.0 * G * delta_e_eqv * flow_dir;
   pressure += K * _beta * delta_e_eqv;
   elastic_strain_incr -= _plastic_strain_incr[_qp];
@@ -132,7 +132,7 @@ LynxADPlasticModel<compute_stage>::plasticIncrement(const ADReal & eqv_stress, c
   initPlasticParameters(pressure, K);
 
   // If no friction and cohesion are provided, there is no plastic update
-  if (_alpha == 0.0 && _k == 0.0)
+  if ((_alpha == 0.0 && _k == 0.0) || G == 0.0)
   {
     _plastic_yield_function[_qp] = -1.0;
     return 0.0;
