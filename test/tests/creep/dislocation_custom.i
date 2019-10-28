@@ -134,7 +134,7 @@
     type = LynxADCreepModel
     A_dislocation = 5.0e-23
     n_dislocation = 1.0
-    viscous_update = newton_safe
+    viscous_update = 'newton_safe'
   [../]
 []
 
