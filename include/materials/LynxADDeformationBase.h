@@ -26,7 +26,8 @@
   using LynxADDeformationBase<compute_stage>::_spin_increment;                                     \
   using LynxADDeformationBase<compute_stage>::_thermal_exp;                                        \
   using LynxADDeformationBase<compute_stage>::_stress;                                             \
-  using LynxADDeformationBase<compute_stage>::_inelastic_heat
+  using LynxADDeformationBase<compute_stage>::_inelastic_heat;                                     \
+  using LynxADDeformationBase<compute_stage>::spinRotation
 
 template <ComputeStage>
 class LynxADDeformationBase;

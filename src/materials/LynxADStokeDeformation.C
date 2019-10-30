@@ -18,7 +18,8 @@ registerADMooseObject("LynxApp", LynxADStokeDeformation);
 defineADValidParams(
     LynxADStokeDeformation,
     LynxADDeformationBase,
-    params.addClassDescription("Class calculating strain and stress for a viscous (Stoke) rheology.");
+    params.addClassDescription(
+        "Class calculating strain and stress for a viscous (Stoke) rheology.");
     params.addCoupledVar("dynamic_pressure", "The dynamic pressure variable.");
     // Stoke parameters
     params.addParam<std::vector<Real>>("A_diffusion",
@@ -50,41 +51,41 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 LynxADStokeDeformation<compute_stage>::LynxADStokeDeformation(const InputParameters & parameters)
   : LynxADDeformationBase<compute_stage>(parameters),
-    _pdyn(isCoupled("dynamic_pressure")? adCoupledValue("dynamic_pressure") : adZeroValue()),
+    _pdyn(isCoupled("dynamic_pressure") ? adCoupledValue("dynamic_pressure") : adZeroValue()),
     _temp(_coupled_temp ? adCoupledValue("temperature") : adZeroValue()),
     // Stoke parameters
     _has_diffusion_creep(isParamValid("A_diffusion")),
-    _A_diffusion(_has_diffusion_creep ? this->getLynxParam("A_diffusion")
+    _A_diffusion(_has_diffusion_creep ? getLynxParam("A_diffusion")
                                       : std::vector<Real>(_n_composition, 0.0)),
     _E_diffusion((_has_diffusion_creep && isParamValid("E_diffusion"))
-                     ? this->getLynxParam("E_diffusion")
+                     ? getLynxParam("E_diffusion")
                      : std::vector<Real>(_n_composition, 0.0)),
     _V_diffusion((_has_diffusion_creep && isParamValid("V_diffusion"))
-                     ? this->getLynxParam("V_diffusion")
+                     ? getLynxParam("V_diffusion")
                      : std::vector<Real>(_n_composition, 0.0)),
     _has_dislocation_creep(isParamValid("A_dislocation")),
-    _A_dislocation(_has_dislocation_creep ? this->getLynxParam("A_dislocation")
+    _A_dislocation(_has_dislocation_creep ? getLynxParam("A_dislocation")
                                           : std::vector<Real>(_n_composition, 0.0)),
     _n_dislocation((_has_dislocation_creep && isParamValid("n_dislocation"))
-                       ? this->getLynxParam("n_dislocation")
+                       ? getLynxParam("n_dislocation")
                        : std::vector<Real>(_n_composition, 1.0)),
     _E_dislocation((_has_dislocation_creep && isParamValid("E_dislocation"))
-                       ? this->getLynxParam("E_dislocation")
+                       ? getLynxParam("E_dislocation")
                        : std::vector<Real>(_n_composition, 0.0)),
     _V_dislocation((_has_dislocation_creep && isParamValid("V_dislocation"))
-                       ? this->getLynxParam("V_dislocation")
+                       ? getLynxParam("V_dislocation")
                        : std::vector<Real>(_n_composition, 0.0)),
     _gas_constant(getParam<Real>("gas_constant")),
     _has_background_strain_rate(isParamValid("background_strain_rate")),
     _has_initial_viscosity(_has_background_strain_rate ? false
                                                        : isParamValid("_has_initial_viscosity")),
-    _initial_viscosity(_has_initial_viscosity ? this->getLynxParam("initial_viscosity")
+    _initial_viscosity(_has_initial_viscosity ? getLynxParam("initial_viscosity")
                                               : std::vector<Real>(_n_composition, 0.0)),
     _background_strain_rate(_has_background_strain_rate ? getParam<Real>("background_strain_rate")
                                                         : 0.0),
-    _eta_min(isParamValid("eta_min") ? this->getLynxParam("eta_min")
+    _eta_min(isParamValid("eta_min") ? getLynxParam("eta_min")
                                      : std::vector<Real>(_n_composition, 0.0)),
-    _eta_max(isParamValid("eta_max") ? this->getLynxParam("eta_max")
+    _eta_max(isParamValid("eta_max") ? getLynxParam("eta_max")
                                      : std::vector<Real>(_n_composition, 1.0e+99)),
     // Stoke properties
     _eta_eff(declareADProperty<Real>("effective_viscosity"))
@@ -105,14 +106,14 @@ template <ComputeStage compute_stage>
 void
 LynxADStokeDeformation<compute_stage>::initializeQpDeformation()
 {
-  _A_diff = this->averageProperty(_A_diffusion);
-  _E_diff = this->averageProperty(_E_diffusion);
-  _V_diff = this->averageProperty(_V_diffusion);
+  _A_diff = averageProperty(_A_diffusion);
+  _E_diff = averageProperty(_E_diffusion);
+  _V_diff = averageProperty(_V_diffusion);
 
-  _A_disl = this->averageProperty(_A_dislocation);
-  _n_disl = this->averageProperty(_n_dislocation);
-  _E_disl = this->averageProperty(_E_dislocation);
-  _V_disl = this->averageProperty(_V_dislocation);
+  _A_disl = averageProperty(_A_dislocation);
+  _n_disl = averageProperty(_n_dislocation);
+  _E_disl = averageProperty(_E_dislocation);
+  _V_disl = averageProperty(_V_dislocation);
 }
 
 template <ComputeStage compute_stage>
@@ -139,8 +140,8 @@ LynxADStokeDeformation<compute_stage>::computeQpEffectiveViscosity(const ADReal 
   ADReal strain_rate_II = std::sqrt(0.5) * _strain_increment[_qp].deviatoric().L2norm() / _dt;
 
   if (_t_step <= 1 && strain_rate_II == 0.0 && _has_initial_viscosity)
-    return std::min(std::max(this->averageProperty(_initial_viscosity), this->averageProperty(_eta_min)),
-                    this->averageProperty(_eta_max));
+    return std::min(std::max(averageProperty(_initial_viscosity), averageProperty(_eta_min)),
+                    averageProperty(_eta_max));
 
   strain_rate_II = (_has_background_strain_rate && _t_step <= 1 && strain_rate_II == 0.0)
                        ? _background_strain_rate
@@ -153,7 +154,7 @@ LynxADStokeDeformation<compute_stage>::computeQpEffectiveViscosity(const ADReal 
     _A_diff *= std::exp(-(_E_diff + pressure * _V_diff) / RT);
     _A_disl *= std::exp(-(_E_disl + pressure * _V_disl) / RT);
   }
-  
+
   if (_has_diffusion_creep)
     one_on_eta_diff = computeQpOneOnDiffViscosity(_A_diff);
   if (_has_dislocation_creep)
@@ -161,7 +162,7 @@ LynxADStokeDeformation<compute_stage>::computeQpEffectiveViscosity(const ADReal 
 
   ADReal eta = 1.0 / (one_on_eta_diff + one_on_eta_disl);
 
-  return std::min(std::max(eta, this->averageProperty(_eta_min)), this->averageProperty(_eta_max));
+  return std::min(std::max(eta, averageProperty(_eta_min)), averageProperty(_eta_max));
 }
 
 template <ComputeStage compute_stage>
@@ -173,8 +174,9 @@ LynxADStokeDeformation<compute_stage>::computeQpOneOnDiffViscosity(const ADReal 
 
 template <ComputeStage compute_stage>
 ADReal
-LynxADStokeDeformation<compute_stage>::computeQpOneOnDislViscosity(
-    const ADReal A, const ADReal n, const ADReal eII)
+LynxADStokeDeformation<compute_stage>::computeQpOneOnDislViscosity(const ADReal A,
+                                                                   const ADReal n,
+                                                                   const ADReal eII)
 {
   if ((eII == 0.0) && (n == 1.0))
     return 2.0;

@@ -30,9 +30,9 @@ template <ComputeStage compute_stage>
 void
 LynxADDensityConstant<compute_stage>::computeQpProperties()
 {
-  this->computeQpGravity();
-  _rho_f[_qp] = this->averageProperty(_fluid_density);
-  _rho_s[_qp] = this->averageProperty(_solid_density);
+  computeQpGravity();
+  _rho_f[_qp] = averageProperty(_fluid_density);
+  _rho_s[_qp] = averageProperty(_solid_density);
   _rho_b[_qp] = _porosity[_qp] * _rho_f[_qp] + (1.0 - _porosity[_qp]) * _rho_s[_qp];
   _reference_rho_b[_qp] = _rho_b[_qp];
 }

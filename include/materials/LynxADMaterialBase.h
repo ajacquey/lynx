@@ -20,7 +20,9 @@
   using LynxADMaterialBase<compute_stage>::_has_compositional_phases;                              \
   using LynxADMaterialBase<compute_stage>::_n_composition;                                         \
   using LynxADMaterialBase<compute_stage>::_average_type;                                          \
-  using LynxADMaterialBase<compute_stage>::_compositional_phases
+  using LynxADMaterialBase<compute_stage>::_compositional_phases;                                  \
+  using LynxADMaterialBase<compute_stage>::getLynxParam;                                           \
+  using LynxADMaterialBase<compute_stage>::averageProperty
 
 template <ComputeStage>
 class LynxADMaterialBase;

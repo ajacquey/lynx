@@ -23,7 +23,8 @@
   using LynxADDensityBase<compute_stage>::_rho_f;                                                  \
   using LynxADDensityBase<compute_stage>::_rho_s;                                                  \
   using LynxADDensityBase<compute_stage>::_rho_b;                                                  \
-  using LynxADDensityBase<compute_stage>::_reference_rho_b
+  using LynxADDensityBase<compute_stage>::_reference_rho_b;                                        \
+  using LynxADDensityBase<compute_stage>::computeQpGravity
 
 template <ComputeStage>
 class LynxADDensityBase;

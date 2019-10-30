@@ -27,13 +27,13 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 LynxADHydroConstant<compute_stage>::LynxADHydroConstant(const InputParameters & parameters)
   : LynxADHydroBase<compute_stage>(parameters),
-    _perm(this->getLynxParam("permeability")),
-    _fluid_viscosity(this->getLynxParam("fluid_viscosity"))
+    _perm(getLynxParam("permeability")),
+    _fluid_viscosity(getLynxParam("fluid_viscosity"))
 {
   if (isParamValid("fluid_modulus"))
   {
     _fluid_compr = std::vector<Real>(_n_composition, 0.0);
-    std::vector<Real> fluid_modulus = this->getLynxParam("fluid_modulus");
+    std::vector<Real> fluid_modulus = getLynxParam("fluid_modulus");
     for (unsigned int i = 0; i < _n_composition; ++i)
       if (fluid_modulus[i] != 0.0)
         _fluid_compr[i] = 1.0 / fluid_modulus[i];
@@ -44,7 +44,7 @@ LynxADHydroConstant<compute_stage>::LynxADHydroConstant(const InputParameters & 
   if (isParamValid("solid_modulus"))
   {
     _solid_compr = std::vector<Real>(_n_composition, 0.0);
-    std::vector<Real> solid_modulus = this->getLynxParam("solid_modulus");
+    std::vector<Real> solid_modulus = getLynxParam("solid_modulus");
     for (unsigned int i = 0; i < _n_composition; ++i)
       if (solid_modulus[i] != 0.0)
         _solid_compr[i] = 1.0 / solid_modulus[i];
@@ -57,30 +57,28 @@ template <ComputeStage compute_stage>
 void
 LynxADHydroConstant<compute_stage>::computeQpFluidCompressibility()
 {
-  _C_f[_qp] = this->averageProperty(_fluid_compr);
+  _C_f[_qp] = averageProperty(_fluid_compr);
 }
 
 template <ComputeStage compute_stage>
 void
 LynxADHydroConstant<compute_stage>::computeQpSolidCompressibility()
 {
-  _C_s[_qp] = this->averageProperty(_solid_compr);
+  _C_s[_qp] = averageProperty(_solid_compr);
 }
-
 
 template <ComputeStage compute_stage>
 void
 LynxADHydroConstant<compute_stage>::computeQpPermeability()
 {
-  _k[_qp] = this->averageProperty(_perm);
+  _k[_qp] = averageProperty(_perm);
 }
-
 
 template <ComputeStage compute_stage>
 void
 LynxADHydroConstant<compute_stage>::computeQpFluidViscosity()
 {
-  _eta_f[_qp] = this->averageProperty(_fluid_viscosity);
+  _eta_f[_qp] = averageProperty(_fluid_viscosity);
 }
 
 adBaseClass(LynxADHydroConstant);

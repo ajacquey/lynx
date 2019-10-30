@@ -42,8 +42,8 @@ LynxADElasticDeformation<compute_stage>::LynxADElasticDeformation(
     const InputParameters & parameters)
   : LynxADDeformationBase<compute_stage>(parameters),
     // Elastic moduli parameters
-    _bulk_modulus(this->getLynxParam("bulk_modulus")),
-    _shear_modulus(this->getLynxParam("shear_modulus")),
+    _bulk_modulus(getLynxParam("bulk_modulus")),
+    _shear_modulus(getLynxParam("shear_modulus")),
     // Creep and platic models
     _has_creep(isParamValid("creep_model")),
     _has_plastic(isParamValid("plastic_model")),
@@ -103,8 +103,8 @@ LynxADElasticDeformation<compute_stage>::initializeQpDeformation()
 {
   // Initialize elastic properties
   _elastic_strain_incr[_qp] = _strain_increment[_qp];
-  _K[_qp] = this->averageProperty(_bulk_modulus);
-  _G[_qp] = this->averageProperty(_shear_modulus);
+  _K[_qp] = averageProperty(_bulk_modulus);
+  _G[_qp] = averageProperty(_shear_modulus);
 }
 
 template <ComputeStage compute_stage>
@@ -152,7 +152,7 @@ template <ComputeStage compute_stage>
 ADRankTwoTensor
 LynxADElasticDeformation<compute_stage>::deviatoricDeformation(const ADReal & /*pressure*/)
 {
-  ADRankTwoTensor stress_dev = this->spinRotation(_stress_old[_qp].deviatoric());
+  ADRankTwoTensor stress_dev = spinRotation(_stress_old[_qp].deviatoric());
 
   stress_dev += 2.0 * _G[_qp] * _elastic_strain_incr[_qp].deviatoric();
 

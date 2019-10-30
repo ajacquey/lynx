@@ -27,7 +27,7 @@ LynxADThermalBase<compute_stage>::LynxADThermalBase(const InputParameters & para
     // _coupled_porosity(isCoupled("porosity")),
     _porosity(isCoupled("porosity") ? adCoupledValue("porosity") : adZeroValue()),
     _heat_source(isParamValid("radiogenic_heat_production")
-                     ? this->getLynxParam("radiogenic_heat_production")
+                     ? getLynxParam("radiogenic_heat_production")
                      : std::vector<Real>(_n_composition, 0.0)),
     _coupled_dens(hasMaterialProperty<Real>("solid_density")),
     _rho_f(_coupled_dens ? &getADMaterialProperty<Real>("fluid_density") : nullptr),
@@ -94,7 +94,7 @@ LynxADThermalBase<compute_stage>::computeQpThermalSource()
 {
   // In this material, we compute only radiogenic heat production
   // In LynxElasticRheology, we compute shear heating and adiabatic heating
-  _radiogenic_heat[_qp] = this->averageProperty(_heat_source);
+  _radiogenic_heat[_qp] = averageProperty(_heat_source);
 }
 
 template <ComputeStage compute_stage>

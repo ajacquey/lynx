@@ -16,12 +16,14 @@
 
 defineADValidParams(LynxADDensityBase,
                     LynxADMaterialBase,
-  params.addClassDescription("Base class for calculating densities and gravity.");
-  params.addCoupledVar("porosity","The porosity auxiliary variable.");
-  params.addParam<bool>("has_gravity", false, "Model with gravity on?");
-  params.addParam<Real>("gravity_acceleration", 9.81, "The magnitude of the gravity acceleration.");
-  params.addParam<std::vector<Real>>("fluid_density", "The fluid density.");
-  params.addParam<std::vector<Real>>("solid_density", "The solid density."););
+                    params.addClassDescription("Base class for calculating densities and gravity.");
+                    params.addCoupledVar("porosity", "The porosity auxiliary variable.");
+                    params.addParam<bool>("has_gravity", false, "Model with gravity on?");
+                    params.addParam<Real>("gravity_acceleration",
+                                          9.81,
+                                          "The magnitude of the gravity acceleration.");
+                    params.addParam<std::vector<Real>>("fluid_density", "The fluid density.");
+                    params.addParam<std::vector<Real>>("solid_density", "The solid density."););
 
 template <ComputeStage compute_stage>
 LynxADDensityBase<compute_stage>::LynxADDensityBase(const InputParameters & parameters)
@@ -29,9 +31,9 @@ LynxADDensityBase<compute_stage>::LynxADDensityBase(const InputParameters & para
     _porosity(isCoupled("porosity") ? adCoupledValue("porosity") : adZeroValue()),
     _has_gravity(getParam<bool>("has_gravity")),
     _g(_has_gravity ? getParam<Real>("gravity_acceleration") : 0.0),
-    _fluid_density(isParamValid("fluid_density") ? this->getLynxParam("fluid_density")
+    _fluid_density(isParamValid("fluid_density") ? getLynxParam("fluid_density")
                                                  : std::vector<Real>(_n_composition, 0.0)),
-    _solid_density(isParamValid("solid_density") ? this->getLynxParam("solid_density")
+    _solid_density(isParamValid("solid_density") ? getLynxParam("solid_density")
                                                  : std::vector<Real>(_n_composition, 0.0)),
     _gravity(declareADProperty<RealVectorValue>("gravity_vector")),
     _rho_f(declareADProperty<Real>("fluid_density")),
