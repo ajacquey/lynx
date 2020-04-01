@@ -1,0 +1,12 @@
+[Tests]
+  [./darcy_vel]
+    type = 'Exodiff'
+    input = 'darcy_vel.i'
+    exodiff = 'darcy_vel_out.e'
+  [../]
+  [./darcy_vel_grav]
+    type = 'Exodiff'
+    input = 'darcy_vel_grav.i'
+    exodiff = 'darcy_vel_grav_out.e'
+  [../]
+[]

@@ -188,7 +188,8 @@
         "LynxADAdvectionTemperature.C": "cpp",
         "LynxHeatSources copy.C": "cpp",
         "LynxADHeatSources.C": "cpp",
-        "LynxADPlasticModel.C": "cpp"
+        "LynxADPlasticModel.C": "cpp",
+        "LynxDarcyVelocityAux.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "python.pythonPath": "/opt/moose/miniconda/bin/python"
