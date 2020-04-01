@@ -29,9 +29,4 @@
     input = 'elastic_bending_plate.i'
     exodiff = 'elastic_bending_plate_out.e'
   [../]
-#  [./initial_stress]
-#    type = 'Exodiff'
-#    input = 'elastic_initial_stress.i'
-#    exodiff = 'elastic_initial_stress_out.e'
-#  [../]
 []
