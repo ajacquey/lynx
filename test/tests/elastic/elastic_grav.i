@@ -52,13 +52,13 @@
 
 [AuxKernels]
   [./strain_zz]
-    type = LynxStrainAux
+    type = LynxADStrainAux
     variable = strain_zz
     index_i = 2
     index_j = 2
   [../]
   [./stress_zz]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = stress_zz
     index_i = 2
     index_j = 2
@@ -67,22 +67,25 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0.0
+    preset = true
   [../]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0.0
+    preset = true
   [../]
   [./no_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
+    preset = true
   [../]
 []
 

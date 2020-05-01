@@ -25,11 +25,10 @@ registerMooseAction("LynxApp", LynxADAdvectionAction, "add_aux_kernel");
 registerMooseAction("LynxApp", LynxADAdvectionAction, "add_postprocessor");
 registerMooseAction("LynxApp", LynxADAdvectionAction, "add_kernel");
 
-template <>
 InputParameters
-validParams<LynxADAdvectionAction>()
+LynxADAdvectionAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<VariableName>>(
       "velocities", "The name of the advective velocities in the simulation.");
   params.addParam<std::vector<VariableName>>(
@@ -414,7 +413,7 @@ LynxADAdvectionAction::createKernelActions()
   for (unsigned i = 0; i < _compositional_phases.size(); ++i)
   {
     tmp[0] = _aux_variables[i];
-    params = _factory.getValidParams(name + "Composition<RESIDUAL>");
+    params = _factory.getValidParams(name + "Composition");
     params.set<NonlinearVariableName>("variable") = _compositional_phases[i];
     params.set<std::vector<VariableName>>("entropy") = tmp;
     params.set<std::vector<VariableName>>("velocities") = _velocities;
@@ -428,27 +427,25 @@ LynxADAdvectionAction::createKernelActions()
     params.set<PostprocessorName>("pp_max_entropy") = _max_entropy_pp[i];
     params.set<PostprocessorName>("pp_min_entropy") = _min_entropy_pp[i];
     params.set<PostprocessorName>("pp_avg_entropy") = _avg_entropy_pp[i];
-    _problem->addKernel(name + "Composition<RESIDUAL>",
-                        "advection_" + _compositional_phases[i] + "_residual",
-                        params);
-    _problem->addKernel(name + "Composition<JACOBIAN>",
-                        "advection_" + _compositional_phases[i] + "_jacobian",
-                        params);
+    _problem->addKernel(
+        name + "Composition", "advection_" + _compositional_phases[i] + "_residual", params);
+    // _problem->addKernel(name + "Composition<JACOBIAN>",
+    //                     "advection_" + _compositional_phases[i] + "_jacobian",
+    //                     params);
     _problem->haveADObjects(true);
-    params = _factory.getValidParams("ADTimeDerivative<RESIDUAL>");
+    params = _factory.getValidParams("ADTimeDerivative");
     params.set<NonlinearVariableName>("variable") = _compositional_phases[i];
-    _problem->addKernel("ADTimeDerivative<RESIDUAL>",
-                        "time_" + _compositional_phases[i] + "_residual",
-                        params);
-    _problem->addKernel("ADTimeDerivative<JACOBIAN>",
-                        "time_" + _compositional_phases[i] + "_jacobian",
-                        params);
+    _problem->addKernel(
+        "ADTimeDerivative", "time_" + _compositional_phases[i] + "_residual", params);
+    // _problem->addKernel("ADTimeDerivative<JACOBIAN>",
+    //                     "time_" + _compositional_phases[i] + "_jacobian",
+    //                     params);
     _problem->haveADObjects(true);
   }
   for (unsigned i = 0; i < _temperature.size(); ++i)
   {
     tmp[0] = _aux_variables.back();
-    params = _factory.getValidParams(name + "Temperature<RESIDUAL>");
+    params = _factory.getValidParams(name + "Temperature");
     params.set<NonlinearVariableName>("variable") = _temperature[i];
     params.set<std::vector<VariableName>>("entropy") = tmp;
     params.set<std::vector<VariableName>>("velocities") = _velocities;
@@ -467,17 +464,15 @@ LynxADAdvectionAction::createKernelActions()
     params.set<PostprocessorName>("pp_max_entropy") = _max_entropy_pp.back();
     params.set<PostprocessorName>("pp_min_entropy") = _min_entropy_pp.back();
     params.set<PostprocessorName>("pp_avg_entropy") = _avg_entropy_pp.back();
-    _problem->addKernel(
-        name + "Temperature<RESIDUAL>", "advection_" + _temperature[i] + "_residual", params);
-    _problem->addKernel(
-        name + "Temperature<JACOBIAN>", "advection_" + _temperature[i] + "_jacobian", params);
+    _problem->addKernel(name + "Temperature", "advection_" + _temperature[i] + "_residual", params);
+    // _problem->addKernel(
+    //     name + "Temperature<JACOBIAN>", "advection_" + _temperature[i] + "_jacobian", params);
     _problem->haveADObjects(true);
-    params = _factory.getValidParams("ADTimeDerivative<RESIDUAL>");
+    params = _factory.getValidParams("ADTimeDerivative");
     params.set<NonlinearVariableName>("variable") = _temperature[i];
-    _problem->addKernel(
-        "ADTimeDerivative<RESIDUAL>", "time_" + _temperature[i] + "_residual", params);
-    _problem->addKernel(
-        "ADTimeDerivative<JACOBIAN>", "time_" + _temperature[i] + "_jacobian", params);
+    _problem->addKernel("ADTimeDerivative", "time_" + _temperature[i] + "_residual", params);
+    // _problem->addKernel(
+    //     "ADTimeDerivative<JACOBIAN>", "time_" + _temperature[i] + "_jacobian", params);
     _problem->haveADObjects(true);
   }
 }

@@ -15,16 +15,10 @@
 
 #include "IntegratedBC.h"
 
-class LynxHeatFluxBC;
-class Function;
-class MooseRandom;
-
-template <>
-InputParameters validParams<LynxHeatFluxBC>();
-
 class LynxHeatFluxBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
   LynxHeatFluxBC(const InputParameters & parameters);
 
 protected:

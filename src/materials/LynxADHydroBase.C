@@ -13,21 +13,28 @@
 
 #include "LynxADHydroBase.h"
 
-defineADValidParams(
-    LynxADHydroBase,
-    LynxADMaterialBase,
-    params.addClassDescription("Base class for calculating the thermal properties.");
-    params.addRequiredCoupledVar("porosity", "The porosity auxiliary variable."););
+InputParameters
+LynxADHydroBase::validParams()
+{
+  InputParameters params = LynxADMaterialBase::validParams();
+  params.addClassDescription("Base class for calculating the thermal properties.");
+  params.addRequiredCoupledVar("porosity", "The porosity auxiliary variable.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADHydroBase<compute_stage>::LynxADHydroBase(const InputParameters & parameters)
-  : LynxADMaterialBase<compute_stage>(parameters),
+LynxADHydroBase::LynxADHydroBase(const InputParameters & parameters)
+  : LynxADMaterialBase(parameters),
     _porosity(adCoupledValue("porosity")),
-    _coupled_mech(hasMaterialProperty<Real>("bulk_modulus")),
+    _coupled_mech(hasADMaterialProperty<Real>("bulk_modulus")),
     _K(_coupled_mech ? &getADMaterialProperty<Real>("bulk_modulus") : nullptr),
-    _strain_increment(_coupled_mech ? &getADMaterialProperty<RankTwoTensor>("strain_increment") : nullptr),
-    // _viscous_strain_incr(_coupled_mech ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),
-    // _plastic_strain_incr(_coupled_mech ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr),
+    _strain_increment(_coupled_mech ? &getADMaterialProperty<RankTwoTensor>("strain_increment")
+                                    : nullptr),
+    _has_viscous(hasADMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
+    _viscous_strain_incr(
+        _has_viscous ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),
+    _has_plastic(hasADMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
+    _plastic_strain_incr(
+        _has_viscous ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr),
     _biot(declareADProperty<Real>("biot_coefficient")),
     _C_d(declareADProperty<Real>("bulk_compressibility")),
     _C_biot(declareADProperty<Real>("biot_compressibility")),
@@ -40,18 +47,16 @@ LynxADHydroBase<compute_stage>::LynxADHydroBase(const InputParameters & paramete
 {
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroBase<compute_stage>::computeQpProperties()
+LynxADHydroBase::computeQpProperties()
 {
   computeQpCompressibilities();
   computeQpFluidMobility();
   computeQpPoroMech();
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroBase<compute_stage>::computeQpCompressibilities()
+LynxADHydroBase::computeQpCompressibilities()
 {
   computeQpFluidCompressibility();
   computeQpSolidCompressibility();
@@ -71,9 +76,8 @@ LynxADHydroBase<compute_stage>::computeQpCompressibilities()
   _C_biot[_qp] = _porosity[_qp] * _C_f[_qp] + (1.0 - _biot[_qp]) * C_phi;
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroBase<compute_stage>::computeQpFluidMobility()
+LynxADHydroBase::computeQpFluidMobility()
 {
   computeQpPermeability();
   computeQpFluidViscosity();
@@ -84,15 +88,18 @@ LynxADHydroBase<compute_stage>::computeQpFluidMobility()
     _fluid_mobility[_qp] /= _C_biot[_qp];
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroBase<compute_stage>::computeQpPoroMech()
+LynxADHydroBase::computeQpPoroMech()
 {
   if (_coupled_mech)
   {
     ADRankTwoTensor e_tot = (*_strain_increment)[_qp] / _dt;
-    // ADRankTwoTensor e_in = ((*_viscous_strain_incr)[_qp] + (*_plastic_strain_incr)[_qp]) / _dt;
     ADRankTwoTensor e_in = ADRankTwoTensor();
+    if (_has_viscous)
+      e_in += (*_viscous_strain_incr)[_qp] / _dt;
+    if (_has_plastic)
+      e_in += (*_plastic_strain_incr)[_qp] / _dt;
+
     _poro_mech[_qp] = _biot[_qp] * e_tot.trace() + (1.0 - _biot[_qp]) * e_in.trace();
 
     if (_C_biot[_qp] != 0.0)
@@ -101,5 +108,3 @@ LynxADHydroBase<compute_stage>::computeQpPoroMech()
   else
     _poro_mech[_qp] = 0.0;
 }
-
-adBaseClass(LynxADHydroBase);

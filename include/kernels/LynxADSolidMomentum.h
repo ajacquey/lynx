@@ -15,19 +15,10 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class LynxADSolidMomentum;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(LynxADSolidMomentum);
-
-template <ComputeStage compute_stage>
-class LynxADSolidMomentum : public ADKernel<compute_stage>
+class LynxADSolidMomentum : public ADKernel
 {
 public:
+  static InputParameters validParams();
   LynxADSolidMomentum(const InputParameters & parameters);
 
 protected:
@@ -37,13 +28,11 @@ protected:
   const ADVariableValue & _pf;
   const unsigned int _component;
   const bool _vol_locking_correction;
-  const ADMaterialProperty(RankTwoTensor) & _stress;
+  const ADMaterialProperty<RankTwoTensor> & _stress;
   const bool _coupled_pf;
-  const ADMaterialProperty(Real) * _biot;
+  const ADMaterialProperty<Real> * _biot;
   const bool _coupled_grav;
-  const ADMaterialProperty(RealVectorValue) * _gravity;
-  const ADMaterialProperty(Real) * _rho_b;
+  const ADMaterialProperty<RealVectorValue> * _gravity;
+  const ADMaterialProperty<Real> * _rho_b;
   std::vector<ADReal> _avg_grad_test;
-
-  usingKernelMembers;
 };

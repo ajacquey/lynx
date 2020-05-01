@@ -15,14 +15,10 @@
 
 #include "MooseApp.h"
 
-class LynxApp;
-
-template <>
-InputParameters validParams<LynxApp>();
-
 class LynxApp : public MooseApp
 {
 public:
+  static InputParameters validParams();
   LynxApp(InputParameters parameters);
   virtual ~LynxApp();
 

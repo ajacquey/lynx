@@ -15,14 +15,10 @@
 
 #include "Action.h"
 
-class LynxADAdvectionAction;
-
-template <>
-InputParameters validParams<LynxADAdvectionAction>();
-
 class LynxADAdvectionAction : public Action
 {
 public:
+  static InputParameters validParams();
   LynxADAdvectionAction(InputParameters params);
   enum ElementLengthType
   {

@@ -16,11 +16,10 @@
 
 registerMooseObject("LynxApp", LynxHoldStressBC);
 
-template <>
 InputParameters
-validParams<LynxHoldStressBC>()
+LynxHoldStressBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Hold the stress on a given boundary in a given direction.");
   params.addCoupledVar("fluid_pressure", "The fluid pressure variable.");
   params.addRequiredParam<unsigned int>("component", "The component for the pressure.");

@@ -16,11 +16,10 @@
 
 registerMooseObject("LynxApp", LynxPressureBC);
 
-template <>
 InputParameters
-validParams<LynxPressureBC>()
+LynxPressureBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Applies a pressure on a given boundary in a given direction.");
   params.addRequiredParam<unsigned int>("component", "The component for the pressure.");
   params.addParam<Real>("value", 0.0, "Value of the pressure applied.");

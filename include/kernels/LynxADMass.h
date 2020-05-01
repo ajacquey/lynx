@@ -15,19 +15,10 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class LynxADMass;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(LynxADMass);
-
-template <ComputeStage compute_stage>
-class LynxADMass : public ADKernel<compute_stage>
+class LynxADMass : public ADKernel
 {
 public:
+  static InputParameters validParams();
   LynxADMass(const InputParameters & parameters);
 
 protected:
@@ -35,7 +26,5 @@ protected:
 
   const Real _penalty;
   const unsigned int _penalty_type;
-  const ADMaterialProperty(RankTwoTensor) & _strain_increment;
-
-  usingKernelMembers;
+  const ADMaterialProperty<RankTwoTensor> & _strain_increment;
 };

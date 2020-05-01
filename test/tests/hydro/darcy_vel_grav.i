@@ -43,19 +43,19 @@
 
 [AuxKernels]
   [./darcy_vel_x_aux]
-    type = LynxDarcyVelocityAux
+    type = LynxADDarcyVelocityAux
     variable = darcy_vel_x
     component = 0
     fluid_pressure = pf
   [../]
   [./darcy_vel_y_aux]
-    type = LynxDarcyVelocityAux
+    type = LynxADDarcyVelocityAux
     variable = darcy_vel_y
     component = 1
     fluid_pressure = pf
   [../]
   [./darcy_vel_z_aux]
-    type = LynxDarcyVelocityAux
+    type = LynxADDarcyVelocityAux
     variable = darcy_vel_z
     component = 2
     fluid_pressure = pf

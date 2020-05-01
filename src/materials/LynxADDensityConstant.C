@@ -13,22 +13,23 @@
 
 #include "LynxADDensityConstant.h"
 
-registerADMooseObject("LynxApp", LynxADDensityConstant);
+registerMooseObject("LynxApp", LynxADDensityConstant);
 
-defineADValidParams(
-    LynxADDensityConstant,
-    LynxADDensityBase,
-  params.addClassDescription("Material calculating densities as constant values."););
+InputParameters
+LynxADDensityConstant::validParams()
+{
+  InputParameters params = LynxADDensityBase::validParams();
+  params.addClassDescription("Material calculating densities as constant values.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADDensityConstant<compute_stage>::LynxADDensityConstant(const InputParameters & parameters)
-  : LynxADDensityBase<compute_stage>(parameters)
+LynxADDensityConstant::LynxADDensityConstant(const InputParameters & parameters)
+  : LynxADDensityBase(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADDensityConstant<compute_stage>::computeQpProperties()
+LynxADDensityConstant::computeQpProperties()
 {
   computeQpGravity();
   _rho_f[_qp] = averageProperty(_fluid_density);
@@ -36,5 +37,3 @@ LynxADDensityConstant<compute_stage>::computeQpProperties()
   _rho_b[_qp] = _porosity[_qp] * _rho_f[_qp] + (1.0 - _porosity[_qp]) * _rho_s[_qp];
   _reference_rho_b[_qp] = _rho_b[_qp];
 }
-
-adBaseClass(LynxADDensityConstant);

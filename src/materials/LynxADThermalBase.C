@@ -13,23 +13,25 @@
 
 #include "LynxADThermalBase.h"
 
-defineADValidParams(
-    LynxADThermalBase,
-    LynxADMaterialBase,
+InputParameters
+LynxADThermalBase::validParams()
+{
+  InputParameters params = LynxADMaterialBase::validParams();
   params.addClassDescription("Base class for calculating the thermal properties.");
   params.addCoupledVar("porosity", "The porosity auxiliary variable.");
   params.addParam<std::vector<Real>>("radiogenic_heat_production",
-                                     "The radiogenic heat production value."););
+                                     "The radiogenic heat production value.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADThermalBase<compute_stage>::LynxADThermalBase(const InputParameters & parameters)
-  : LynxADMaterialBase<compute_stage>(parameters),
+LynxADThermalBase::LynxADThermalBase(const InputParameters & parameters)
+  : LynxADMaterialBase(parameters),
     // _coupled_porosity(isCoupled("porosity")),
     _porosity(isCoupled("porosity") ? adCoupledValue("porosity") : adZeroValue()),
     _heat_source(isParamValid("radiogenic_heat_production")
-                     ? getLynxParam("radiogenic_heat_production")
+                     ? getLynxParam<Real>("radiogenic_heat_production")
                      : std::vector<Real>(_n_composition, 0.0)),
-    _coupled_dens(hasMaterialProperty<Real>("solid_density")),
+    _coupled_dens(hasADMaterialProperty<Real>("solid_density")),
     _rho_f(_coupled_dens ? &getADMaterialProperty<Real>("fluid_density") : nullptr),
     _rho_s(_coupled_dens ? &getADMaterialProperty<Real>("solid_density") : nullptr),
     _thermal_diff(declareADProperty<Real>("thermal_diffusivity")),
@@ -46,9 +48,8 @@ LynxADThermalBase<compute_stage>::LynxADThermalBase(const InputParameters & para
 {
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADThermalBase<compute_stage>::computeQpProperties()
+LynxADThermalBase::computeQpProperties()
 {
   computeQpSpecificHeat();
   computeQpThermalDiff();
@@ -56,9 +57,8 @@ LynxADThermalBase<compute_stage>::computeQpProperties()
   computeQpThermalSource();
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADThermalBase<compute_stage>::computeQpSpecificHeat()
+LynxADThermalBase::computeQpSpecificHeat()
 {
   computeQpHeatCap();
 
@@ -68,9 +68,8 @@ LynxADThermalBase<compute_stage>::computeQpSpecificHeat()
   _rhoC_b[_qp] = computeMixtureProperty(_rhoC_f[_qp], rhoC_s);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADThermalBase<compute_stage>::computeQpThermalDiff()
+LynxADThermalBase::computeQpThermalDiff()
 {
   computeQpThermalCond();
 
@@ -79,27 +78,24 @@ LynxADThermalBase<compute_stage>::computeQpThermalDiff()
     _thermal_diff[_qp] /= _rhoC_b[_qp];
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADThermalBase<compute_stage>::computeQpThermalExpansion()
+LynxADThermalBase::computeQpThermalExpansion()
 {
   computeQpThermalExp();
 
   _thermal_exp[_qp] = computeMixtureProperty(_beta_f[_qp], _beta_s[_qp]);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADThermalBase<compute_stage>::computeQpThermalSource()
+LynxADThermalBase::computeQpThermalSource()
 {
   // In this material, we compute only radiogenic heat production
   // In LynxElasticRheology, we compute shear heating and adiabatic heating
   _radiogenic_heat[_qp] = averageProperty(_heat_source);
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADThermalBase<compute_stage>::computeMixtureProperty(const ADReal fluid_prop, const ADReal solid_prop)
+LynxADThermalBase::computeMixtureProperty(const ADReal fluid_prop, const ADReal solid_prop)
 {
   // if (_coupled_porosity)
   //   return (*_porosity)[_qp] * fluid_prop + (1.0 - (*_porosity)[_qp]) * solid_prop;
@@ -107,5 +103,3 @@ LynxADThermalBase<compute_stage>::computeMixtureProperty(const ADReal fluid_prop
   //   return solid_prop;
   return _porosity[_qp] * fluid_prop + (1.0 - _porosity[_qp]) * solid_prop;
 }
-
-adBaseClass(LynxADThermalBase);

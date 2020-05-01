@@ -15,24 +15,17 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class LynxADHydroDarcy;
-
-declareADValidParams(LynxADHydroDarcy);
-
-template <ComputeStage compute_stage>
-class LynxADHydroDarcy : public ADKernel<compute_stage>
+class LynxADHydroDarcy : public ADKernel
 {
 public:
+  static InputParameters validParams();
   LynxADHydroDarcy(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty(Real) & _fluid_mobility;
+  const ADMaterialProperty<Real> & _fluid_mobility;
   const bool _coupled_grav;
-  const ADMaterialProperty(RealVectorValue) * _gravity;
-  const ADMaterialProperty(Real) * _rho_f;
-
-  usingKernelMembers;
+  const ADMaterialProperty<RealVectorValue> * _gravity;
+  const ADMaterialProperty<Real> * _rho_f;
 };

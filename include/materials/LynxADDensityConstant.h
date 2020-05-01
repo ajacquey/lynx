@@ -15,19 +15,12 @@
 
 #include "LynxADDensityBase.h"
 
-template <ComputeStage>
-class LynxADDensityConstant;
-
-declareADValidParams(LynxADDensityConstant);
-
-template <ComputeStage compute_stage>
-class LynxADDensityConstant : public LynxADDensityBase<compute_stage>
+class LynxADDensityConstant : public LynxADDensityBase
 {
 public:
+  static InputParameters validParams();
   LynxADDensityConstant(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
-
-  usingDensityBaseMembers;
 };

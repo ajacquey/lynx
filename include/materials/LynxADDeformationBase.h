@@ -15,33 +15,10 @@
 
 #include "LynxADMaterialBase.h"
 
-#define usingDeformationBaseMembers                                                                \
-  usingMaterialBaseMembers;                                                                        \
-  using LynxADDeformationBase<compute_stage>::_plith;                                              \
-  using LynxADDeformationBase<compute_stage>::_coupled_temp;                                       \
-  using LynxADDeformationBase<compute_stage>::_temp_dot;                                           \
-  using LynxADDeformationBase<compute_stage>::_coupled_temp_aux;                                   \
-  using LynxADDeformationBase<compute_stage>::_temp_dot_aux;                                       \
-  using LynxADDeformationBase<compute_stage>::_strain_increment;                                   \
-  using LynxADDeformationBase<compute_stage>::_spin_increment;                                     \
-  using LynxADDeformationBase<compute_stage>::_thermal_exp;                                        \
-  using LynxADDeformationBase<compute_stage>::_stress;                                             \
-  using LynxADDeformationBase<compute_stage>::_inelastic_heat;                                     \
-  using LynxADDeformationBase<compute_stage>::spinRotation
-
-template <ComputeStage>
-class LynxADDeformationBase;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(LynxADDeformationBase);
-
-template <ComputeStage compute_stage>
-class LynxADDeformationBase : public LynxADMaterialBase<compute_stage>
+class LynxADDeformationBase : public LynxADMaterialBase
 {
 public:
+  static InputParameters validParams();
   LynxADDeformationBase(const InputParameters & parameters);
   void initialSetup() override;
   void displacementIntegrityCheck();
@@ -79,13 +56,11 @@ protected:
   const Real & _current_elem_volume;
 
   // Strain properties
-  ADMaterialProperty(RankTwoTensor) & _strain_increment;
-  ADMaterialProperty(RankTwoTensor) & _spin_increment;
-  const ADMaterialProperty(Real) * _thermal_exp;
+  ADMaterialProperty<RankTwoTensor> & _strain_increment;
+  ADMaterialProperty<RankTwoTensor> & _spin_increment;
+  const ADMaterialProperty<Real> * _thermal_exp;
 
   // Stress properties
-  ADMaterialProperty(RankTwoTensor) & _stress;
-  ADMaterialProperty(Real) & _inelastic_heat;
-
-  usingMaterialBaseMembers;
+  ADMaterialProperty<RankTwoTensor> & _stress;
+  ADMaterialProperty<Real> & _inelastic_heat;
 };

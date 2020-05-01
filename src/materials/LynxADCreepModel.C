@@ -13,92 +13,91 @@
 
 #include "LynxADCreepModel.h"
 
-registerADMooseObject("LynxApp", LynxADCreepModel);
+registerMooseObject("LynxApp", LynxADCreepModel);
 
-defineADValidParams(
-    LynxADCreepModel,
-    LynxADMaterialBase,
-    params.addClassDescription(
-        "Base class for the viscous correction of a visco-elastic rheology.");
-    params.set<bool>("compute") = false;
-    params.suppressParameter<bool>("compute");
-    params.addCoupledVar("temperature", "The temperature variable.");
-    // Creep parameters
-    params.addParam<std::vector<Real>>("A_diffusion",
-                                       "List of pre-exponential factors for diffusion creep.");
-    params.addParam<std::vector<Real>>("E_diffusion",
-                                       "List of activation energy for diffusion creep.");
-    params.addParam<std::vector<Real>>("V_diffusion",
-                                       "List of activation (molar) volume for diffusion creep.");
-    params.addParam<std::vector<Real>>("A_dislocation",
-                                       "List of pre-exponential factors for dislocation creep.");
-    params.addParam<std::vector<Real>>("E_dislocation",
-                                       "List of activation energy for dislocation creep.");
-    params.addParam<std::vector<Real>>("V_dislocation",
-                                       "List of activation (molar) volume for dislocation creep.");
-    params.addParam<std::vector<Real>>("n_dislocation",
-                                       "List of power law exponents for dislocation creep.");
-    params.addParam<Real>("gas_constant", 8.3144621, "The universal gas constant");
-    params.addParam<std::vector<Real>>(
-        "initial_viscosity", "The vector of initial viscosity for purely viscous deformation.");
-    params.addParam<Real>("background_strain_rate",
-                          "The background strain rate for purely viscous deformation.");
-    params.addParam<std::vector<Real>>(
-        "eta_min",
-        "The lower threshold for the effective viscosity for purely viscous deformation.");
-    params.addParam<std::vector<Real>>(
-        "eta_max",
-        "The upper threshold for the effective viscosity for purely viscous deformation.");
-    MooseEnum viscous_upt("direct=0 brent=1 newton_safe=2", "direct");
-    params.addParam<MooseEnum>(
-        "viscous_update",
-        viscous_upt,
-        "The type of update for the viscous strain (Direct, Brent or Newton-safe method).");
-    params.addParam<Real>("tolerance", 1.0e-10, "Tolerance for the root finding algorithms.");
-    params.addRangeCheckedParam<unsigned int>(
-        "max_iterations",
-        100,
-        "max_iterations>0",
-        "Maximum number of iterations in the root finding algorithms."););
+InputParameters
+LynxADCreepModel::validParams()
+{
+  InputParameters params = LynxADMaterialBase::validParams();
+  params.addClassDescription("Base class for the viscous correction of a visco-elastic rheology.");
+  params.set<bool>("compute") = false;
+  params.suppressParameter<bool>("compute");
+  params.addCoupledVar("temperature", "The temperature variable.");
+  // Creep parameters
+  params.addParam<std::vector<Real>>("A_diffusion",
+                                     "List of pre-exponential factors for diffusion creep.");
+  params.addParam<std::vector<Real>>("E_diffusion",
+                                     "List of activation energy for diffusion creep.");
+  params.addParam<std::vector<Real>>("V_diffusion",
+                                     "List of activation (molar) volume for diffusion creep.");
+  params.addParam<std::vector<Real>>("A_dislocation",
+                                     "List of pre-exponential factors for dislocation creep.");
+  params.addParam<std::vector<Real>>("E_dislocation",
+                                     "List of activation energy for dislocation creep.");
+  params.addParam<std::vector<Real>>("V_dislocation",
+                                     "List of activation (molar) volume for dislocation creep.");
+  params.addParam<std::vector<Real>>("n_dislocation",
+                                     "List of power law exponents for dislocation creep.");
+  params.addParam<Real>("gas_constant", 8.3144621, "The universal gas constant");
+  params.addParam<std::vector<Real>>(
+      "initial_viscosity", "The vector of initial viscosity for purely viscous deformation.");
+  params.addParam<Real>("background_strain_rate",
+                        "The background strain rate for purely viscous deformation.");
+  params.addParam<std::vector<Real>>(
+      "eta_min", "The lower threshold for the effective viscosity for purely viscous deformation.");
+  params.addParam<std::vector<Real>>(
+      "eta_max", "The upper threshold for the effective viscosity for purely viscous deformation.");
+  MooseEnum viscous_upt("direct=0 brent=1 newton_safe=2", "direct");
+  params.addParam<MooseEnum>(
+      "viscous_update",
+      viscous_upt,
+      "The type of update for the viscous strain (Direct, Brent or Newton-safe method).");
+  params.addParam<Real>("tolerance", 1.0e-10, "Tolerance for the root finding algorithms.");
+  params.addRangeCheckedParam<unsigned int>(
+      "max_iterations",
+      100,
+      "max_iterations>0",
+      "Maximum number of iterations in the root finding algorithms.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADCreepModel<compute_stage>::LynxADCreepModel(const InputParameters & parameters)
-  : LynxADMaterialBase<compute_stage>(parameters),
+LynxADCreepModel::LynxADCreepModel(const InputParameters & parameters)
+  : LynxADMaterialBase(parameters),
     _coupled_temp(isCoupled("temperature")),
     _temp(_coupled_temp ? adCoupledValue("temperature") : adZeroValue()),
     // Creep parameters
     _has_diffusion_creep(isParamValid("A_diffusion")),
-    _A_diffusion(_has_diffusion_creep ? getLynxParam("A_diffusion")
+    _A_diffusion(_has_diffusion_creep ? getLynxParam<Real>("A_diffusion")
                                       : std::vector<Real>(_n_composition, 0.0)),
     _E_diffusion((_has_diffusion_creep && isParamValid("E_diffusion"))
-                     ? getLynxParam("E_diffusion")
+                     ? getLynxParam<Real>("E_diffusion")
                      : std::vector<Real>(_n_composition, 0.0)),
     _V_diffusion((_has_diffusion_creep && isParamValid("V_diffusion"))
-                     ? getLynxParam("V_diffusion")
+                     ? getLynxParam<Real>("V_diffusion")
                      : std::vector<Real>(_n_composition, 0.0)),
     _has_dislocation_creep(isParamValid("A_dislocation")),
-    _A_dislocation(_has_dislocation_creep ? getLynxParam("A_dislocation")
+    _A_dislocation(_has_dislocation_creep ? getLynxParam<Real>("A_dislocation")
                                           : std::vector<Real>(_n_composition, 0.0)),
     _n_dislocation((_has_dislocation_creep && isParamValid("n_dislocation"))
-                       ? getLynxParam("n_dislocation")
+                       ? getLynxParam<Real>("n_dislocation")
                        : std::vector<Real>(_n_composition, 1.0)),
     _E_dislocation((_has_dislocation_creep && isParamValid("E_dislocation"))
-                       ? getLynxParam("E_dislocation")
+                       ? getLynxParam<Real>("E_dislocation")
                        : std::vector<Real>(_n_composition, 0.0)),
     _V_dislocation((_has_dislocation_creep && isParamValid("V_dislocation"))
-                       ? getLynxParam("V_dislocation")
+                       ? getLynxParam<Real>("V_dislocation")
                        : std::vector<Real>(_n_composition, 0.0)),
     _gas_constant(getParam<Real>("gas_constant")),
     _has_background_strain_rate(isParamValid("background_strain_rate")),
     _has_initial_viscosity(_has_background_strain_rate ? false
                                                        : isParamValid("_has_initial_viscosity")),
-    _initial_viscosity(_has_initial_viscosity ? getLynxParam("initial_viscosity")
+    _initial_viscosity(_has_initial_viscosity ? getLynxParam<Real>("initial_viscosity")
                                               : std::vector<Real>(_n_composition, 0.0)),
     _background_strain_rate(_has_background_strain_rate ? getParam<Real>("background_strain_rate")
                                                         : 0.0),
-    _eta_min(isParamValid("eta_min") ? getLynxParam("eta_min")
+    _eta_min(isParamValid("eta_min") ? getLynxParam<Real>("eta_min")
                                      : std::vector<Real>(_n_composition, 0.0)),
-    _eta_max(isParamValid("eta_max") ? getLynxParam("eta_max")
+    _eta_max(isParamValid("eta_max") ? getLynxParam<Real>("eta_max")
                                      : std::vector<Real>(_n_composition, 1.0e+99)),
     _viscous_update(getParam<MooseEnum>("viscous_update")),
     _tol(getParam<Real>("tolerance")),
@@ -109,19 +108,17 @@ LynxADCreepModel<compute_stage>::LynxADCreepModel(const InputParameters & parame
 {
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADCreepModel<compute_stage>::setQp(unsigned int qp)
+LynxADCreepModel::setQp(unsigned int qp)
 {
   _qp = qp;
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADCreepModel<compute_stage>::creepUpdate(ADRankTwoTensor & stress_dev,
-                                             const ADReal & pressure,
-                                             const ADReal & G,
-                                             ADRankTwoTensor & elastic_strain_incr)
+LynxADCreepModel::creepUpdate(ADRankTwoTensor & stress_dev,
+                              const ADReal & pressure,
+                              const ADReal & G,
+                              ADRankTwoTensor & elastic_strain_incr)
 {
   if (G != 0.0) // Visco elastic update
   {
@@ -145,11 +142,10 @@ LynxADCreepModel<compute_stage>::creepUpdate(ADRankTwoTensor & stress_dev,
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::viscousIncrement(const ADReal & pressure,
-                                                  const ADReal & tau_II_tr,
-                                                  const ADReal & G)
+LynxADCreepModel::viscousIncrement(const ADReal & pressure,
+                                   const ADReal & tau_II_tr,
+                                   const ADReal & G)
 {
   if (tau_II_tr == 0.0)
   {
@@ -206,9 +202,8 @@ LynxADCreepModel<compute_stage>::viscousIncrement(const ADReal & pressure,
   return delta_e_II;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::computeQpEffectiveViscosity(const ADReal & pressure)
+LynxADCreepModel::computeQpEffectiveViscosity(const ADReal & pressure)
 {
   // Map creep parameters
   initCreepParameters(pressure);
@@ -235,18 +230,14 @@ LynxADCreepModel<compute_stage>::computeQpEffectiveViscosity(const ADReal & pres
   return std::min(std::max(eta, averageProperty(_eta_min)), averageProperty(_eta_max));
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::computeQpOneOnDiffViscosity(const ADReal A)
+LynxADCreepModel::computeQpOneOnDiffViscosity(const ADReal A)
 {
   return 2.0 * A;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::computeQpOneOnDislViscosity(const ADReal A,
-                                                             const ADReal n,
-                                                             const ADReal eII)
+LynxADCreepModel::computeQpOneOnDislViscosity(const ADReal A, const ADReal n, const ADReal eII)
 {
   if ((eII == 0.0) && (n == 1.0))
     return 2.0;
@@ -254,9 +245,8 @@ LynxADCreepModel<compute_stage>::computeQpOneOnDislViscosity(const ADReal A,
     return 2.0 * std::pow(A, 1.0 / n) * std::pow(eII, 1.0 - 1.0 / n);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADCreepModel<compute_stage>::initCreepParameters(const ADReal & pressure)
+LynxADCreepModel::initCreepParameters(const ADReal & pressure)
 {
   _A_diff = averageProperty(_A_diffusion);
   _E_diff = averageProperty(_E_diffusion);
@@ -275,23 +265,20 @@ LynxADCreepModel<compute_stage>::initCreepParameters(const ADReal & pressure)
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::iterativeResidual(const ADReal & x)
+LynxADCreepModel::iterativeResidual(const ADReal & x)
 {
   return 2.0 * _G * (_A_diff * x + _A_disl * std::pow(x, _n_disl)) * _dt - (_tau_II_tr - x);
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::iterativeResidualDerivative(const ADReal & x)
+LynxADCreepModel::iterativeResidualDerivative(const ADReal & x)
 {
   return 2.0 * _G * (_A_diff + _n_disl * _A_disl * std::pow(x, _n_disl - 1.0)) * _dt + 1.0;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::newtonRoot()
+LynxADCreepModel::newtonRoot()
 {
   mooseError("LynxCreepModel: 'newton' update for viscous strain is not yet implemented. Please "
              "use 'brent' or 'safe_newton' instead.");
@@ -301,9 +288,8 @@ LynxADCreepModel<compute_stage>::newtonRoot()
 // Finding root of function using the Van Wijngaarden-Dekker-Brent method or Brent method in
 // short. The values x1 and x2 must bracket the root (f(x1) * f(x2) < 0) See 9.3 of Numerical
 // Recipes. The Art of Scientific Computing, 3rd Edition, 2007, (C++ code)
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::brentRoot(const ADReal & x1, const ADReal x2)
+LynxADCreepModel::brentRoot(const ADReal & x1, const ADReal x2)
 {
   // Machine floating-point precision
   const Real eps = std::numeric_limits<Real>::epsilon();
@@ -402,9 +388,8 @@ LynxADCreepModel<compute_stage>::brentRoot(const ADReal & x1, const ADReal x2)
 // Finding root of function using a safe Newton-Raphson method (combinsaison of Newton-Raphson and
 // bisection). The values x1 and x2 must bracket the root (f(x1) * f(x2) < 0) See 9.4 of Numerical
 // Recipes. The Art of Scientific Computing, 3rd Edition, 2007, (C++ code)
-template <ComputeStage compute_stage>
 ADReal
-LynxADCreepModel<compute_stage>::safeNewtonRoot(const ADReal & x1, const ADReal x2)
+LynxADCreepModel::safeNewtonRoot(const ADReal & x1, const ADReal x2)
 {
   // Machine floating-point precision
   const Real eps = std::numeric_limits<Real>::epsilon();
@@ -487,5 +472,3 @@ LynxADCreepModel<compute_stage>::safeNewtonRoot(const ADReal & x1, const ADReal 
   throw MooseException(
       "LynxCreepModel: maximum number of iterations exceeded in 'safeNewtonRoot'!");
 }
-
-// adBaseClass(LynxADCreepModel);

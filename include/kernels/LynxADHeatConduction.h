@@ -15,21 +15,14 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class LynxADHeatConduction;
-
-declareADValidParams(LynxADHeatConduction);
-
-template <ComputeStage compute_stage>
-class LynxADHeatConduction : public ADKernel<compute_stage>
+class LynxADHeatConduction : public ADKernel
 {
 public:
+  static InputParameters validParams();
   LynxADHeatConduction(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty(Real) & _thermal_diff;
-
-  usingKernelMembers;
+  const ADMaterialProperty<Real> & _thermal_diff;
 };

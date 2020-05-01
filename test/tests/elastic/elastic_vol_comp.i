@@ -52,33 +52,36 @@
 
 [AuxKernels]
   [./Pe_aux]
-    type = LynxEffectivePressureAux
+    type = LynxADEffectivePressureAux
     variable = Pe
   [../]
   [./Ev_aux]
-    type = LynxVolStrainAux
+    type = LynxADVolStrainAux
     variable = Ev
   [../]
 []
 
 [BCs]
   [./no_ux]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0.0
+    preset = true
   [../]
   [./no_uy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
+    preset = true
   [../]
   [./no_uz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back'
     value = 0.0
+    preset = true
   [../]
   [./load_ux]
     type = LynxVelocityBC

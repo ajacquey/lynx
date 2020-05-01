@@ -15,15 +15,10 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class LynxADHeatSources;
-
-declareADValidParams(LynxADHeatSources);
-
-template <ComputeStage compute_stage>
-class LynxADHeatSources : public ADKernel<compute_stage>
+class LynxADHeatSources : public ADKernel
 {
 public:
+  static InputParameters validParams();
   LynxADHeatSources(const InputParameters & parameters);
 
 protected:
@@ -32,14 +27,12 @@ protected:
   const Real _coeff_Hs;
   unsigned int _nvel;
   std::vector<const ADVariableValue *> _vel;
-  const ADVariableGradient & _grad_pressure; 
-  const ADMaterialProperty(Real) & _rhoC_b;
+  const ADVariableGradient & _grad_pressure;
+  const ADMaterialProperty<Real> & _rhoC_b;
   const bool _has_inelastic_heat_mat;
-  const ADMaterialProperty(Real) * _radiogenic_heat;
-  const ADMaterialProperty(Real) * _inelastic_heat_mat;
+  const ADMaterialProperty<Real> * _radiogenic_heat;
+  const ADMaterialProperty<Real> * _inelastic_heat_mat;
   const bool _coupled_inelastic_heat;
   const ADVariableValue & _inelastic_heat;
-  const ADMaterialProperty(Real) & _thermal_exp;
-
-  usingKernelMembers;
+  const ADMaterialProperty<Real> & _thermal_exp;
 };

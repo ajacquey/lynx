@@ -15,28 +15,10 @@
 
 #include "LynxADMaterialBase.h"
 
-#define usingThermalBaseMembers                                                                    \
-  usingMaterialBaseMembers;                                                                        \
-  using LynxADThermalBase<compute_stage>::_c_f;                                                    \
-  using LynxADThermalBase<compute_stage>::_c_s;                                                    \
-  using LynxADThermalBase<compute_stage>::_lambda_f;                                               \
-  using LynxADThermalBase<compute_stage>::_lambda_s;                                               \
-  using LynxADThermalBase<compute_stage>::_beta_f;                                                 \
-  using LynxADThermalBase<compute_stage>::_beta_s
-
-template <ComputeStage>
-class LynxADThermalBase;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(LynxADThermalBase);
-
-template <ComputeStage compute_stage>
-class LynxADThermalBase : public LynxADMaterialBase<compute_stage>
+class LynxADThermalBase : public LynxADMaterialBase
 {
 public:
+  static InputParameters validParams();
   LynxADThermalBase(const InputParameters & parameters);
 
 protected:
@@ -55,13 +37,13 @@ protected:
   const std::vector<Real> _heat_source;
   const bool _coupled_dens;
 
-  const ADMaterialProperty(Real) * _rho_f;
-  const ADMaterialProperty(Real) * _rho_s;
-  ADMaterialProperty(Real) & _thermal_diff;
-  ADMaterialProperty(Real) & _rhoC_b;
-  ADMaterialProperty(Real) & _rhoC_f;
-  ADMaterialProperty(Real) & _thermal_exp;
-  ADMaterialProperty(Real) & _radiogenic_heat;
+  const ADMaterialProperty<Real> * _rho_f;
+  const ADMaterialProperty<Real> * _rho_s;
+  ADMaterialProperty<Real> & _thermal_diff;
+  ADMaterialProperty<Real> & _rhoC_b;
+  ADMaterialProperty<Real> & _rhoC_f;
+  ADMaterialProperty<Real> & _thermal_exp;
+  ADMaterialProperty<Real> & _radiogenic_heat;
 
   std::vector<ADReal> _c_f;
   std::vector<ADReal> _c_s;
@@ -69,6 +51,4 @@ protected:
   std::vector<ADReal> _lambda_s;
   std::vector<ADReal> _beta_f;
   std::vector<ADReal> _beta_s;
-
-  usingMaterialBaseMembers;
 };

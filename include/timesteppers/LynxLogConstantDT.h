@@ -15,14 +15,10 @@
 
 #include "TimeStepper.h"
 
-class LynxLogConstantDT;
-
-template <>
-InputParameters validParams<LynxLogConstantDT>();
-
 class LynxLogConstantDT : public TimeStepper
 {
 public:
+  static InputParameters validParams();
   LynxLogConstantDT(const InputParameters & parameters);
 
 protected:

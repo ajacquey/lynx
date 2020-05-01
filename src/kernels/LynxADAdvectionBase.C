@@ -14,43 +14,42 @@
 #include "LynxADAdvectionBase.h"
 #include "Assembly.h"
 
-defineADValidParams(
-    LynxADAdvectionBase,
-    ADTimeKernel,
-    params.addClassDescription(
-        "Base class for the advection term corrected by an artificial entropy "
-        "viscosity stabilization term after Guermond et al. (2011).");
-    params.addRequiredCoupledVar("velocities", "The string of velocities that advect the problem.");
-    params.addRequiredCoupledVar("entropy",
-                                 "The entropy used to calculate the artificial viscosity.");
-    MooseEnum element_length_type("min=0 max=1 average=2", "min");
-    params.addParam<MooseEnum>("element_length_type",
-                               element_length_type,
-                               "The diameter of a single cell.");
-    params.addParam<Real>("beta_stabilization", 0.026, "The beta local stabilization parameter.");
-    params.addParam<Real>("cr_stabilization", 0.5, "The cr local stabilization parameter.");
-    params.addParam<PostprocessorName>(
-        "pp_max_vel", "The postprocessor to retrieve the maximum velocity on the whole domain.");
-    params.addParam<PostprocessorName>(
-        "pp_max_var",
-        "The postprocessor to retrieve the maximum advected variable on the whole domain.");
-    params.addParam<PostprocessorName>(
-        "pp_min_var",
-        "The postprocessor to retrieve the minimum advected variable on the whole domain.");
-    params.addParam<PostprocessorName>(
-        "pp_avg_var",
-        "The postprocessor to retrieve the average advected variable on the whole domain.");
-    params.addParam<PostprocessorName>(
-        "pp_max_entropy", "The postprocessor to retrieve the maximum entropy on the whole domain.");
-    params.addParam<PostprocessorName>(
-        "pp_min_entropy", "The postprocessor to retrieve the minimum entropy on the whole domain.");
-    params.addParam<PostprocessorName>(
-        "pp_avg_entropy",
-        "The postprocessor to retrieve the average entropy on the whole domain."););
+InputParameters
+LynxADAdvectionBase::validParams()
+{
+  InputParameters params = ADTimeKernel::validParams();
+  params.addClassDescription("Base class for the advection term corrected by an artificial entropy "
+                             "viscosity stabilization term after Guermond et al. (2011).");
+  params.addRequiredCoupledVar("velocities", "The string of velocities that advect the problem.");
+  params.addRequiredCoupledVar("entropy",
+                               "The entropy used to calculate the artificial viscosity.");
+  MooseEnum element_length_type("min=0 max=1 average=2", "min");
+  params.addParam<MooseEnum>(
+      "element_length_type", element_length_type, "The diameter of a single cell.");
+  params.addParam<Real>("beta_stabilization", 0.026, "The beta local stabilization parameter.");
+  params.addParam<Real>("cr_stabilization", 0.5, "The cr local stabilization parameter.");
+  params.addParam<PostprocessorName>(
+      "pp_max_vel", "The postprocessor to retrieve the maximum velocity on the whole domain.");
+  params.addParam<PostprocessorName>(
+      "pp_max_var",
+      "The postprocessor to retrieve the maximum advected variable on the whole domain.");
+  params.addParam<PostprocessorName>(
+      "pp_min_var",
+      "The postprocessor to retrieve the minimum advected variable on the whole domain.");
+  params.addParam<PostprocessorName>(
+      "pp_avg_var",
+      "The postprocessor to retrieve the average advected variable on the whole domain.");
+  params.addParam<PostprocessorName>(
+      "pp_max_entropy", "The postprocessor to retrieve the maximum entropy on the whole domain.");
+  params.addParam<PostprocessorName>(
+      "pp_min_entropy", "The postprocessor to retrieve the minimum entropy on the whole domain.");
+  params.addParam<PostprocessorName>(
+      "pp_avg_entropy", "The postprocessor to retrieve the average entropy on the whole domain.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADAdvectionBase<compute_stage>::LynxADAdvectionBase(const InputParameters & parameters)
-  : ADTimeKernel<compute_stage>(parameters),
+LynxADAdvectionBase::LynxADAdvectionBase(const InputParameters & parameters)
+  : ADTimeKernel(parameters),
     _element_length_type(getParam<MooseEnum>("element_length_type")),
     _beta_stabilization(getParam<Real>("beta_stabilization")),
     _cr_stabilization(getParam<Real>("cr_stabilization")),
@@ -93,9 +92,8 @@ LynxADAdvectionBase<compute_stage>::LynxADAdvectionBase(const InputParameters & 
   }
 }
 
-template <ComputeStage compute_stage>
 Real
-LynxADAdvectionBase<compute_stage>::computeElementDiameter()
+LynxADAdvectionBase::computeElementDiameter()
 {
   Real diameter = 0.0;
 
@@ -121,16 +119,14 @@ LynxADAdvectionBase<compute_stage>::computeElementDiameter()
   return diameter;
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADAdvectionBase<compute_stage>::precalculateResidual()
+LynxADAdvectionBase::precalculateResidual()
 {
   _artificial_viscosity = computeArtificialViscosity();
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADAdvectionBase<compute_stage>::computeQpResidual()
+LynxADAdvectionBase::computeQpResidual()
 {
   ADRealVectorValue u((*_vel[0])[_qp], (*_vel[1])[_qp], (*_vel[2])[_qp]);
   ADReal res = u * _grad_u[_qp] * _test[_i][_qp];
@@ -141,5 +137,3 @@ LynxADAdvectionBase<compute_stage>::computeQpResidual()
 
   return res;
 }
-
-adBaseClass(LynxADAdvectionBase);

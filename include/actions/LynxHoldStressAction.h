@@ -15,16 +15,11 @@
 
 #include "Action.h"
 
-class LynxHoldStressAction;
-
-template <>
-InputParameters validParams<LynxHoldStressAction>();
-
 class LynxHoldStressAction : public Action
 {
 public:
+  static InputParameters validParams();
   LynxHoldStressAction(const InputParameters & params);
-
   virtual void act() override;
 
 protected:

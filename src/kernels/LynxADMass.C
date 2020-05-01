@@ -13,30 +13,30 @@
 
 #include "LynxADMass.h"
 
-registerADMooseObject("LynxApp", LynxADMass);
+registerMooseObject("LynxApp", LynxADMass);
 
-defineADValidParams(
-    LynxADMass,
-    ADKernel,
-    params.addClassDescription("Divergence of solid velocity for incompressible Stoke flow.");
-    params.addParam<Real>("penalty", 0.0, "The value of the penalty.");
-    MooseEnum penalty_type_options("linear=0 laplace=1", "linear");
-    params.addParam<MooseEnum>("penalty_type",
-                               penalty_type_options,
-                               "The type of penalty formulation."););
+InputParameters
+LynxADMass::validParams()
+{
+  InputParameters params = ADKernel::validParams();
+  params.addClassDescription("Divergence of solid velocity for incompressible Stoke flow.");
+  params.addParam<Real>("penalty", 0.0, "The value of the penalty.");
+  MooseEnum penalty_type_options("linear=0 laplace=1", "linear");
+  params.addParam<MooseEnum>(
+      "penalty_type", penalty_type_options, "The type of penalty formulation.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADMass<compute_stage>::LynxADMass(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+LynxADMass::LynxADMass(const InputParameters & parameters)
+  : ADKernel(parameters),
     _penalty(getParam<Real>("penalty")),
     _penalty_type(getParam<MooseEnum>("penalty_type")),
     _strain_increment(getADMaterialProperty<RankTwoTensor>("strain_increment"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADMass<compute_stage>::computeQpResidual()
+LynxADMass::computeQpResidual()
 {
   Real one_on_penalty = (_penalty != 0.0) ? 1.0 / _penalty : 0.0;
   ADReal res = -_strain_increment[_qp].trace() * _test[_i][_qp];

@@ -17,11 +17,10 @@
 
 registerMooseObject("LynxApp", LynxHeatFluxBC);
 
-template <>
 InputParameters
-validParams<LynxHeatFluxBC>()
+LynxHeatFluxBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Applies a constant heat flux.");
   params.addParam<Real>("value", 0.0, "Value of the heat flux applied.");
   params.addParam<FunctionName>("function", "Function giving the heat flux applied.");

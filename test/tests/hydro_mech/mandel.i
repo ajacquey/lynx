@@ -83,7 +83,7 @@
     value = 0.1
   [../]
   [./stress_yy_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = stress_yy
     index_i = 1
     index_j = 1
@@ -107,22 +107,25 @@
 
 [BCs]
   [./no_x_left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
+    preset = true
   [../]
   [./no_y_bottom]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
+    preset = true
   [../]
   [./no_z_plane_strain]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back front'
     value = 0
+    preset = true
   [../]
   [./drained_right]
     type = DirichletBC
@@ -131,10 +134,11 @@
     value = 0
   [../]
   [./top_velocity]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     function = top_velocity
     boundary = top
+    preset = true
   [../]
 []
 

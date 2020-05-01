@@ -13,24 +13,23 @@
 
 #include "LynxADHydroPoroMech.h"
 
-registerADMooseObject("LynxApp", LynxADHydroPoroMech);
+registerMooseObject("LynxApp", LynxADHydroPoroMech);
 
-defineADValidParams(LynxADHydroPoroMech,
-                    ADKernel,
-  params.addClassDescription("Poromechanics coupling kernel."););
+InputParameters
+LynxADHydroPoroMech::validParams()
+{
+  InputParameters params = ADKernel::validParams();
+  params.addClassDescription("Poromechanics coupling kernel.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADHydroPoroMech<compute_stage>::LynxADHydroPoroMech(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
-    _poro_mech(getADMaterialProperty<Real>("poro_mechanical"))
+LynxADHydroPoroMech::LynxADHydroPoroMech(const InputParameters & parameters)
+  : ADKernel(parameters), _poro_mech(getADMaterialProperty<Real>("poro_mechanical"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADHydroPoroMech<compute_stage>::computeQpResidual()
+LynxADHydroPoroMech::computeQpResidual()
 {
   return _poro_mech[_qp] * _test[_i][_qp];
 }
-
-adBaseClass(LynxADHydroPoroMech);

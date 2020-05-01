@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/lynx-dbg",
-            "args": ["-i", "test/tests/creep/dislocation_custom.i"],
+            "args": ["-i", "test/tests/thermo_mech/thermal_expansion.i"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

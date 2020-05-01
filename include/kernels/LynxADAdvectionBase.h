@@ -15,37 +15,10 @@
 
 #include "ADTimeKernel.h"
 
-#define usingAdvectionBaseMembers                                                                  \
-  usingTimeKernelMembers;                                                                          \
-  using LynxADAdvectionBase<compute_stage>::_beta_stabilization;                                   \
-  using LynxADAdvectionBase<compute_stage>::_cr_stabilization;                                     \
-  using LynxADAdvectionBase<compute_stage>::_value_old;                                            \
-  using LynxADAdvectionBase<compute_stage>::_value_older;                                          \
-  using LynxADAdvectionBase<compute_stage>::_vel;                                                  \
-  using LynxADAdvectionBase<compute_stage>::_vel_old;                                              \
-  using LynxADAdvectionBase<compute_stage>::_vel_older;                                            \
-  using LynxADAdvectionBase<compute_stage>::_entropy_old;                                          \
-  using LynxADAdvectionBase<compute_stage>::_entropy_older;                                        \
-  using LynxADAdvectionBase<compute_stage>::_gradient_old;                                         \
-  using LynxADAdvectionBase<compute_stage>::_gradient_older;                                       \
-  using LynxADAdvectionBase<compute_stage>::_second_old;                                           \
-  using LynxADAdvectionBase<compute_stage>::_second_older;                                         \
-  using LynxADAdvectionBase<compute_stage>::_pp_max_vel;                                           \
-  using LynxADAdvectionBase<compute_stage>::_pp_avg_var;                                           \
-  using LynxADAdvectionBase<compute_stage>::_pp_max_entropy;                                       \
-  using LynxADAdvectionBase<compute_stage>::_pp_min_entropy;                                       \
-  using LynxADAdvectionBase<compute_stage>::_pp_avg_entropy;                                       \
-  using LynxADAdvectionBase<compute_stage>::_residual
-
-template <ComputeStage>
-class LynxADAdvectionBase;
-
-declareADValidParams(LynxADAdvectionBase);
-
-template <ComputeStage compute_stage>
-class LynxADAdvectionBase : public ADTimeKernel<compute_stage>
+class LynxADAdvectionBase : public ADTimeKernel
 {
 public:
+  static InputParameters validParams();
   LynxADAdvectionBase(const InputParameters & parameters);
 
 protected:
@@ -90,6 +63,4 @@ protected:
 
   std::vector<ADReal> _residual;
   ADReal _artificial_viscosity;
-
-  usingTimeKernelMembers;
 };

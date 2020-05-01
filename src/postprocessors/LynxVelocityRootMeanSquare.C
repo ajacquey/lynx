@@ -16,11 +16,10 @@
 
 registerMooseObject("MooseApp", LynxVelocityRootMeanSquare);
 
-template <>
 InputParameters
-validParams<LynxVelocityRootMeanSquare>()
+LynxVelocityRootMeanSquare::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription("Calculates the mean square root of the velocity vector.");
   params.addRequiredCoupledVar("velocities", "The string of velocities that advect the problem.");
   return params;

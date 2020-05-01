@@ -15,11 +15,10 @@
 
 registerMooseObject("LynxApp", LynxEntropyAux);
 
-template <>
 InputParameters
-validParams<LynxEntropyAux>()
+LynxEntropyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes the entropy of the system needed in the definition of the "
                              "artificial viscosity to stabilize the advection equation - either "
                              "for temperature or any compositional field.");
@@ -34,7 +33,7 @@ validParams<LynxEntropyAux>()
 }
 
 LynxEntropyAux::LynxEntropyAux(const InputParameters & parameters)
-  : DerivativeMaterialInterface<AuxKernel>(parameters),
+  : AuxKernel(parameters),
     _var_old(_is_transient ? coupledValueOld("entropy_variable") : _zero),
     _var_older(_is_transient ? coupledValueOlder("entropy_variable") : _zero),
     _pp_max_var(getPostprocessorValue("pp_max_var")),

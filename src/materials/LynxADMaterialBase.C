@@ -13,17 +13,22 @@
 
 #include "LynxADMaterialBase.h"
 
-defineADValidParams(LynxADMaterialBase,
-                    ADMaterial,
-                    params.addClassDescription("Base class for compositional phases.");
-                    params.addCoupledVar("compositional_phases", "The compositional phases.");
-                    MooseEnum avg_type("arithmetic=0 harmonic=1 max=2", "arithmetic");
-                    params.addParam<MooseEnum>("average_type", avg_type, "The type of averaging rule for compositional field dependent properties.");
-                    params.suppressParameter<bool>("use_displaced_mesh"););
+InputParameters
+LynxADMaterialBase::validParams()
+{
+  InputParameters params = ADMaterial::validParams();
+  params.addClassDescription("Base class for compositional phases.");
+  params.addCoupledVar("compositional_phases", "The compositional phases.");
+  MooseEnum avg_type("arithmetic=0 harmonic=1 max=2", "arithmetic");
+  params.addParam<MooseEnum>(
+      "average_type",
+      avg_type,
+      "The type of averaging rule for compositional field dependent properties.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADMaterialBase<compute_stage>::LynxADMaterialBase(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+LynxADMaterialBase::LynxADMaterialBase(const InputParameters & parameters)
+  : ADMaterial(parameters),
     _has_compositional_phases(isCoupled("compositional_phases")),
     _n_composition(_has_compositional_phases ? coupledComponents("compositional_phases") : 1),
     _average_type(getParam<MooseEnum>("average_type")),
@@ -34,12 +39,12 @@ LynxADMaterialBase<compute_stage>::LynxADMaterialBase(const InputParameters & pa
       _compositional_phases[i] = &adCoupledValue("compositional_phases", i);
 }
 
-template <ComputeStage compute_stage>
-// template <typename T>
-const std::vector<Real> &
-LynxADMaterialBase<compute_stage>::getLynxParam(const std::string & name) const
+template <typename T>
+const std::vector<T> &
+LynxADMaterialBase::getLynxParam(const std::string & name) const
 {
-  const std::vector<Real> & prop = getParam<std::vector<Real> >(name);
+  const std::vector<T> & prop =
+      InputParameters::getParamHelper(name, _pars, static_cast<std::vector<T> *>(0));
 
   if (prop.size() != _n_composition)
     mooseError("Size of vector \"", name, "\" must match the size of compositional phases!");
@@ -47,9 +52,8 @@ LynxADMaterialBase<compute_stage>::getLynxParam(const std::string & name) const
     return prop;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADMaterialBase<compute_stage>::averageProperty(const std::vector<Real> & properties)
+LynxADMaterialBase::averageProperty(const std::vector<Real> & properties)
 {
   if (_n_composition == 1)
     return properties[0];
@@ -70,9 +74,8 @@ LynxADMaterialBase<compute_stage>::averageProperty(const std::vector<Real> & pro
   return average_property;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADMaterialBase<compute_stage>::arithmetic_average(const std::vector<Real> & properties)
+LynxADMaterialBase::arithmetic_average(const std::vector<Real> & properties)
 {
   ADReal phase = 0;
   ADReal sum = 0;
@@ -88,9 +91,8 @@ LynxADMaterialBase<compute_stage>::arithmetic_average(const std::vector<Real> & 
   return value;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADMaterialBase<compute_stage>::harmonic_average(const std::vector<Real> & properties)
+LynxADMaterialBase::harmonic_average(const std::vector<Real> & properties)
 {
   ADReal phase = 0;
   ADReal sum = 0;
@@ -106,9 +108,8 @@ LynxADMaterialBase<compute_stage>::harmonic_average(const std::vector<Real> & pr
   return (value != 0) ? 1.0 / value : 0;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADMaterialBase<compute_stage>::max_average(const std::vector<Real> & properties)
+LynxADMaterialBase::max_average(const std::vector<Real> & properties)
 {
   ADReal max_phase = (*_compositional_phases[0])[_qp];
   ADReal value = properties[0];
@@ -121,5 +122,3 @@ LynxADMaterialBase<compute_stage>::max_average(const std::vector<Real> & propert
 
   return value;
 }
-
-adBaseClass(LynxADMaterialBase);

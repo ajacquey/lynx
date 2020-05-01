@@ -66,26 +66,26 @@
 
 [AuxKernels]
   [./strain_xx_aux]
-    type = LynxStrainAux
+    type = LynxADStrainAux
     variable = strain_xx
     index_i = 0
     index_j = 0
   [../]
   [./plastic_strain_xx_aux]
-    type = LynxStrainAux
+    type = LynxADStrainAux
     variable = plastic_strain_xx
     strain_type = plastic
     index_i = 0
     index_j = 0
   [../]
   [./stress_xx_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = stress_xx
     index_i = 0
     index_j = 0
   [../]
   [./yield_aux]
-    type = MaterialRealAux
+    type = ADMaterialRealAux
     variable = yield
     property = plastic_yield_function
   [../]
@@ -93,10 +93,11 @@
 
 [BCs]
   [./no_x_left]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
+    preset = true
   [../]
   [./load_x_right]
     type = LynxVelocityBC
@@ -105,16 +106,18 @@
     value = -1.0e-05
   [../]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0.0
+    preset = true
   [../]
   [./no_z_back]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'back front'
     value = 0.0
+    preset = true
   [../]
 []
 

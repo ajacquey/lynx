@@ -15,11 +15,10 @@
 
 registerMooseObject("LynxApp", LynxComboPhasesAux);
 
-template <>
 InputParameters
-validParams<LynxComboPhasesAux>()
+LynxComboPhasesAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Sample all compositional phases in one aux variable. It gets the "
                              "index of the maximum phase at one quadrature point.");
   params.addCoupledVar("compositional_phases", "The active compositional phases.");

@@ -74,37 +74,37 @@
 
 [AuxKernels]
   [./Sxx_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Sxx
     index_i = 0
     index_j = 0
   [../]
   [./Syy_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Syy
     index_i = 1
     index_j = 1
   [../]
   [./Szz_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Szz
     index_i = 2
     index_j = 2
   [../]
   [./Sxy_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Sxy
     index_i = 0
     index_j = 1
   [../]
   [./Syz_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Syz
     index_i = 1
     index_j = 2
   [../]
   [./Szx_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Szx
     index_i = 2
     index_j = 0
@@ -152,58 +152,67 @@
 
 [BCs]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 100
     value = 0.0
+    preset = true
   [../]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
+    preset = true
   [../]
   [./x_200]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 200
     function = x_200
+    preset = true
   [../]
   [./y_200]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 200
     function = y_200
+    preset = true
   [../]
   [./x_300]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 300
     function = x_300
+    preset = true
   [../]
   [./y_300]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 300
     function = y_300
+    preset = true
   [../]
   [./x_400]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 400
     function = x_400
+    preset = true
   [../]
   [./y_400]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 400
     function = y_400
+    preset = true
   [../]
   [./no_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = '100 200 300 400'
     value = 0.0
+    preset = true
   [../]
 []
 

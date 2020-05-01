@@ -15,16 +15,12 @@
 
 #include "LynxADDeformationBase.h"
 
-template <ComputeStage>
-class LynxADStokeDeformation;
-
-declareADValidParams(LynxADStokeDeformation);
-
-template <ComputeStage compute_stage>
-class LynxADStokeDeformation : public LynxADDeformationBase<compute_stage>
+class LynxADStokeDeformation : public LynxADDeformationBase
 {
 public:
+  static InputParameters validParams();
   LynxADStokeDeformation(const InputParameters & parameters);
+
 protected:
   virtual void initializeQpDeformation() override;
   virtual ADReal volumetricDeformation() override;
@@ -56,7 +52,7 @@ protected:
   const std::vector<Real> _eta_max;
 
   // Elastic properties
-  ADMaterialProperty(Real) & _eta_eff;
+  ADMaterialProperty<Real> & _eta_eff;
 
   ADReal _A_diff;
   ADReal _E_diff;
@@ -66,6 +62,4 @@ protected:
   ADReal _n_disl;
   ADReal _E_disl;
   ADReal _V_disl;
-
-  usingDeformationBaseMembers;
 };

@@ -14,16 +14,11 @@
 #pragma once
 
 #include "ElementPostprocessor.h"
-#include "DerivativeMaterialInterface.h"
 
-class LynxExplicitTimeStepSelector;
-
-template <>
-InputParameters validParams<LynxExplicitTimeStepSelector>();
-
-class LynxExplicitTimeStepSelector : public DerivativeMaterialInterface<ElementPostprocessor>
+class LynxExplicitTimeStepSelector : public ElementPostprocessor
 {
 public:
+  static InputParameters validParams();
   LynxExplicitTimeStepSelector(const InputParameters & parameters);
   virtual ~LynxExplicitTimeStepSelector();
 

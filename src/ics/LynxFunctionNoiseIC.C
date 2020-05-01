@@ -17,11 +17,10 @@
 
 registerMooseObject("LynxApp", LynxFunctionNoiseIC);
 
-template <>
 InputParameters
-validParams<LynxFunctionNoiseIC>()
+LynxFunctionNoiseIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription(
       "Applies a initial condition based on a function and adds some white noise.");
   params.addRequiredParam<FunctionName>("function", "The initial condition function.");

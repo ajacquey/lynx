@@ -15,20 +15,13 @@
 
 #include "LynxADAdvectionBase.h"
 
-template <ComputeStage>
-class LynxADAdvectionComposition;
-
-declareADValidParams(LynxADAdvectionComposition);
-
-template <ComputeStage compute_stage>
-class LynxADAdvectionComposition : public LynxADAdvectionBase<compute_stage>
+class LynxADAdvectionComposition : public LynxADAdvectionBase
 {
 public:
+  static InputParameters validParams();
   LynxADAdvectionComposition(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeArtificialViscosity() override;
   virtual void computeEntropyResidual();
-
-  usingAdvectionBaseMembers;
 };

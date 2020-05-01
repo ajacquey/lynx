@@ -15,15 +15,10 @@
 
 #include "LynxADHydroBase.h"
 
-template <ComputeStage>
-class LynxADHydroConstant;
-
-declareADValidParams(LynxADHydroConstant);
-
-template <ComputeStage compute_stage>
-class LynxADHydroConstant : public LynxADHydroBase<compute_stage>
+class LynxADHydroConstant : public LynxADHydroBase
 {
 public:
+  static InputParameters validParams();
   LynxADHydroConstant(const InputParameters & parameters);
 
 protected:
@@ -36,6 +31,4 @@ protected:
   std::vector<Real> _fluid_viscosity;
   std::vector<Real> _fluid_compr;
   std::vector<Real> _solid_compr;
-
-  usingHydroBaseMembers;
 };

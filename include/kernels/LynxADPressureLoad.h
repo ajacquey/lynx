@@ -15,22 +15,15 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class LynxADPressureLoad;
-
-declareADValidParams(LynxADPressureLoad);
-
-template <ComputeStage compute_stage>
-class LynxADPressureLoad : public ADKernel<compute_stage>
+class LynxADPressureLoad : public ADKernel
 {
 public:
+  static InputParameters validParams();
   LynxADPressureLoad(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty(Real) & _bulk_density;
-  const ADMaterialProperty(RealVectorValue) & _gravity;
-
-  usingKernelMembers;
+  const ADMaterialProperty<Real> & _bulk_density;
+  const ADMaterialProperty<RealVectorValue> & _gravity;
 };

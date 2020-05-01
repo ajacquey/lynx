@@ -6,6 +6,11 @@ This includes a reference to the repository:
 
 Jacquey, Antoine B., & Cacace, Mauro. (2019, July 30). LYNX: Lithosphere dYnamic Numerical toolboX, a MOOSE-based application (Version 1.0). Zenodo. http://doi.org/10.5281/zenodo.3355376
 
+And to one of the following research articles:
+
+Jacquey, Antoine B., & Cacace, Mauro. (2020). Multiphysics Modeling of a Brittle‐Ductile Lithosphere: 1. Explicit Visco‐Elasto‐Plastic Formulation and Its Numerical Implementation. Journal of Geophysical Research: Solid Earth. http://doi.org/10.1029/2019jb018474
+Jacquey, Antoine B., & Cacace, Mauro. (2020). Multiphysics Modeling of a Brittle‐Ductile Lithosphere: 2. Semi‐brittle, Semi‐ductile Deformation and Damage Rheology. Journal of Geophysical Research: Solid Earth. http://doi.org/10.1029/2019jb018475
+
 And also a reference to the publication describing the theory and implementation of the LYNX simulator:
 The articles presenting the LYNX simulator are currently under review.
 
@@ -18,4 +23,34 @@ Here are the BibTex entries for LaTeX users:
   year = {2019},
   doi = {10.5281/zenodo.3355376},
   url = {https://doi.org/10.5281/zenodo.3355376}
+}
+
+@article{Lynx1,
+  author = {Jacquey, Antoine B. and Cacace, Mauro},
+  title = {Multiphysics Modeling of a Brittle-Ductile Lithosphere: 1. Explicit Visco-Elasto-Plastic Formulation and Its Numerical Implementation},
+  journal = {Journal of Geophysical Research: Solid Earth},
+  volume = {125},
+  number = {1},
+  pages = {e2019JB018474},
+  doi = {10.1029/2019JB018474},
+  url = {https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2019JB018474},
+  eprint = {https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019JB018474},
+  note = {e2019JB018474 10.1029/2019JB018474},
+  abstract = {Abstract The long-term strength of the lithosphere is controled by two different modes of deformation: a brittle-like, effective pressure-sensitive behavior at shallow crustal depth, which gradually transits to a thermally activated ductile flow rheology with increasing depth. All applications dealing with long-term tectonics therefore share the necessity to describe in a consistent way the multiphysics coupling among the different deformation mechanisms controlling the bulk behavior of the lithosphere. We describe an efficient numerical implementation of a consistent visco-elasto-plastic rheology suitable to describe the first-order aspects of continental rock masses. Different from typical long-term geodynamics numerical frameworks, we explicitly account for both volumetric and deviatoric response of lithospheric rocks to applied loads. Plastic correction to a viscoelastic stress state is introduced via a non-associative Drucker-Prager model, without resorting to the assumption of a plastic limiter. The transient behavior of crustal and lithospheric rocks is accounted for by an overstress (rate-dependent) viscoplastic rheology, which additionally helps solving for numerical issues related to plastic strain accumulation even in the absence of energetic feedbacks. When applied to the study of the dynamics of plume-lithosphere interactions, our implementation is able to reproduce a surface topography with complex multiharmonic wavelength patterns in agreement with observations. In the final chapter, we discuss main limitations of the current rheological description when applied to the study of transient semi-brittle rock behavior. These aspects are tackled in a companion paper, where a thermodynamically consistent formulation extending the current numerical description is presented.},
+  year = {2020}
+}
+
+@article{Lynx2,
+  author = {Jacquey, Antoine B. and Cacace, Mauro},
+  title = {Multiphysics Modeling of a Brittle-Ductile Lithosphere: 2. Semi-brittle, Semi-ductile Deformation and Damage Rheology},
+  journal = {Journal of Geophysical Research: Solid Earth},
+  volume = {125},
+  number = {1},
+  pages = {e2019JB018475},
+  doi = {10.1029/2019JB018475},
+  url = {https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2019JB018475},
+  eprint = {https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019JB018475},
+  note = {e2019JB018475 10.1029/2019JB018475},
+  abstract = {Abstract The brittle-ductile transition is a domain of finite extent characterized by high differential stress where both brittle and ductile deformation are likely to occur. Understanding its depth location, extent, and stability through time is of relevance for diverse applications including subduction dynamics, mantle-surface interactions, and, more recently, proper targeting of high-enthalpy unconventional geothermal resources, where local thermal conditions may activate ductile creep at shallower depths than expected. In this contribution, we describe a thermodynamically consistent physical framework and its numerical implementation, therefore extending the formulation of the companion paper Jacquey and Cacace (2020, https://doi.org/10.1029/2019JB018474) to model thermo-hydro-mechanical coupled processes responsible for the occurrence of transitional semi-brittle, semi-ductile behavior in porous rocks. We make use of a damage rheology to account for the macroscopic effects of microstructural processes leading to brittle-like material weakening and of a rate-dependent plastic model to account for ductile material behavior. Our formulation additionally considers the role of porosity and its evolution during loading in controlling the volumetric mechanical response of a stressed rock. By means of dedicated applications, we discuss how our damage poro-visco-elasto-viscoplastic rheology can effectively reconcile the style of localized deformation under different confining pressure conditions as well as the bulk macroscopic material response as recorded by laboratory experiments under full triaxial conditions.},
+  year = {2020}
 }

@@ -15,15 +15,11 @@
 
 #include "AuxKernel.h"
 
-class LynxComboPhasesAux;
-template <>
-InputParameters validParams<LynxComboPhasesAux>();
-
 class LynxComboPhasesAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
   LynxComboPhasesAux(const InputParameters & parameters);
-  virtual ~LynxComboPhasesAux() {}
 
 protected:
   virtual Real computeValue();

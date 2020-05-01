@@ -15,19 +15,10 @@
 
 #include "LynxADMaterialBase.h"
 
-template <ComputeStage>
-class LynxADCreepModel;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(LynxADCreepModel);
-
-template <ComputeStage compute_stage>
-class LynxADCreepModel : public LynxADMaterialBase<compute_stage>
+class LynxADCreepModel : public LynxADMaterialBase
 {
 public:
+  static InputParameters validParams();
   LynxADCreepModel(const InputParameters & parameters);
   void setQp(unsigned int qp);
   virtual void creepUpdate(ADRankTwoTensor & stress_dev,
@@ -74,8 +65,8 @@ protected:
   const unsigned int _itmax;
 
   // Creep properties
-  ADMaterialProperty(Real) & _eta_eff;
-  ADMaterialProperty(RankTwoTensor) & _viscous_strain_incr;
+  ADMaterialProperty<Real> & _eta_eff;
+  ADMaterialProperty<RankTwoTensor> & _viscous_strain_incr;
 
   // Creep effective parameters
   ADReal _A_diff;
@@ -90,7 +81,4 @@ protected:
   // For iterative update
   ADReal _tau_II_tr;
   ADReal _G;
-  
-
-  usingMaterialBaseMembers;
 };

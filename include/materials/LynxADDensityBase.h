@@ -15,26 +15,10 @@
 
 #include "LynxADMaterialBase.h"
 
-#define usingDensityBaseMembers                                                                    \
-  usingMaterialBaseMembers;                                                                        \
-  using LynxADDensityBase<compute_stage>::_porosity;                                               \
-  using LynxADDensityBase<compute_stage>::_fluid_density;                                          \
-  using LynxADDensityBase<compute_stage>::_solid_density;                                          \
-  using LynxADDensityBase<compute_stage>::_rho_f;                                                  \
-  using LynxADDensityBase<compute_stage>::_rho_s;                                                  \
-  using LynxADDensityBase<compute_stage>::_rho_b;                                                  \
-  using LynxADDensityBase<compute_stage>::_reference_rho_b;                                        \
-  using LynxADDensityBase<compute_stage>::computeQpGravity
-
-template <ComputeStage>
-class LynxADDensityBase;
-
-declareADValidParams(LynxADDensityBase);
-
-template <ComputeStage compute_stage>
-class LynxADDensityBase : public LynxADMaterialBase<compute_stage>
+class LynxADDensityBase : public LynxADMaterialBase
 {
 public:
+  static InputParameters validParams();
   LynxADDensityBase(const InputParameters & parameters);
 
 protected:
@@ -47,11 +31,9 @@ protected:
   const std::vector<Real> _fluid_density;
   const std::vector<Real> _solid_density;
 
-  ADMaterialProperty(RealVectorValue) & _gravity;
-  ADMaterialProperty(Real) & _rho_f;
-  ADMaterialProperty(Real) & _rho_s;
-  ADMaterialProperty(Real) & _rho_b;
-  ADMaterialProperty(Real) & _reference_rho_b;
-
-  usingMaterialBaseMembers;
+  ADMaterialProperty<RealVectorValue> & _gravity;
+  ADMaterialProperty<Real> & _rho_f;
+  ADMaterialProperty<Real> & _rho_s;
+  ADMaterialProperty<Real> & _rho_b;
+  ADMaterialProperty<Real> & _reference_rho_b;
 };

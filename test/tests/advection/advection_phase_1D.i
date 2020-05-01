@@ -45,10 +45,11 @@
 
 [BCs]
   [./left_phase]
-    type = PresetBC
+    type = DirichletBC
     variable = phase
     value = 0.0
     boundary = 'left right'
+    preset = true
   [../]
 []
 

@@ -15,21 +15,14 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class LynxADHydroPoroMech;
-
-declareADValidParams(LynxADHydroPoroMech);
-
-template <ComputeStage compute_stage>
-class LynxADHydroPoroMech : public ADKernel<compute_stage>
+class LynxADHydroPoroMech : public ADKernel
 {
 public:
+  static InputParameters validParams();
   LynxADHydroPoroMech(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty(Real) & _poro_mech;
-
-  usingKernelMembers;
+  const ADMaterialProperty<Real> & _poro_mech;
 };

@@ -15,14 +15,10 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-class LynxVelocityRootMeanSquare;
-
-template <>
-InputParameters validParams<LynxVelocityRootMeanSquare>();
-
 class LynxVelocityRootMeanSquare : public ElementIntegralPostprocessor
 {
 public:
+  static InputParameters validParams();
   LynxVelocityRootMeanSquare(const InputParameters & parameters);
   virtual Real getValue() override;
 

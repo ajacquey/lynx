@@ -13,27 +13,25 @@
 
 #include "LynxADHeatConduction.h"
 
-registerADMooseObject("LynxApp", LynxADHeatConduction);
+registerMooseObject("LynxApp", LynxADHeatConduction);
 
-defineADValidParams(
-    LynxADHeatConduction,
-    ADKernel,
+InputParameters
+LynxADHeatConduction::validParams()
+{
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription("Heat conduction kernel.");
   params.addParam<bool>(
-      "use_displaced_mesh", true, "Set the displaced mesh flag to true by default."););
+      "use_displaced_mesh", true, "Set the displaced mesh flag to true by default.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADHeatConduction<compute_stage>::LynxADHeatConduction(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
-    _thermal_diff(getADMaterialProperty<Real>("thermal_diffusivity"))
+LynxADHeatConduction::LynxADHeatConduction(const InputParameters & parameters)
+  : ADKernel(parameters), _thermal_diff(getADMaterialProperty<Real>("thermal_diffusivity"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADHeatConduction<compute_stage>::computeQpResidual()
+LynxADHeatConduction::computeQpResidual()
 {
   return _thermal_diff[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
-
-adBaseClass(LynxADHeatConduction);

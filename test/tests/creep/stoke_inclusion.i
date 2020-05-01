@@ -49,10 +49,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./Pe]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./Se]
     order = CONSTANT
     family = MONOMIAL
@@ -78,20 +74,16 @@
     variable = vel_y
     displacement = disp_y
   [../]
-  [./Pe_aux]
-    type = LynxEffectivePressureAux
-    variable = Pe
-  [../]
   [./Se_aux]
-    type = LynxVonMisesStressAux
+    type = LynxADVonMisesStressAux
     variable = Se
   [../]
   [./eqv_strain_rate_aux]
-    type = LynxEqvStrainRateAux
+    type = LynxADEqvStrainRateAux
     variable = eqv_strain_rate
   [../]
   [./vol_strain_rate_aux]
-    type = LynxVolStrainRateAux
+    type = LynxADVolStrainRateAux
     variable = vol_strain_rate
   [../]
 []

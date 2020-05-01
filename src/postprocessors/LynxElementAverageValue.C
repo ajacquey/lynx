@@ -15,11 +15,10 @@
 
 registerMooseObject("LynxApp", LynxElementAverageValue);
 
-template <>
 InputParameters
-validParams<LynxElementAverageValue>()
+LynxElementAverageValue::validParams()
 {
-  InputParameters params = validParams<ElementAverageValue>();
+  InputParameters params = ElementAverageValue::validParams();
   params.addClassDescription("Compute the average value (integral sense) based on a forward "
                              "projection (unconditionally stable) of the advected variable.");
   return params;

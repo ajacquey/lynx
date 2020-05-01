@@ -51,13 +51,23 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./pressure]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
   [./vol_strain_aux]
-    type = LynxVolStrainAux
+    type = LynxADVolStrainRateAux
     variable = vol_strain
-    strain_type = thermal
+    strain_type = elastic
+    execute_on = 'TIMESTEP_END'
+  [../]
+  [./pressure_aux]
+    type = LynxADEffectivePressureAux
+    variable = pressure
+    execute_on = 'TIMESTEP_END'
   [../]
 []
 
@@ -116,7 +126,7 @@
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  automatic_scaling = true
+  # automatic_scaling = true
   start_time = 0.0
   end_time = 1
   dt = 1

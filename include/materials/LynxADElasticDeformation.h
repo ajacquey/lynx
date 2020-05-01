@@ -15,19 +15,13 @@
 
 #include "LynxADDeformationBase.h"
 
-template <ComputeStage>
-class LynxADElasticDeformation;
-template <ComputeStage>
 class LynxADCreepModel;
-template <ComputeStage>
 class LynxADPlasticModel;
 
-declareADValidParams(LynxADElasticDeformation);
-
-template <ComputeStage compute_stage>
-class LynxADElasticDeformation : public LynxADDeformationBase<compute_stage>
+class LynxADElasticDeformation : public LynxADDeformationBase
 {
 public:
+  static InputParameters validParams();
   LynxADElasticDeformation(const InputParameters & parameters);
   void initialSetup() override;
 
@@ -49,16 +43,14 @@ protected:
 
   // Elastic properties
   const VariableValue & _plith_old;
-  ADMaterialProperty(RankTwoTensor) & _elastic_strain_incr;
-  ADMaterialProperty(Real) & _K;
-  ADMaterialProperty(Real) & _G;
+  ADMaterialProperty<RankTwoTensor> & _elastic_strain_incr;
+  ADMaterialProperty<Real> & _K;
+  ADMaterialProperty<Real> & _G;
   const MaterialProperty<RankTwoTensor> & _stress_old;
-  const ADMaterialProperty(RankTwoTensor) * _viscous_strain_incr;
-  const ADMaterialProperty(RankTwoTensor) * _plastic_strain_incr;
+  const ADMaterialProperty<RankTwoTensor> * _viscous_strain_incr;
+  const ADMaterialProperty<RankTwoTensor> * _plastic_strain_incr;
   // Creep Model
-  LynxADCreepModel<compute_stage> * _creep_model;
+  LynxADCreepModel * _creep_model;
   // Plastic Model
-  LynxADPlasticModel<compute_stage> * _plastic_model;
-
-  usingDeformationBaseMembers;
+  LynxADPlasticModel * _plastic_model;
 };

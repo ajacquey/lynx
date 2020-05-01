@@ -15,11 +15,10 @@
 
 registerMooseObject("MooseApp", LynxLogConstantDT);
 
-template <>
 InputParameters
-validParams<LynxLogConstantDT>()
+LynxLogConstantDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addClassDescription(
       "TimeStepper which imposes a time step constant in the logarithmic space");
   params.addRequiredRangeCheckedParam<Real>("log_dt", "log_dt > 0", "Time step in log10(time)");

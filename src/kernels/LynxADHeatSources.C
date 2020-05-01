@@ -13,35 +13,37 @@
 
 #include "LynxADHeatSources.h"
 
-registerADMooseObject("LynxApp", LynxADHeatSources);
+registerMooseObject("LynxApp", LynxADHeatSources);
 
-defineADValidParams(
-    LynxADHeatSources,
-    ADKernel,
-    params.addClassDescription(
-        "Heat generation by radiogenic, shear heating and adiabatic processes.");
-    params.addParam<Real>("coeff_shear_heating",
-                          0.0,
-                          "The coefficient in front of the shear heating generation.");
-    params.addCoupledVar(
-        "inelastic_heat",
-        "The auxiliary variable holding the inelastic heat value for running in a subApp.");
-    params.addCoupledVar("velocities",
-                       "The string of velocities suitable for the problem statement");
-    params.addCoupledVar("pressure",
-                       "The pressure variable"););
+InputParameters
+LynxADHeatSources::validParams()
+{
+  InputParameters params = ADKernel::validParams();
+  params.addClassDescription(
+      "Heat generation by radiogenic, shear heating and adiabatic processes.");
+  params.addParam<Real>(
+      "coeff_shear_heating", 0.0, "The coefficient in front of the shear heating generation.");
+  params.addCoupledVar(
+      "inelastic_heat",
+      "The auxiliary variable holding the inelastic heat value for running in a subApp.");
+  params.addCoupledVar("velocities", "The string of velocities suitable for the problem statement");
+  params.addCoupledVar("pressure", "The pressure variable");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADHeatSources<compute_stage>::LynxADHeatSources(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+LynxADHeatSources::LynxADHeatSources(const InputParameters & parameters)
+  : ADKernel(parameters),
     _coeff_Hs(getParam<Real>("coeff_shear_heating")),
     _nvel(coupledComponents("velocities")),
     _vel(3),
     _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : adZeroGradient()),
     _rhoC_b(getADMaterialProperty<Real>("bulk_specific_heat")),
-    _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),
-    _radiogenic_heat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("radiogenic_heat_production") : nullptr),
-    _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat") : nullptr),
+    _has_inelastic_heat_mat(hasADMaterialProperty<Real>("inelastic_heat")),
+    _radiogenic_heat(_has_inelastic_heat_mat
+                         ? &getADMaterialProperty<Real>("radiogenic_heat_production")
+                         : nullptr),
+    _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat")
+                                                : nullptr),
     _coupled_inelastic_heat(isCoupled("inelastic_heat")),
     _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : adZeroValue()),
     _thermal_exp(getADMaterialProperty<Real>("thermal_expansion_coefficient"))
@@ -52,9 +54,8 @@ LynxADHeatSources<compute_stage>::LynxADHeatSources(const InputParameters & para
     _vel[i] = &adZeroValue();
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADHeatSources<compute_stage>::computeQpResidual()
+LynxADHeatSources::computeQpResidual()
 {
   ADReal Hr = _has_inelastic_heat_mat ? (*_radiogenic_heat)[_qp] : 0.0;
   ADReal Hs = _coeff_Hs;

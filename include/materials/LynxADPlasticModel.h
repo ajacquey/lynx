@@ -15,19 +15,10 @@
 
 #include "LynxADMaterialBase.h"
 
-template <ComputeStage>
-class LynxADPlasticModel;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(LynxADPlasticModel);
-
-template <ComputeStage compute_stage>
-class LynxADPlasticModel : public LynxADMaterialBase<compute_stage>
+class LynxADPlasticModel : public LynxADMaterialBase
 {
 public:
+  static InputParameters validParams();
   LynxADPlasticModel(const InputParameters & parameters);
   void setQp(unsigned int qp);
   virtual void plasticUpdate(ADRankTwoTensor & stress_dev,
@@ -56,9 +47,9 @@ protected:
   const bool _has_hardening;
 
   // Plastic Properties
-  ADMaterialProperty(Real) & _plastic_yield_function;
-  ADMaterialProperty(RankTwoTensor) & _plastic_strain_incr;
-  ADMaterialProperty(Real) * _intnl;
+  ADMaterialProperty<Real> & _plastic_yield_function;
+  ADMaterialProperty<RankTwoTensor> & _plastic_strain_incr;
+  ADMaterialProperty<Real> * _intnl;
   const MaterialProperty<Real> * _intnl_old;
 
   // Plastic effective parameters
@@ -73,6 +64,4 @@ protected:
   ADReal _alpha;
   ADReal _k;
   ADReal _H;
-
-  usingMaterialBaseMembers;
 };

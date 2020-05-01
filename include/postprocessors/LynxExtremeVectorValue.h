@@ -14,16 +14,11 @@
 #pragma once
 
 #include "ElementExtremeValue.h"
-#include "DerivativeMaterialInterface.h"
 
-class LynxExtremeVectorValue;
-
-template <>
-InputParameters validParams<LynxExtremeVectorValue>();
-
-class LynxExtremeVectorValue : public DerivativeMaterialInterface<ElementExtremeValue>
+class LynxExtremeVectorValue : public ElementExtremeValue
 {
 public:
+  static InputParameters validParams();
   LynxExtremeVectorValue(const InputParameters & parameters);
 
 protected:

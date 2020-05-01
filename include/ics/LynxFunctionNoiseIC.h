@@ -15,16 +15,10 @@
 
 #include "InitialCondition.h"
 
-class LynxFunctionNoiseIC;
-class Function;
-class RandomIC;
-
-template <>
-InputParameters validParams<LynxFunctionNoiseIC>();
-
 class LynxFunctionNoiseIC : public InitialCondition
 {
 public:
+  static InputParameters validParams();
   LynxFunctionNoiseIC(const InputParameters & parameters);
 
 protected:

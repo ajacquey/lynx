@@ -29,24 +29,4 @@
     input = 'uniaxial_hardening_vp.i'
     exodiff = 'uniaxial_hardening_vp_out.e'
   [../]
-  [./convex_compression]
-    type = 'Exodiff'
-    input = 'convex_compression.i'
-    exodiff = 'convex_compression_out.e'
-  [../]
-  [./convex_compression_vp]
-    type = 'Exodiff'
-    input = 'convex_compression_vp.i'
-    exodiff = 'convex_compression_vp_out.e'
-  [../]
-  [./convex_oedometer]
-    type = 'Exodiff'
-    input = 'convex_oedometer.i'
-    exodiff = 'convex_oedometer_out.e'
-  [../]
-  [./convex_oedometer_vp]
-    type = 'Exodiff'
-    input = 'convex_oedometer_vp.i'
-    exodiff = 'convex_oedometer_vp_out.e'
-  [../]
 []

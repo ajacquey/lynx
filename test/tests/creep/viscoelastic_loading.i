@@ -60,26 +60,26 @@
 
 [AuxKernels]
   [./Syy_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Syy
     index_i = 1
     index_j = 1
   [../]
   [./Eyy_aux]
-    type = LynxStrainAux
+    type = LynxADStrainAux
     variable = Eyy
     index_i = 1
     index_j = 1
   [../]
   [./Ecyy_aux]
-    type = LynxStrainAux
+    type = LynxADStrainAux
     variable = Ecyy
     strain_type = viscous
     index_i = 1
     index_j = 1
   [../]
   [./eta_e_aux]
-    type = MaterialRealAux
+    type = ADMaterialRealAux
     variable = eta_e
     property = effective_viscosity
   [../]
@@ -87,10 +87,11 @@
 
 [BCs]
   [./no_ux]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
+    preset = true
   [../]
   [./ux_right]
     type = LynxVelocityBC
@@ -99,10 +100,11 @@
     value = -1.0e-14
   [../]
   [./no_uy]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.0
+    preset = true
   [../]
   [./uy_bottom]
     type = LynxVelocityBC
@@ -111,10 +113,11 @@
     value = -1.0e-14
   [../]
   [./no_uz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'front back'
     value = 0.0
+    preset = true
   [../]
 []
 

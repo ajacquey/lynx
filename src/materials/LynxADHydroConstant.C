@@ -13,27 +13,29 @@
 
 #include "LynxADHydroConstant.h"
 
-registerADMooseObject("LynxApp", LynxADHydroConstant);
+registerMooseObject("LynxApp", LynxADHydroConstant);
 
-defineADValidParams(
-    LynxADHydroConstant,
-    LynxADHydroBase,
-    params.addClassDescription("Constant hydraulic properties.");
-    params.addRequiredParam<std::vector<Real>>("permeability", "The permeability of the matrix.");
-    params.addRequiredParam<std::vector<Real>>("fluid_viscosity", "The viscosity of the fluid.");
-    params.addParam<std::vector<Real>>("fluid_modulus", "The bulk modulus of the fluid phase.");
-    params.addParam<std::vector<Real>>("solid_modulus", "The bulk modulus of the solid phase."););
+InputParameters
+LynxADHydroConstant::validParams()
+{
+  InputParameters params = LynxADHydroBase::validParams();
+  params.addClassDescription("Constant hydraulic properties.");
+  params.addRequiredParam<std::vector<Real>>("permeability", "The permeability of the matrix.");
+  params.addRequiredParam<std::vector<Real>>("fluid_viscosity", "The viscosity of the fluid.");
+  params.addParam<std::vector<Real>>("fluid_modulus", "The bulk modulus of the fluid phase.");
+  params.addParam<std::vector<Real>>("solid_modulus", "The bulk modulus of the solid phase.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADHydroConstant<compute_stage>::LynxADHydroConstant(const InputParameters & parameters)
-  : LynxADHydroBase<compute_stage>(parameters),
-    _perm(getLynxParam("permeability")),
-    _fluid_viscosity(getLynxParam("fluid_viscosity"))
+LynxADHydroConstant::LynxADHydroConstant(const InputParameters & parameters)
+  : LynxADHydroBase(parameters),
+    _perm(getLynxParam<Real>("permeability")),
+    _fluid_viscosity(getLynxParam<Real>("fluid_viscosity"))
 {
   if (isParamValid("fluid_modulus"))
   {
     _fluid_compr = std::vector<Real>(_n_composition, 0.0);
-    std::vector<Real> fluid_modulus = getLynxParam("fluid_modulus");
+    std::vector<Real> fluid_modulus = getLynxParam<Real>("fluid_modulus");
     for (unsigned int i = 0; i < _n_composition; ++i)
       if (fluid_modulus[i] != 0.0)
         _fluid_compr[i] = 1.0 / fluid_modulus[i];
@@ -44,7 +46,7 @@ LynxADHydroConstant<compute_stage>::LynxADHydroConstant(const InputParameters & 
   if (isParamValid("solid_modulus"))
   {
     _solid_compr = std::vector<Real>(_n_composition, 0.0);
-    std::vector<Real> solid_modulus = getLynxParam("solid_modulus");
+    std::vector<Real> solid_modulus = getLynxParam<Real>("solid_modulus");
     for (unsigned int i = 0; i < _n_composition; ++i)
       if (solid_modulus[i] != 0.0)
         _solid_compr[i] = 1.0 / solid_modulus[i];
@@ -53,32 +55,26 @@ LynxADHydroConstant<compute_stage>::LynxADHydroConstant(const InputParameters & 
     _solid_compr = std::vector<Real>(_n_composition, 0.0);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroConstant<compute_stage>::computeQpFluidCompressibility()
+LynxADHydroConstant::computeQpFluidCompressibility()
 {
   _C_f[_qp] = averageProperty(_fluid_compr);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroConstant<compute_stage>::computeQpSolidCompressibility()
+LynxADHydroConstant::computeQpSolidCompressibility()
 {
   _C_s[_qp] = averageProperty(_solid_compr);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroConstant<compute_stage>::computeQpPermeability()
+LynxADHydroConstant::computeQpPermeability()
 {
   _k[_qp] = averageProperty(_perm);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADHydroConstant<compute_stage>::computeQpFluidViscosity()
+LynxADHydroConstant::computeQpFluidViscosity()
 {
   _eta_f[_qp] = averageProperty(_fluid_viscosity);
 }
-
-adBaseClass(LynxADHydroConstant);

@@ -13,17 +13,12 @@
 
 #pragma once
 
-#include "PresetNodalBC.h"
+#include "DirichletBCBase.h"
 
-class LynxVelocityBC;
-class Function;
-
-template <>
-InputParameters validParams<LynxVelocityBC>();
-
-class LynxVelocityBC : public PresetNodalBC
+class LynxVelocityBC : public DirichletBCBase
 {
 public:
+  static InputParameters validParams();
   LynxVelocityBC(const InputParameters & parameters);
 
 protected:

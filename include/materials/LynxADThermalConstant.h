@@ -15,15 +15,10 @@
 
 #include "LynxADThermalBase.h"
 
-template <ComputeStage>
-class LynxADThermalConstant;
-
-declareADValidParams(LynxADThermalConstant);
-
-template <ComputeStage compute_stage>
-class LynxADThermalConstant : public LynxADThermalBase<compute_stage>
+class LynxADThermalConstant : public LynxADThermalBase
 {
 public:
+  static InputParameters validParams();
   LynxADThermalConstant(const InputParameters & parameters);
 
 protected:
@@ -37,6 +32,4 @@ protected:
   const std::vector<Real> _solid_heat_cap;
   const std::vector<Real> _fluid_thermal_exp;
   const std::vector<Real> _solid_thermal_exp;
-
-  usingThermalBaseMembers;
 };

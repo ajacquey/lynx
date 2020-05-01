@@ -16,19 +16,19 @@
 
 registerMooseObject("LynxApp", LynxVelocityBC);
 
-template <>
 InputParameters
-validParams<LynxVelocityBC>()
+LynxVelocityBC::validParams()
 {
-  InputParameters params = validParams<PresetNodalBC>();
+  InputParameters params = DirichletBCBase::validParams();
   params.addClassDescription("Applies a velocity whose value is described by a function.");
   params.addParam<Real>("value", 0.0, "Value of the velocity applied.");
   params.addParam<FunctionName>("function", "Function giving the velocity applied.");
+  params.set<bool>("preset") = true;
   return params;
 }
 
 LynxVelocityBC::LynxVelocityBC(const InputParameters & parameters)
-  : PresetNodalBC(parameters),
+  : DirichletBCBase(parameters),
     _u_old(valueOld()),
     _value(getParam<Real>("value")),
     _function(isParamValid("function") ? &getFunction("function") : NULL)

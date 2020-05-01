@@ -18,18 +18,17 @@
 
 registerMooseObject("LynxApp", LynxExtrapolateValue);
 
-template <>
 InputParameters
-validParams<LynxExtrapolateValue>()
+LynxExtrapolateValue::validParams()
 {
-  InputParameters params = validParams<ElementExtremeValue>();
+  InputParameters params = ElementExtremeValue::validParams();
   params.addClassDescription("Compute the global range of variation based on a forward "
                              "projection (unconditionally stable) of the advected variable.");
   return params;
 }
 
 LynxExtrapolateValue::LynxExtrapolateValue(const InputParameters & parameters)
-  : DerivativeMaterialInterface<ElementExtremeValue>(parameters),
+  : ElementExtremeValue(parameters),
     _value_old(_fe_problem.isTransient() ? valueOld() : _zero),
     _value_older(_fe_problem.isTransient() ? valueOlder() : _zero)
 {

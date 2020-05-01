@@ -15,14 +15,10 @@
 
 #include "ElementAverageValue.h"
 
-class LynxElementAverageValue;
-
-template <>
-InputParameters validParams<LynxElementAverageValue>();
-
 class LynxElementAverageValue : public ElementAverageValue
 {
 public:
+  static InputParameters validParams();
   LynxElementAverageValue(const InputParameters & parameters);
 
 protected:

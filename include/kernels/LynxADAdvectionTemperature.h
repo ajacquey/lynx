@@ -15,15 +15,10 @@
 
 #include "LynxADAdvectionBase.h"
 
-template <ComputeStage>
-class LynxADAdvectionTemperature;
-
-declareADValidParams(LynxADAdvectionTemperature);
-
-template <ComputeStage compute_stage>
-class LynxADAdvectionTemperature : public LynxADAdvectionBase<compute_stage>
+class LynxADAdvectionTemperature : public LynxADAdvectionBase
 {
 public:
+  static InputParameters validParams();
   LynxADAdvectionTemperature(const InputParameters & parameters);
 
 protected:
@@ -31,15 +26,13 @@ protected:
   virtual void computeEntropyResidual();
 
   const Real _coeff_Hs;
-  const ADVariableGradient & _grad_pressure; 
-  const ADMaterialProperty(Real) & _thermal_diff;
-  const ADMaterialProperty(Real) & _rhoC;
+  const ADVariableGradient & _grad_pressure;
+  const ADMaterialProperty<Real> & _thermal_diff;
+  const ADMaterialProperty<Real> & _rhoC;
   const bool _has_inelastic_heat_mat;
-  const ADMaterialProperty(Real) * _radiogenic_heat;
-  const ADMaterialProperty(Real) * _inelastic_heat_mat;
+  const ADMaterialProperty<Real> * _radiogenic_heat;
+  const ADMaterialProperty<Real> * _inelastic_heat_mat;
   const bool _coupled_inelastic_heat;
   const ADVariableValue & _inelastic_heat;
-  const ADMaterialProperty(Real) & _thermal_exp;
-
-  usingAdvectionBaseMembers;
+  const ADMaterialProperty<Real> & _thermal_exp;
 };

@@ -86,9 +86,15 @@ If you use LYNX for your work please cite:
 * This repository:  
 Jacquey, Antoine B., & Cacace, Mauro. (2019, July 30). LYNX: Lithosphere dYnamic Numerical toolboX, a MOOSE-based application (Version 1.0). Zenodo. http://doi.org/10.5281/zenodo.3355376
 
+* The following research articles:
+Jacquey, Antoine B., & Cacace, Mauro. (2020). Multiphysics Modeling of a Brittle‐Ductile Lithosphere: 1. Explicit Visco‐Elasto‐Plastic Formulation and Its Numerical Implementation. Journal of Geophysical Research: Solid Earth. http://doi.org/10.1029/2019jb018474
+Jacquey, Antoine B., & Cacace, Mauro. (2020). Multiphysics Modeling of a Brittle‐Ductile Lithosphere: 2. Semi‐brittle, Semi‐ductile Deformation and Damage Rheology. Journal of Geophysical Research: Solid Earth. http://doi.org/10.1029/2019jb018475
+
 
 Please read the [CITATION](https://gitext.gfz-potsdam.de/ajacquey/lynx//blob/master/CITATION) file for more information.
 
 ## Publications using LYNX
 
-More to come...
+* Jacquey, Antoine B., & Cacace, Mauro. (2020). Multiphysics Modeling of a Brittle‐Ductile Lithosphere: 1. Explicit Visco‐Elasto‐Plastic Formulation and Its Numerical Implementation. Journal of Geophysical Research: Solid Earth. http://doi.org/10.1029/2019jb018474
+
+* Jacquey, Antoine B., & Cacace, Mauro. (2020). Multiphysics Modeling of a Brittle‐Ductile Lithosphere: 2. Semi‐brittle, Semi‐ductile Deformation and Damage Rheology. Journal of Geophysical Research: Solid Earth. http://doi.org/10.1029/2019jb018475

@@ -12,14 +12,15 @@
                 "kind": "build",
                 "isDefault": true
             },
+            "options": {"shell": {"args": ["-ic"]}},
             "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
             },
-            // arg passing example: in this case is executed with 2 processors
-            "args": ["test", "-j2"],
+            // arg passing example: in this case is executed with 4 processors
+            "args": ["test", "-j4"],
             // Use the standard less compilation problem matcher.
             "problemMatcher": {
                 "owner": "cpp",
@@ -40,6 +41,7 @@
             "command": "make",
             // start the build without prompting for task selection, use "group": "build" otherwise
             "group": "none",
+            "options": {"shell": {"args": ["-ic"]}},
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -68,6 +70,7 @@
             "command": "make",
             // start the build without prompting for task selection, use "group": "build" otherwise
             "group": "none",
+            "options": {"shell": {"args": ["-ic"]}},
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -99,14 +102,15 @@
                 "kind": "test",
                 "isDefault": true
             },
+            "options": {"shell": {"args": ["-ic"]}},
             "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
             },
-            // arg passing example: in this case is executed with 2 processors
-            "args": ["-j2"]
+            // arg passing example: in this case is executed with 4 processors
+            "args": ["-j4"]
         }
     ]
 }

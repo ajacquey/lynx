@@ -13,60 +13,60 @@
 
 #include "LynxADPlasticModel.h"
 
-registerADMooseObject("LynxApp", LynxADPlasticModel);
+registerMooseObject("LynxApp", LynxADPlasticModel);
 
-defineADValidParams(
-    LynxADPlasticModel,
-    LynxADMaterialBase,
-    params.addClassDescription(
-        "Base class for the plastic correction of a elasto-plastic rheology.");
-    params.set<bool>("compute") = false;
-    params.suppressParameter<bool>("compute");
-    // Plastic parameters
-    params.addParam<std::vector<Real>>(
-        "friction_angle",
-        "The friction angle of the material for the pressure-dependant part of the yield stress.");
-    params.addParam<std::vector<Real>>("friction_angle_residual",
-                                       "The residual friction angle of the material for the "
-                                       "pressure-dependant part of the yield stress");
-    params.addParam<std::vector<Real>>("cohesion",
-                                       "The constant coefficient of the yield stress corresponding "
-                                       "to the cohesion of the material.");
-    params.addParam<std::vector<Real>>(
-        "cohesion_residual",
-        "The residual of the constant coefficient of the yield stress "
-        "corresponding to the cohesion of the material.");
-    params.addParam<std::vector<Real>>(
-        "dilation_angle",
-        "The dilation angle of the material for the non-associative plastic update.");
-    params.addParam<std::vector<Real>>(
-        "internal_0", "The value of the plastic strain when hardening/softening begins.");
-    params.addParam<std::vector<Real>>(
-        "internal_limit", "The value of the plastic strain when hardening/softening ends.");
-    params.addParam<std::vector<Real>>(
-        "plastic_viscosity",
-        "The reference viscosity in the generalized Duvaut-Lions viscoplastic formulation."););
+InputParameters
+LynxADPlasticModel::validParams()
+{
+  InputParameters params = LynxADMaterialBase::validParams();
+  params.addClassDescription("Base class for the plastic correction of a elasto-plastic rheology.");
+  params.set<bool>("compute") = false;
+  params.suppressParameter<bool>("compute");
+  // Plastic parameters
+  params.addParam<std::vector<Real>>(
+      "friction_angle",
+      "The friction angle of the material for the pressure-dependant part of the yield stress.");
+  params.addParam<std::vector<Real>>("friction_angle_residual",
+                                     "The residual friction angle of the material for the "
+                                     "pressure-dependant part of the yield stress");
+  params.addParam<std::vector<Real>>("cohesion",
+                                     "The constant coefficient of the yield stress corresponding "
+                                     "to the cohesion of the material.");
+  params.addParam<std::vector<Real>>("cohesion_residual",
+                                     "The residual of the constant coefficient of the yield stress "
+                                     "corresponding to the cohesion of the material.");
+  params.addParam<std::vector<Real>>(
+      "dilation_angle",
+      "The dilation angle of the material for the non-associative plastic update.");
+  params.addParam<std::vector<Real>>(
+      "internal_0", "The value of the plastic strain when hardening/softening begins.");
+  params.addParam<std::vector<Real>>(
+      "internal_limit", "The value of the plastic strain when hardening/softening ends.");
+  params.addParam<std::vector<Real>>(
+      "plastic_viscosity",
+      "The reference viscosity in the generalized Duvaut-Lions viscoplastic formulation.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADPlasticModel<compute_stage>::LynxADPlasticModel(const InputParameters & parameters)
-  : LynxADMaterialBase<compute_stage>(parameters),
+LynxADPlasticModel::LynxADPlasticModel(const InputParameters & parameters)
+  : LynxADMaterialBase(parameters),
     // Plastic parameters
-    _friction_angle_0(isParamValid("friction_angle") ? getLynxParam("friction_angle")
+    _friction_angle_0(isParamValid("friction_angle") ? getLynxParam<Real>("friction_angle")
                                                      : std::vector<Real>(_n_composition, 0.0)),
-    _cohesion_0(isParamValid("cohesion") ? getLynxParam("cohesion")
+    _cohesion_0(isParamValid("cohesion") ? getLynxParam<Real>("cohesion")
                                          : std::vector<Real>(_n_composition, 0.0)),
     _friction_angle_res(isParamValid("friction_angle_residual")
-                            ? getLynxParam("friction_angle_residual")
+                            ? getLynxParam<Real>("friction_angle_residual")
                             : _friction_angle_0),
-    _cohesion_res(isParamValid("cohesion_residual") ? getLynxParam("cohesion_residual")
+    _cohesion_res(isParamValid("cohesion_residual") ? getLynxParam<Real>("cohesion_residual")
                                                     : _cohesion_0),
-    _dilation_angle(isParamValid("dilation_angle") ? getLynxParam("dilation_angle")
+    _dilation_angle(isParamValid("dilation_angle") ? getLynxParam<Real>("dilation_angle")
                                                    : std::vector<Real>(_n_composition, 0.0)),
-    _intnl_param_0(isParamValid("internal_0") ? getLynxParam("internal_0")
+    _intnl_param_0(isParamValid("internal_0") ? getLynxParam<Real>("internal_0")
                                               : std::vector<Real>(_n_composition, 0.0)),
-    _intnl_param_lim(isParamValid("internal_limit") ? getLynxParam("internal_limit")
+    _intnl_param_lim(isParamValid("internal_limit") ? getLynxParam<Real>("internal_limit")
                                                     : std::vector<Real>(_n_composition, 1.0)),
-    _one_on_plastic_eta(isParamValid("plastic_viscosity") ? getLynxParam("plastic_viscosity")
+    _one_on_plastic_eta(isParamValid("plastic_viscosity") ? getLynxParam<Real>("plastic_viscosity")
                                                           : std::vector<Real>(_n_composition, 0.0)),
     _has_hardening(((_friction_angle_0 != _friction_angle_res) || (_cohesion_0 != _cohesion_res)) &&
                    (_intnl_param_0 != _intnl_param_lim)),
@@ -84,28 +84,25 @@ LynxADPlasticModel<compute_stage>::LynxADPlasticModel(const InputParameters & pa
       _one_on_plastic_eta[i] = 1.0 / _one_on_plastic_eta[i];
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADPlasticModel<compute_stage>::initQpStatefulProperties()
+LynxADPlasticModel::initQpStatefulProperties()
 {
   if (_has_hardening)
     (*_intnl)[_qp] = 0.0;
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADPlasticModel<compute_stage>::setQp(unsigned int qp)
+LynxADPlasticModel::setQp(unsigned int qp)
 {
   _qp = qp;
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADPlasticModel<compute_stage>::plasticUpdate(ADRankTwoTensor & stress_dev,
-                                                 ADReal & pressure,
-                                                 const ADReal & G,
-                                                 const ADReal & K,
-                                                 ADRankTwoTensor & elastic_strain_incr)
+LynxADPlasticModel::plasticUpdate(ADRankTwoTensor & stress_dev,
+                                  ADReal & pressure,
+                                  const ADReal & G,
+                                  const ADReal & K,
+                                  ADRankTwoTensor & elastic_strain_incr)
 {
   const ADReal eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
   const ADRankTwoTensor flow_dir =
@@ -124,12 +121,11 @@ LynxADPlasticModel<compute_stage>::plasticUpdate(ADRankTwoTensor & stress_dev,
       plasticYieldFunction(std::sqrt(1.5) * stress_dev.L2norm(), pressure);
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADPlasticModel<compute_stage>::plasticIncrement(const ADReal & eqv_stress,
-                                                    const ADReal & pressure,
-                                                    const ADReal G,
-                                                    const ADReal K)
+LynxADPlasticModel::plasticIncrement(const ADReal & eqv_stress,
+                                     const ADReal & pressure,
+                                     const ADReal G,
+                                     const ADReal K)
 {
   // Initialize hardening
   if (_has_hardening)
@@ -171,9 +167,8 @@ LynxADPlasticModel<compute_stage>::plasticIncrement(const ADReal & eqv_stress,
   return delta_e_eqv;
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADPlasticModel<compute_stage>::initPlasticParameters(const ADReal & pressure, const ADReal & K)
+LynxADPlasticModel::initPlasticParameters(const ADReal & pressure, const ADReal & K)
 {
   _alpha_0 = std::sqrt(3.0) * std::sin(averageProperty(_friction_angle_0) * libMesh::pi / 180.0);
   _alpha_res =
@@ -211,12 +206,8 @@ LynxADPlasticModel<compute_stage>::initPlasticParameters(const ADReal & pressure
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADPlasticModel<compute_stage>::plasticYieldFunction(const ADReal & eqv_stress,
-                                                        const ADReal & pressure)
+LynxADPlasticModel::plasticYieldFunction(const ADReal & eqv_stress, const ADReal & pressure)
 {
   return eqv_stress - _alpha * pressure - _k;
 }
-
-// adBaseClass(LynxADPlasticModel);

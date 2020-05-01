@@ -14,9 +14,12 @@
 #include "LynxADSolidMomentum.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("LynxApp", LynxADSolidMomentum);
+registerMooseObject("LynxApp", LynxADSolidMomentum);
 
-defineADValidParams(LynxADSolidMomentum, ADKernel,
+InputParameters
+LynxADSolidMomentum::validParams()
+{
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription("Solid momentum kernel.");
   params.addCoupledVar("fluid_pressure", 0.0, "The fluid pressure variable.");
   params.set<bool>("use_displaced_mesh") = false;
@@ -25,27 +28,27 @@ defineADValidParams(LynxADSolidMomentum, ADKernel,
                                         "the variable this kernel acts in (0 for x, "
                                         "1 for y, 2 for z).");
   params.addParam<bool>(
-      "volumetric_locking_correction", false, "Flag to correct volumetric locking"););
+      "volumetric_locking_correction", false, "Flag to correct volumetric locking");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADSolidMomentum<compute_stage>::LynxADSolidMomentum(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+LynxADSolidMomentum::LynxADSolidMomentum(const InputParameters & parameters)
+  : ADKernel(parameters),
     _pf(adCoupledValue("fluid_pressure")),
     _component(getParam<unsigned int>("component")),
     _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
     _stress(getADMaterialProperty<RankTwoTensor>("stress")),
-    _coupled_pf(hasMaterialProperty<Real>("biot_coefficient")),
+    _coupled_pf(hasADMaterialProperty<Real>("biot_coefficient")),
     _biot(_coupled_pf ? &getADMaterialProperty<Real>("biot_coefficient") : nullptr),
-    _coupled_grav(hasMaterialProperty<Real>("bulk_density")),
+    _coupled_grav(hasADMaterialProperty<Real>("bulk_density")),
     _gravity(_coupled_grav ? &getADMaterialProperty<RealVectorValue>("gravity_vector") : nullptr),
     _rho_b(_coupled_grav ? &getADMaterialProperty<Real>("bulk_density") : nullptr),
     _avg_grad_test()
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADSolidMomentum<compute_stage>::computeQpResidual()
+LynxADSolidMomentum::computeQpResidual()
 {
   ADRealVectorValue stress_row = _stress[_qp].row(_component);
   if (_coupled_pf)
@@ -61,9 +64,8 @@ LynxADSolidMomentum<compute_stage>::computeQpResidual()
   return residual;
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADSolidMomentum<compute_stage>::precalculateResidual()
+LynxADSolidMomentum::precalculateResidual()
 {
   if (!_vol_locking_correction)
     return;
@@ -83,5 +85,3 @@ LynxADSolidMomentum<compute_stage>::precalculateResidual()
     _avg_grad_test[_i] /= ad_current_elem_volume;
   }
 }
-
-adBaseClass(LynxADSolidMomentum);

@@ -19,11 +19,10 @@
 
 registerMooseObject("LynxApp", LynxExtremeVectorValue);
 
-template <>
 InputParameters
-validParams<LynxExtremeVectorValue>()
+LynxExtremeVectorValue::validParams()
 {
-  InputParameters params = validParams<ElementExtremeValue>();
+  InputParameters params = ElementExtremeValue::validParams();
   params.addClassDescription(
       "Compute the global minimum/maximum of a vectorial variable @ quadrature "
       "points with reference to the node.");
@@ -33,7 +32,7 @@ validParams<LynxExtremeVectorValue>()
 }
 
 LynxExtremeVectorValue::LynxExtremeVectorValue(const InputParameters & parameters)
-  : DerivativeMaterialInterface<ElementExtremeValue>(parameters),
+  : ElementExtremeValue(parameters),
     _v(_mesh.dimension() > 1 ? coupledValue("add_var_1") : _zero),
     _w(_mesh.dimension() > 2 ? coupledValue("add_var_2") : _zero)
 {

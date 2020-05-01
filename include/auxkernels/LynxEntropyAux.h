@@ -14,17 +14,12 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "DerivativeMaterialInterface.h"
 
-class LynxEntropyAux;
-template <>
-InputParameters validParams<LynxEntropyAux>();
-
-class LynxEntropyAux : public DerivativeMaterialInterface<AuxKernel>
+class LynxEntropyAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
   LynxEntropyAux(const InputParameters & parameters);
-  virtual ~LynxEntropyAux() {}
 
 protected:
   virtual Real computeValue();

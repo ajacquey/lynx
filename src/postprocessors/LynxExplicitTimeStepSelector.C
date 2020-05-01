@@ -16,11 +16,10 @@
 
 registerMooseObject("LynxApp", LynxExplicitTimeStepSelector);
 
-template <>
 InputParameters
-validParams<LynxExplicitTimeStepSelector>()
+LynxExplicitTimeStepSelector::validParams()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = ElementPostprocessor::validParams();
   params.addClassDescription("Postprocessor that computes the minimum value of h_min/|u|, where "
                              "|u| is coupled in as an aux variable.");
   params.addRequiredCoupledVar("vel_norm", "Velocity magnitude");
@@ -37,7 +36,7 @@ validParams<LynxExplicitTimeStepSelector>()
 }
 
 LynxExplicitTimeStepSelector::LynxExplicitTimeStepSelector(const InputParameters & parameters)
-  : DerivativeMaterialInterface<ElementPostprocessor>(parameters),
+  : ElementPostprocessor(parameters),
     _vel_norm(coupledValue("vel_norm")),
     _beta(getParam<Real>("beta")),
     _epsilon(isParamValid("epsilon") ? getParam<Real>("epsilon")

@@ -16,15 +16,10 @@
 #include "LynxADDensityBase.h"
 #include "Function.h"
 
-template <ComputeStage>
-class LynxADDensityThermal;
-
-declareADValidParams(LynxADDensityThermal);
-
-template <ComputeStage compute_stage>
-class LynxADDensityThermal : public LynxADDensityBase<compute_stage>
+class LynxADDensityThermal : public LynxADDensityBase
 {
 public:
+  static InputParameters validParams();
   LynxADDensityThermal(const InputParameters & parameters);
 
 protected:
@@ -35,6 +30,4 @@ protected:
   const std::vector<Real> _beta_solid;
   Real _temp_ref;
   const Function * _temp_ref_fct;
-
-  usingDensityBaseMembers;
 };

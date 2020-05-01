@@ -13,25 +13,26 @@
 
 #include "LynxADPressureLoad.h"
 
-registerADMooseObject("LynxApp", LynxADPressureLoad);
+registerMooseObject("LynxApp", LynxADPressureLoad);
 
-defineADValidParams(
-    LynxADPressureLoad,
-    ADKernel,
-    params.addClassDescription(
-        "Kernel calculating the lithostatic pressure based on density distribution."););
+InputParameters
+LynxADPressureLoad::validParams()
+{
+  InputParameters params = ADKernel::validParams();
+  params.addClassDescription(
+      "Kernel calculating the lithostatic pressure based on density distribution.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADPressureLoad<compute_stage>::LynxADPressureLoad(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+LynxADPressureLoad::LynxADPressureLoad(const InputParameters & parameters)
+  : ADKernel(parameters),
     _bulk_density(getADMaterialProperty<Real>("reference_bulk_density")),
     _gravity(getADMaterialProperty<RealVectorValue>("gravity_vector"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADPressureLoad<compute_stage>::computeQpResidual()
+LynxADPressureLoad::computeQpResidual()
 {
   return (_grad_u[_qp] - _bulk_density[_qp] * _gravity[_qp]) * _grad_test[_i][_qp];
 }

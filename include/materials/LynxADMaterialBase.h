@@ -15,26 +15,13 @@
 
 #include "ADMaterial.h"
 
-#define usingMaterialBaseMembers                                                                   \
-  usingMaterialMembers;                                                                            \
-  using LynxADMaterialBase<compute_stage>::_has_compositional_phases;                              \
-  using LynxADMaterialBase<compute_stage>::_n_composition;                                         \
-  using LynxADMaterialBase<compute_stage>::_average_type;                                          \
-  using LynxADMaterialBase<compute_stage>::_compositional_phases;                                  \
-  using LynxADMaterialBase<compute_stage>::getLynxParam;                                           \
-  using LynxADMaterialBase<compute_stage>::averageProperty
-
-template <ComputeStage>
-class LynxADMaterialBase;
-
-declareADValidParams(LynxADMaterialBase);
-
-template <ComputeStage compute_stage>
-class LynxADMaterialBase : public ADMaterial<compute_stage>
+class LynxADMaterialBase : public ADMaterial
 {
 public:
+  static InputParameters validParams();
   LynxADMaterialBase(const InputParameters & parameters);
-  const std::vector<Real> & getLynxParam(const std::string & name) const;
+  template <typename T>
+  const std::vector<T> & getLynxParam(const std::string & name) const;
 
 protected:
   virtual ADReal averageProperty(const std::vector<Real> & properties);
@@ -46,6 +33,4 @@ protected:
   const unsigned int _n_composition;
   const unsigned int  _average_type;
   std::vector<const ADVariableValue *> _compositional_phases;
-
-  usingMaterialMembers;
 };

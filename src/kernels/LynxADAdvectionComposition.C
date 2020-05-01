@@ -13,22 +13,25 @@
 
 #include "LynxADAdvectionComposition.h"
 
-registerADMooseObject("LynxApp", LynxADAdvectionComposition);
+registerMooseObject("LynxApp", LynxADAdvectionComposition);
 
-defineADValidParams(LynxADAdvectionComposition, LynxADAdvectionBase,
-  params.addClassDescription("Composition advection kernel."););
+InputParameters
+LynxADAdvectionComposition::validParams()
+{
+  InputParameters params = LynxADAdvectionBase::validParams();
+  params.addClassDescription("Composition advection kernel.");
+  return params;
+}
 
-template <ComputeStage compute_stage>
-LynxADAdvectionComposition<compute_stage>::LynxADAdvectionComposition(const InputParameters & parameters)
-  : LynxADAdvectionBase<compute_stage>(parameters)
+LynxADAdvectionComposition::LynxADAdvectionComposition(const InputParameters & parameters)
+  : LynxADAdvectionBase(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-LynxADAdvectionComposition<compute_stage>::computeArtificialViscosity()
+LynxADAdvectionComposition::computeArtificialViscosity()
 {
-  Real diameter = LynxADAdvectionBase<compute_stage>::computeElementDiameter();
+  Real diameter = LynxADAdvectionBase::computeElementDiameter();
 
   computeEntropyResidual();
 
@@ -64,9 +67,8 @@ LynxADAdvectionComposition<compute_stage>::computeArtificialViscosity()
   return std::min(max_viscosity, entropy_viscosity);
 }
 
-template <ComputeStage compute_stage>
 void
-LynxADAdvectionComposition<compute_stage>::computeEntropyResidual()
+LynxADAdvectionComposition::computeEntropyResidual()
 {
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {

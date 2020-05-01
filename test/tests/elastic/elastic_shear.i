@@ -60,21 +60,21 @@
 
 [AuxKernels]
   [./Ev_aux]
-    type = LynxVolStrainAux
+    type = LynxADVolStrainAux
     variable = Ev
   [../]
   [./S_aux]
-    type = LynxVonMisesStressAux
+    type = LynxADVonMisesStressAux
     variable = S_dev
   [../]
   [./Sxy_aux]
-    type = LynxStressAux
+    type = LynxADStressAux
     variable = Sxy
     index_i = 0
     index_j = 1
   [../]
   [./Exy_aux]
-    type = LynxStrainAux
+    type = LynxADStrainAux
     variable = Exy
     index_i = 0
     index_j = 1
@@ -92,16 +92,18 @@
 
 [BCs]
   [./no_ux]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left right bottom top front back'
     value = 0.0
+    preset = true
   [../]
   [./no_uz]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 'left right bottom top front back'
     value = 0.0
+    preset = true
   [../]
   [./disp_y_plate]
     type = LynxVelocityBC

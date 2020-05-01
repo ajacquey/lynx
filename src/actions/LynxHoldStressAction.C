@@ -19,11 +19,10 @@
 
 registerMooseAction("LynxApp", LynxHoldStressAction, "add_bc");
 
-template <>
 InputParameters
-validParams<LynxHoldStressAction>()
+LynxHoldStressAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Set up hold stress boundary conditions.");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied.");

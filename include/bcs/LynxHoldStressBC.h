@@ -15,15 +15,10 @@
 
 #include "IntegratedBC.h"
 
-class LynxHoldStressBC;
-class Function;
-
-template <>
-InputParameters validParams<LynxHoldStressBC>();
-
 class LynxHoldStressBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
   LynxHoldStressBC(const InputParameters & parameters);
 
 protected:
