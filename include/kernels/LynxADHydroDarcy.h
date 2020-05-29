@@ -24,8 +24,8 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _fluid_mobility;
+  const MaterialProperty<Real> & _fluid_mobility;
   const bool _coupled_grav;
-  const ADMaterialProperty<RealVectorValue> * _gravity;
+  const MaterialProperty<RealVectorValue> * _gravity;
   const ADMaterialProperty<Real> * _rho_f;
 };

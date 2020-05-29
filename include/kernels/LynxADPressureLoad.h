@@ -25,5 +25,5 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const ADMaterialProperty<Real> & _bulk_density;
-  const ADMaterialProperty<RealVectorValue> & _gravity;
+  const MaterialProperty<RealVectorValue> & _gravity;
 };

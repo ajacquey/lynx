@@ -36,7 +36,7 @@ LynxADMaterialBase::LynxADMaterialBase(const InputParameters & parameters)
 {
   if (_has_compositional_phases)
     for (unsigned i = 0; i < _n_composition; ++i)
-      _compositional_phases[i] = &adCoupledValue("compositional_phases", i);
+      _compositional_phases[i] = &coupledValue("compositional_phases", i);
 }
 
 template <typename T>
@@ -52,12 +52,12 @@ LynxADMaterialBase::getLynxParam(const std::string & name) const
     return prop;
 }
 
-ADReal
+Real
 LynxADMaterialBase::averageProperty(const std::vector<Real> & properties)
 {
   if (_n_composition == 1)
     return properties[0];
-  ADReal average_property = 0.0;
+  Real average_property = 0.0;
   switch (_average_type)
   {
     case 0: // ARITHMETIC
@@ -74,12 +74,12 @@ LynxADMaterialBase::averageProperty(const std::vector<Real> & properties)
   return average_property;
 }
 
-ADReal
+Real
 LynxADMaterialBase::arithmetic_average(const std::vector<Real> & properties)
 {
-  ADReal phase = 0;
-  ADReal sum = 0;
-  ADReal value = 0;
+  Real phase = 0;
+  Real sum = 0;
+  Real value = 0;
   for (unsigned i = 0; i < _n_composition; ++i)
   {
     phase = std::min(std::max(0.0, (*_compositional_phases[i])[_qp]), 1.0);
@@ -91,12 +91,12 @@ LynxADMaterialBase::arithmetic_average(const std::vector<Real> & properties)
   return value;
 }
 
-ADReal
+Real
 LynxADMaterialBase::harmonic_average(const std::vector<Real> & properties)
 {
-  ADReal phase = 0;
-  ADReal sum = 0;
-  ADReal value = 0;
+  Real phase = 0;
+  Real sum = 0;
+  Real value = 0;
   for (unsigned i = 0; i < _n_composition; ++i)
   {
     phase = std::min(std::max(0.0, (*_compositional_phases[i])[_qp]), 1.0);
@@ -108,11 +108,11 @@ LynxADMaterialBase::harmonic_average(const std::vector<Real> & properties)
   return (value != 0) ? 1.0 / value : 0;
 }
 
-ADReal
+Real
 LynxADMaterialBase::max_average(const std::vector<Real> & properties)
 {
-  ADReal max_phase = (*_compositional_phases[0])[_qp];
-  ADReal value = properties[0];
+  Real max_phase = (*_compositional_phases[0])[_qp];
+  Real value = properties[0];
   for (unsigned i = 1; i < _n_composition; ++i)
     if ((*_compositional_phases[i])[_qp] > max_phase)
     {

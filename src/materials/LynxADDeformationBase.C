@@ -57,7 +57,7 @@ LynxADDeformationBase::LynxADDeformationBase(const InputParameters & parameters)
     _strain_increment(declareADProperty<RankTwoTensor>("strain_increment")),
     _spin_increment(declareADProperty<RankTwoTensor>("spin_increment")),
     _thermal_exp(_coupled_temp || _coupled_temp_aux
-                     ? &getADMaterialProperty<Real>("thermal_expansion_coefficient")
+                     ? &getMaterialProperty<Real>("thermal_expansion_coefficient")
                      : nullptr),
     // Stress properties
     _stress(declareADProperty<RankTwoTensor>("stress")),
@@ -140,6 +140,8 @@ LynxADDeformationBase::computeStrainIncrement()
         mooseError("Unknown strain model. Specify 'small' or 'finite'!");
     }
 
+    if (_temp_dot[_qp] != 0.0)
+      Real y = 0.0;
     // Thermal strain correction
     if (_coupled_temp && !_coupled_temp_aux) 
       _strain_increment[_qp].addIa(-(*_thermal_exp)[_qp] * _temp_dot[_qp] * _dt / 3.0);

@@ -36,7 +36,7 @@ LynxADAdvectionComposition::computeArtificialViscosity()
   computeEntropyResidual();
 
   ADReal max_residual = 0.0;
-  ADReal max_velocity = 0.0;
+  Real max_velocity = 0.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -49,8 +49,8 @@ LynxADAdvectionComposition::computeArtificialViscosity()
     max_velocity = std::max(u.norm(), max_velocity);
   }
 
-  ADReal max_viscosity = _beta_stabilization * max_velocity * diameter;
-  ADReal entropy_variation =
+  Real max_viscosity = _beta_stabilization * max_velocity * diameter;
+  Real entropy_variation =
       std::max(_pp_max_entropy - _pp_avg_entropy, _pp_avg_entropy - _pp_min_entropy);
 
   if (this->_t_step <= 1 || std::abs(entropy_variation) < 1e-50)

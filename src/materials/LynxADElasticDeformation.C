@@ -49,8 +49,8 @@ LynxADElasticDeformation::LynxADElasticDeformation(const InputParameters & param
     // Elastic properties
     _plith_old(isCoupled("lithostatic_pressure") ? coupledValueOld("lithostatic_pressure") : _zero),
     _elastic_strain_incr(declareADProperty<RankTwoTensor>("elastic_strain_increment")),
-    _K(declareADProperty<Real>("bulk_modulus")),
-    _G(declareADProperty<Real>("shear_modulus")),
+    _K(declareProperty<Real>("bulk_modulus")),
+    _G(declareProperty<Real>("shear_modulus")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
     _viscous_strain_incr(
         _has_creep ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),

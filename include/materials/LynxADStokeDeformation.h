@@ -55,11 +55,11 @@ protected:
   ADMaterialProperty<Real> & _eta_eff;
 
   ADReal _A_diff;
-  ADReal _E_diff;
-  ADReal _V_diff;
+  Real _E_diff;
+  Real _V_diff;
 
   ADReal _A_disl;
-  ADReal _n_disl;
-  ADReal _E_disl;
-  ADReal _V_disl;
+  Real _n_disl;
+  Real _E_disl;
+  Real _V_disl;
 };

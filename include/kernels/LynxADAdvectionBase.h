@@ -34,7 +34,7 @@ protected:
 
   // velocities
   unsigned int _nvel;
-  std::vector<const ADVariableValue *> _vel;
+  std::vector<const VariableValue *> _vel;
   std::vector<const VariableValue *> _vel_old;
   std::vector<const VariableValue *> _vel_older;
 

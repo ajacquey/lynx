@@ -30,9 +30,9 @@ protected:
   const bool _vol_locking_correction;
   const ADMaterialProperty<RankTwoTensor> & _stress;
   const bool _coupled_pf;
-  const ADMaterialProperty<Real> * _biot;
+  const MaterialProperty<Real> * _biot;
   const bool _coupled_grav;
-  const ADMaterialProperty<RealVectorValue> * _gravity;
+  const MaterialProperty<RealVectorValue> * _gravity;
   const ADMaterialProperty<Real> * _rho_b;
   std::vector<ADReal> _avg_grad_test;
 };

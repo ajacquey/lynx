@@ -19,7 +19,7 @@ LynxADDensityBase::validParams()
 {
   InputParameters params = LynxADMaterialBase::validParams();
   params.addClassDescription("Base class for calculating densities and gravity.");
-  params.addCoupledVar("porosity", "The porosity auxiliary variable.");
+  params.addCoupledVar("porosity", 0.0, "The porosity auxiliary variable.");
   params.addParam<bool>("has_gravity", false, "Model with gravity on?");
   params.addParam<Real>("gravity_acceleration", 9.81, "The magnitude of the gravity acceleration.");
   params.addParam<std::vector<Real>>("fluid_density", "The fluid density.");
@@ -29,14 +29,14 @@ LynxADDensityBase::validParams()
 
 LynxADDensityBase::LynxADDensityBase(const InputParameters & parameters)
   : LynxADMaterialBase(parameters),
-    _porosity(isCoupled("porosity") ? adCoupledValue("porosity") : adZeroValue()),
+    _porosity(coupledValue("porosity")),
     _has_gravity(getParam<bool>("has_gravity")),
     _g(_has_gravity ? getParam<Real>("gravity_acceleration") : 0.0),
     _fluid_density(isParamValid("fluid_density") ? getLynxParam<Real>("fluid_density")
                                                  : std::vector<Real>(_n_composition, 0.0)),
     _solid_density(isParamValid("solid_density") ? getLynxParam<Real>("solid_density")
                                                  : std::vector<Real>(_n_composition, 0.0)),
-    _gravity(declareADProperty<RealVectorValue>("gravity_vector")),
+    _gravity(declareProperty<RealVectorValue>("gravity_vector")),
     _rho_f(declareADProperty<Real>("fluid_density")),
     _rho_s(declareADProperty<Real>("solid_density")),
     _rho_b(declareADProperty<Real>("bulk_density")),
@@ -48,9 +48,9 @@ void
 LynxADDensityBase::computeQpGravity()
 {
   if (_mesh.dimension() == 3)
-    _gravity[_qp] = ADRealVectorValue(0., 0., -_g);
+    _gravity[_qp] = RealVectorValue(0., 0., -_g);
   else if (_mesh.dimension() == 2)
-    _gravity[_qp] = ADRealVectorValue(0., -_g, 0.);
+    _gravity[_qp] = RealVectorValue(0., -_g, 0.);
   else if (_mesh.dimension() == 1)
-    _gravity[_qp] = ADRealVectorValue(-_g, 0., 0.);
+    _gravity[_qp] = RealVectorValue(-_g, 0., 0.);
 }

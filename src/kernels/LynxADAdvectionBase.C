@@ -80,13 +80,13 @@ LynxADAdvectionBase::LynxADAdvectionBase(const InputParameters & parameters)
 
   for (unsigned i = 0; i < _nvel; ++i)
   {
-    _vel[i] = &adCoupledValue("velocities", i);
+    _vel[i] = &coupledValue("velocities", i);
     _vel_old[i] = &coupledValueOld("velocities", i);
     _vel_older[i] = &coupledValueOlder("velocities", i);
   }
   for (unsigned i = _nvel; i < 3; ++i)
   {
-    _vel[i] = &adZeroValue();
+    _vel[i] = &_zero;
     _vel_old[i] = &_zero;
     _vel_older[i] = &_zero;
   }
@@ -128,7 +128,7 @@ LynxADAdvectionBase::precalculateResidual()
 ADReal
 LynxADAdvectionBase::computeQpResidual()
 {
-  ADRealVectorValue u((*_vel[0])[_qp], (*_vel[1])[_qp], (*_vel[2])[_qp]);
+  RealVectorValue u((*_vel[0])[_qp], (*_vel[1])[_qp], (*_vel[2])[_qp]);
   ADReal res = u * _grad_u[_qp] * _test[_i][_qp];
   Real a2 = this->_t_step > 1 ? _dt / this->_dt_old : 0.0;
   Real a1 = 1.0 + a2;

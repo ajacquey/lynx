@@ -215,7 +215,10 @@
         "mprealsupport": "cpp",
         "LynxADDarcyVelocityAux.C": "cpp",
         "LynxADPorosityAux.C": "cpp",
-        "LynxADHeatFluxAux.C": "cpp"
+        "LynxADHeatFluxAux.C": "cpp",
+        "LynxADDamageBase.C": "cpp",
+        "LynxADDamageModelBase.C": "cpp",
+        "LynxADLyakhovskyDamage.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "python.pythonPath": "/opt/moose/miniconda/bin/python"

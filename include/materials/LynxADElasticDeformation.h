@@ -44,8 +44,8 @@ protected:
   // Elastic properties
   const VariableValue & _plith_old;
   ADMaterialProperty<RankTwoTensor> & _elastic_strain_incr;
-  ADMaterialProperty<Real> & _K;
-  ADMaterialProperty<Real> & _G;
+  MaterialProperty<Real> & _K;
+  MaterialProperty<Real> & _G;
   const MaterialProperty<RankTwoTensor> & _stress_old;
   const ADMaterialProperty<RankTwoTensor> * _viscous_strain_incr;
   const ADMaterialProperty<RankTwoTensor> * _plastic_strain_incr;

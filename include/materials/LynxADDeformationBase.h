@@ -58,7 +58,7 @@ protected:
   // Strain properties
   ADMaterialProperty<RankTwoTensor> & _strain_increment;
   ADMaterialProperty<RankTwoTensor> & _spin_increment;
-  const ADMaterialProperty<Real> * _thermal_exp;
+  const MaterialProperty<Real> * _thermal_exp;
 
   // Stress properties
   ADMaterialProperty<RankTwoTensor> & _stress;

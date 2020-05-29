@@ -46,31 +46,6 @@
   [../]
 []
 
-[AuxVariables]
-  [./vol_strain]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./pressure]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./vol_strain_aux]
-    type = LynxADVolStrainRateAux
-    variable = vol_strain
-    strain_type = elastic
-    execute_on = 'TIMESTEP_END'
-  [../]
-  [./pressure_aux]
-    type = LynxADEffectivePressureAux
-    variable = pressure
-    execute_on = 'TIMESTEP_END'
-  [../]
-[]
-
 [BCs]
   [./T1_everywhere]
     type = PresetBC

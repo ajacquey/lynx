@@ -18,7 +18,7 @@ LynxADThermalBase::validParams()
 {
   InputParameters params = LynxADMaterialBase::validParams();
   params.addClassDescription("Base class for calculating the thermal properties.");
-  params.addCoupledVar("porosity", "The porosity auxiliary variable.");
+  params.addCoupledVar("porosity", 0.0, "The porosity auxiliary variable.");
   params.addParam<std::vector<Real>>("radiogenic_heat_production",
                                      "The radiogenic heat production value.");
   return params;
@@ -27,18 +27,18 @@ LynxADThermalBase::validParams()
 LynxADThermalBase::LynxADThermalBase(const InputParameters & parameters)
   : LynxADMaterialBase(parameters),
     // _coupled_porosity(isCoupled("porosity")),
-    _porosity(isCoupled("porosity") ? adCoupledValue("porosity") : adZeroValue()),
+    _porosity(coupledValue("porosity")),
     _heat_source(isParamValid("radiogenic_heat_production")
                      ? getLynxParam<Real>("radiogenic_heat_production")
                      : std::vector<Real>(_n_composition, 0.0)),
-    _coupled_dens(hasADMaterialProperty<Real>("solid_density")),
+    _coupled_dens(hasMaterialProperty<RealVectorValue>("gravity_vector")),
     _rho_f(_coupled_dens ? &getADMaterialProperty<Real>("fluid_density") : nullptr),
     _rho_s(_coupled_dens ? &getADMaterialProperty<Real>("solid_density") : nullptr),
     _thermal_diff(declareADProperty<Real>("thermal_diffusivity")),
     _rhoC_b(declareADProperty<Real>("bulk_specific_heat")),
     _rhoC_f(declareADProperty<Real>("fluid_specific_heat")),
-    _thermal_exp(declareADProperty<Real>("thermal_expansion_coefficient")),
-    _radiogenic_heat(declareADProperty<Real>("radiogenic_heat_production")),
+    _thermal_exp(declareProperty<Real>("thermal_expansion_coefficient")),
+    _radiogenic_heat(declareProperty<Real>("radiogenic_heat_production")),
     _c_f(_fe_problem.getMaxQps()),
     _c_s(_fe_problem.getMaxQps()),
     _lambda_f(_fe_problem.getMaxQps()),
@@ -65,7 +65,7 @@ LynxADThermalBase::computeQpSpecificHeat()
   _rhoC_f[_qp] = _coupled_dens ? (*_rho_f)[_qp] * _c_f[_qp] : 0.0;
   _rhoC_f[_qp] = 0.0;
   ADReal rhoC_s = _coupled_dens ? (*_rho_s)[_qp] * _c_s[_qp] : 0.0;
-  _rhoC_b[_qp] = computeMixtureProperty(_rhoC_f[_qp], rhoC_s);
+  _rhoC_b[_qp] = computeADMixtureProperty(_rhoC_f[_qp], rhoC_s);
 }
 
 void
@@ -94,12 +94,14 @@ LynxADThermalBase::computeQpThermalSource()
   _radiogenic_heat[_qp] = averageProperty(_heat_source);
 }
 
-ADReal
-LynxADThermalBase::computeMixtureProperty(const ADReal fluid_prop, const ADReal solid_prop)
+Real
+LynxADThermalBase::computeMixtureProperty(const Real fluid_prop, const Real solid_prop)
 {
-  // if (_coupled_porosity)
-  //   return (*_porosity)[_qp] * fluid_prop + (1.0 - (*_porosity)[_qp]) * solid_prop;
-  // else
-  //   return solid_prop;
+  return _porosity[_qp] * fluid_prop + (1.0 - _porosity[_qp]) * solid_prop;
+}
+
+ADReal
+LynxADThermalBase::computeADMixtureProperty(const ADReal fluid_prop, const ADReal solid_prop)
+{
   return _porosity[_qp] * fluid_prop + (1.0 - _porosity[_qp]) * solid_prop;
 }

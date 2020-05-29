@@ -24,14 +24,14 @@ public:
 protected:
   virtual void computeQpGravity();
 
-  const ADVariableValue & _porosity;
+  const VariableValue & _porosity;
 
   bool _has_gravity;
   Real _g;
   const std::vector<Real> _fluid_density;
   const std::vector<Real> _solid_density;
 
-  ADMaterialProperty<RealVectorValue> & _gravity;
+  MaterialProperty<RealVectorValue> & _gravity;
   ADMaterialProperty<Real> & _rho_f;
   ADMaterialProperty<Real> & _rho_s;
   ADMaterialProperty<Real> & _rho_b;

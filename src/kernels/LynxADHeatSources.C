@@ -38,26 +38,25 @@ LynxADHeatSources::LynxADHeatSources(const InputParameters & parameters)
     _vel(3),
     _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : adZeroGradient()),
     _rhoC_b(getADMaterialProperty<Real>("bulk_specific_heat")),
-    _has_inelastic_heat_mat(hasADMaterialProperty<Real>("inelastic_heat")),
-    _radiogenic_heat(_has_inelastic_heat_mat
-                         ? &getADMaterialProperty<Real>("radiogenic_heat_production")
-                         : nullptr),
+    _radiogenic_heat(getMaterialProperty<Real>("radiogenic_heat_production")),
+    // Here she need hasADMaterialProperty...
+    _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),
     _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat")
                                                 : nullptr),
     _coupled_inelastic_heat(isCoupled("inelastic_heat")),
-    _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : adZeroValue()),
-    _thermal_exp(getADMaterialProperty<Real>("thermal_expansion_coefficient"))
+    _inelastic_heat(_coupled_inelastic_heat ? coupledValue("inelastic_heat") : _zero),
+    _thermal_exp(getMaterialProperty<Real>("thermal_expansion_coefficient"))
 {
   for (unsigned i = 0; i < _nvel; ++i)
-    _vel[i] = &adCoupledValue("velocities", i);
+    _vel[i] = &coupledValue("velocities", i);
   for (unsigned i = _nvel; i < 3; ++i)
-    _vel[i] = &adZeroValue();
+    _vel[i] = &_zero;
 }
 
 ADReal
 LynxADHeatSources::computeQpResidual()
 {
-  ADReal Hr = _has_inelastic_heat_mat ? (*_radiogenic_heat)[_qp] : 0.0;
+  Real Hr = _radiogenic_heat[_qp];
   ADReal Hs = _coeff_Hs;
   if (_coupled_inelastic_heat)
     Hs *= _inelastic_heat[_qp];
@@ -65,7 +64,7 @@ LynxADHeatSources::computeQpResidual()
     Hs *= (*_inelastic_heat_mat)[_qp];
   else
     Hs *= 0.0;
-  ADRealVectorValue vel((*_vel[0])[_qp], (*_vel[1])[_qp], (*_vel[2])[_qp]);
+  RealVectorValue vel((*_vel[0])[_qp], (*_vel[1])[_qp], (*_vel[2])[_qp]);
   ADReal Ha = _thermal_exp[_qp] * _u[_qp] * vel * _grad_pressure[_qp];
 
   ADReal heat_sources = Hr + Hs + Ha;

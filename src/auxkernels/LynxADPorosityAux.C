@@ -31,10 +31,10 @@ LynxADPorosityAux::LynxADPorosityAux(const InputParameters & parameters)
     _biot(getADMaterialProperty<Real>("biot_coefficient")),
     _C_d(getADMaterialProperty<Real>("bulk_compressibility")),
     _strain_increment(getADMaterialProperty<RankTwoTensor>("strain_increment")),
-    _has_viscous(hasADMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
+    _has_viscous(hasMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
     _viscous_strain_incr(
         _has_viscous ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),
-    _has_plastic(hasADMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
+    _has_plastic(hasMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
     _plastic_strain_incr(
         _has_viscous ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr)
 {

@@ -117,7 +117,7 @@ LynxADCreepModel::setQp(unsigned int qp)
 void
 LynxADCreepModel::creepUpdate(ADRankTwoTensor & stress_dev,
                               const ADReal & pressure,
-                              const ADReal & G,
+                              const Real & G,
                               ADRankTwoTensor & elastic_strain_incr)
 {
   if (G != 0.0) // Visco elastic update
@@ -145,7 +145,7 @@ LynxADCreepModel::creepUpdate(ADRankTwoTensor & stress_dev,
 ADReal
 LynxADCreepModel::viscousIncrement(const ADReal & pressure,
                                    const ADReal & tau_II_tr,
-                                   const ADReal & G)
+                                   const Real & G)
 {
   if (tau_II_tr == 0.0)
   {

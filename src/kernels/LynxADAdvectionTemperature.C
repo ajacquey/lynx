@@ -35,7 +35,7 @@ LynxADAdvectionTemperature::LynxADAdvectionTemperature(const InputParameters & p
     _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : adZeroGradient()),
     _thermal_diff(getADMaterialProperty<Real>("thermal_diffusivity")),
     _rhoC(getADMaterialProperty<Real>("bulk_specific_heat")),
-    _has_inelastic_heat_mat(hasADMaterialProperty<Real>("inelastic_heat")),
+    _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),
     _radiogenic_heat(_has_inelastic_heat_mat
                          ? &getADMaterialProperty<Real>("radiogenic_heat_production")
                          : nullptr),

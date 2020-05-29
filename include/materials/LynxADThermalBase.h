@@ -30,10 +30,11 @@ protected:
   virtual void computeQpHeatCap() = 0;
   virtual void computeQpThermalCond() = 0;
   virtual void computeQpThermalExp() = 0;
-  virtual ADReal computeMixtureProperty(const ADReal fluid_prop, const ADReal solid_prop);
+  virtual Real computeMixtureProperty(const Real fluid_prop, const Real solid_prop);
+  virtual ADReal computeADMixtureProperty(const ADReal fluid_prop, const ADReal solid_prop);
 
   // const bool _coupled_porosity;
-  const ADVariableValue & _porosity;
+  const VariableValue & _porosity;
   const std::vector<Real> _heat_source;
   const bool _coupled_dens;
 
@@ -42,13 +43,13 @@ protected:
   ADMaterialProperty<Real> & _thermal_diff;
   ADMaterialProperty<Real> & _rhoC_b;
   ADMaterialProperty<Real> & _rhoC_f;
-  ADMaterialProperty<Real> & _thermal_exp;
-  ADMaterialProperty<Real> & _radiogenic_heat;
+  MaterialProperty<Real> & _thermal_exp;
+  MaterialProperty<Real> & _radiogenic_heat;
 
-  std::vector<ADReal> _c_f;
-  std::vector<ADReal> _c_s;
-  std::vector<ADReal> _lambda_f;
-  std::vector<ADReal> _lambda_s;
-  std::vector<ADReal> _beta_f;
-  std::vector<ADReal> _beta_s;
+  std::vector<Real> _c_f;
+  std::vector<Real> _c_s;
+  std::vector<Real> _lambda_f;
+  std::vector<Real> _lambda_s;
+  std::vector<Real> _beta_f;
+  std::vector<Real> _beta_s;
 };

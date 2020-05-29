@@ -24,13 +24,13 @@ public:
   const std::vector<T> & getLynxParam(const std::string & name) const;
 
 protected:
-  virtual ADReal averageProperty(const std::vector<Real> & properties);
-  virtual ADReal arithmetic_average(const std::vector<Real> & properties);
-  virtual ADReal harmonic_average(const std::vector<Real> & properties);
-  virtual ADReal max_average(const std::vector<Real> & properties);
+  virtual Real averageProperty(const std::vector<Real> & properties);
+  virtual Real arithmetic_average(const std::vector<Real> & properties);
+  virtual Real harmonic_average(const std::vector<Real> & properties);
+  virtual Real max_average(const std::vector<Real> & properties);
 
   const bool _has_compositional_phases;
   const unsigned int _n_composition;
   const unsigned int  _average_type;
-  std::vector<const ADVariableValue *> _compositional_phases;
+  std::vector<const VariableValue *> _compositional_phases;
 };

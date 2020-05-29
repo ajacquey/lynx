@@ -38,10 +38,10 @@ LynxADSolidMomentum::LynxADSolidMomentum(const InputParameters & parameters)
     _component(getParam<unsigned int>("component")),
     _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
     _stress(getADMaterialProperty<RankTwoTensor>("stress")),
-    _coupled_pf(hasADMaterialProperty<Real>("biot_coefficient")),
-    _biot(_coupled_pf ? &getADMaterialProperty<Real>("biot_coefficient") : nullptr),
-    _coupled_grav(hasADMaterialProperty<Real>("bulk_density")),
-    _gravity(_coupled_grav ? &getADMaterialProperty<RealVectorValue>("gravity_vector") : nullptr),
+    _coupled_pf(hasMaterialProperty<Real>("biot_coefficient")),
+    _biot(_coupled_pf ? &getMaterialProperty<Real>("biot_coefficient") : nullptr),
+    _coupled_grav(hasMaterialProperty<RealVectorValue>("gravity_vector")),
+    _gravity(_coupled_grav ? &getMaterialProperty<RealVectorValue>("gravity_vector") : nullptr),
     _rho_b(_coupled_grav ? &getADMaterialProperty<Real>("bulk_density") : nullptr),
     _avg_grad_test()
 {

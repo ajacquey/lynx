@@ -27,7 +27,7 @@ LynxADPressureLoad::validParams()
 LynxADPressureLoad::LynxADPressureLoad(const InputParameters & parameters)
   : ADKernel(parameters),
     _bulk_density(getADMaterialProperty<Real>("reference_bulk_density")),
-    _gravity(getADMaterialProperty<RealVectorValue>("gravity_vector"))
+    _gravity(getMaterialProperty<RealVectorValue>("gravity_vector"))
 {
 }
 
