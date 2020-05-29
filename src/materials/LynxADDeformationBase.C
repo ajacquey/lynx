@@ -140,8 +140,6 @@ LynxADDeformationBase::computeStrainIncrement()
         mooseError("Unknown strain model. Specify 'small' or 'finite'!");
     }
 
-    if (_temp_dot[_qp] != 0.0)
-      Real y = 0.0;
     // Thermal strain correction
     if (_coupled_temp && !_coupled_temp_aux) 
       _strain_increment[_qp].addIa(-(*_thermal_exp)[_qp] * _temp_dot[_qp] * _dt / 3.0);
