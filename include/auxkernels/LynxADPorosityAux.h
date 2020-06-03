@@ -28,8 +28,8 @@ protected:
 
   bool _coupled_pf;
   const VariableValue & _pf_dot;
-  const ADMaterialProperty<Real> & _biot;
-  const ADMaterialProperty<Real> & _C_d;
+  const MaterialProperty<Real> & _biot;
+  const MaterialProperty<Real> & _C_d;
   const ADMaterialProperty<RankTwoTensor> & _strain_increment;
   const bool _has_viscous;
   const ADMaterialProperty<RankTwoTensor> * _viscous_strain_incr;
