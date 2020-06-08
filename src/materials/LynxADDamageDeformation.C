@@ -13,8 +13,7 @@
 
 #include "LynxADDamageDeformation.h"
 #include "ElasticityTensorTools.h"
-#include "LynxADCreepModel.h"
-#include "LynxADPlasticModel.h"
+#include "LynxADDamageModelBase.h"
 
 registerMooseObject("LynxApp", LynxADDamageDeformation);
 
@@ -23,7 +22,7 @@ LynxADDamageDeformation::validParams()
 {
   InputParameters params = LynxADElasticDeformation::validParams();
   params.addClassDescription("Class calculating the deformation of a material following a "
-                             "damage viscoelasto-(visco)plastic rheology.");
+                             "damage elasto-viscoplastic rheology.");
   params.addRequiredParam<MaterialName>(
       "damage_model",
       "The material object to use for the damage rheology.");
@@ -32,16 +31,32 @@ LynxADDamageDeformation::validParams()
 
 LynxADDamageDeformation::LynxADDamageDeformation(const InputParameters & parameters)
   : LynxADElasticDeformation(parameters),
-    // Damage model
-    // _damage_model(&getMaterialByName("damage_model")),
     // Strain properties
     _elastic_strain(declareADProperty<RankTwoTensor>("elastic_strain")),
     _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("elastic_strain"))
 {
-  LynxADDamageModelBase * damage_r =
-        dynamic_cast<LynxADDamageModelBase *>(&this->getMaterialByName("damage_model"));
+}
 
-    _damage_model = damage_r;
+void
+LynxADDamageDeformation::initialSetup()
+{
+  LynxADDeformationBase::initialSetup();
+
+  MaterialName damage_model = getParam<MaterialName>("damage_model");
+
+  LynxADDamageModelBase * damage_r =
+      dynamic_cast<LynxADDamageModelBase *>(&this->getMaterialByName(damage_model));
+
+  _damage_model = damage_r;
+}
+
+void
+LynxADDamageDeformation::initQpStatefulProperties()
+{
+  LynxADElasticDeformation::initQpStatefulProperties();
+
+  _elastic_strain[_qp].zero();
+  _elastic_strain[_qp].addIa(-_plith[_qp] / (3.0 * averageProperty(_bulk_modulus)));
 }
 
 void
@@ -70,8 +85,8 @@ LynxADDamageDeformation::computeQpStress()
   _stress[_qp].addIa(_plith_old[_qp] - _plith[_qp]);
 
   // Damage - plastic correction
-
-  _damage_model->damageUpdate(_stress[_qp], elastic_strain_old);
+  _damage_model->damageUpdate(_stress[_qp], _elastic_strain_incr[_qp]);
+  _elastic_strain[_qp] = elastic_strain_old + _elastic_strain_incr[_qp];
 }
 
 // void

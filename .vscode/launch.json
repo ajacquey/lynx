@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/lynx-dbg",
-            "args": ["-i", "test/tests/thermo_mech/thermal_expansion.i"],
+            "args": ["-i", "test/tests/damage/damage_shear_no_dam.i"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

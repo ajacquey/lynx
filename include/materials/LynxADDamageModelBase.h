@@ -13,28 +13,36 @@
 
 #pragma once
 
-#include "LynxADElasticDeformation.h"
-#include "LynxADDamageModelBase.h"
+#include "LynxADMaterialBase.h"
 
-class LynxADDamageDeformation : public LynxADElasticDeformation
+class LynxADDamageModelBase : public LynxADMaterialBase
 {
 public:
   static InputParameters validParams();
-  LynxADDamageDeformation(const InputParameters & parameters);
-  void initialSetup() override;
+  LynxADDamageModelBase(const InputParameters & parameters);
+  void setQp(unsigned int qp);
+  virtual void elasticGuess(ADRankTwoTensor & stress,
+                            const ADRankTwoTensor & stress_old,
+                            const RankFourTensor & Cijkl,
+                            const ADRankTwoTensor & elastic_strain_old,
+                            const ADRankTwoTensor & elastic_strain_incr) = 0;
+  virtual void damageUpdate(ADRankTwoTensor & stress, ADRankTwoTensor & elastic_strain_incr) = 0;
+  void resetQpProperties() final {}
+  void resetProperties() final {}
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void initializeQpDeformation() override;
-  virtual void computeQpStress() override;
 
-  // Damage rheology
-  LynxADDamageModelBase * _damage_model;
+  const Real _abs_tol;
+  const Real _rel_tol;
+  const unsigned int _max_its;
+  const std::vector<Real> _damage0;
 
-  // Strain properties
-  ADMaterialProperty<RankTwoTensor> & _elastic_strain;
-  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-
-  // Elasticity tensor
-  RankFourTensor _Cijkl;
+  // Damage properties
+  ADMaterialProperty<Real> & _damage;
+  const MaterialProperty<Real> & _damage_old;
+  ADMaterialProperty<Real> & _damage_drive;
+  ADMaterialProperty<RankTwoTensor> & _plastic_strain_incr;
+  ADMaterialProperty<Real> & _damage_incr;
+  ADMaterialProperty<Real> & _yield_function;
 };

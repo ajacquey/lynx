@@ -1,0 +1,12 @@
+[Tests]
+  [./shear_no_dam]
+    type = 'Exodiff'
+    input = 'damage_shear_no_dam.i'
+    exodiff = 'damage_shear_no_dam_out.e'
+  [../]
+  [./shear_dam]
+    type = 'Exodiff'
+    input = 'damage_shear_dam.i'
+    exodiff = 'damage_shear_dam_out.e'
+  [../]
+[]
