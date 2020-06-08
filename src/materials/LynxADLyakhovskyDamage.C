@@ -39,7 +39,6 @@ LynxADLyakhovskyDamage::validParams()
 LynxADLyakhovskyDamage::LynxADLyakhovskyDamage(const InputParameters & parameters)
   : LynxADDamageModelBase(parameters),
     _damage_modulus(getLynxParam<Real>("damage_modulus")),
-    // _critical_strain_ratio(getLynxParam<Real>("critical_strain_ratio")),
     _friction_angle(getLynxParam<Real>("friction_angle")),
     _cohesion(isParamValid("cohesion") ? getLynxParam<Real>("cohesion")
                                        : std::vector<Real>(_n_composition, 0.0)),

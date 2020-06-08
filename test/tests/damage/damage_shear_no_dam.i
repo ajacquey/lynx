@@ -40,6 +40,10 @@
     family = LAGRANGE
     initial_condition = 1.0e+01
   [../]
+  [./pressure]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./mises_stress]
     order = CONSTANT
     family = MONOMIAL
@@ -72,7 +76,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./pressure]
+  [./strain_ratio]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -83,6 +87,11 @@
     type = ConstantAux
     variable = p_lith
     value = 1.0e+01
+  [../]
+  [./pressure_aux]
+    type = LynxADEffectivePressureAux
+    variable = pressure
+    execute_on = 'TIMESTEP_END'
   [../]
   [./mises_stress_aux]
     type = LynxADVonMisesStressAux
@@ -129,9 +138,9 @@
     property = damage_force
     execute_on = 'TIMESTEP_END'
   [../]
-  [./pressure_aux]
-    type = LynxADEffectivePressureAux
-    variable = pressure
+  [./strain_ratio_aux]
+    type = LynxADElasticStrainRatioAux
+    variable = strain_ratio
     execute_on = 'TIMESTEP_END'
   [../]
 []
@@ -165,7 +174,6 @@
   [../]
 []
 
-
 [Materials]
   [./elastic_mat]
     type = LynxADDamageDeformation
@@ -188,6 +196,11 @@
    [./D]
     type = ElementAverageValue
     variable = damage
+    outputs = csv
+  [../]
+  [./P]
+    type = ElementAverageValue
+    variable = pressure
     outputs = csv
   [../]
   [./Se]
@@ -223,6 +236,11 @@
   [./Dam_force]
     type = ElementAverageValue
     variable = damage_force
+    outputs = csv
+  [../]
+  [./Xi]
+    type = ElementAverageValue
+    variable = strain_ratio
     outputs = csv
   [../]
 []

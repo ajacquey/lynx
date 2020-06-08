@@ -218,7 +218,9 @@
         "LynxADHeatFluxAux.C": "cpp",
         "LynxADDamageBase.C": "cpp",
         "LynxADDamageModelBase.C": "cpp",
-        "LynxADLyakhovskyDamage.C": "cpp"
+        "LynxADLyakhovskyDamage.C": "cpp",
+        "LynxADElasticStrainRatio.C": "cpp",
+        "LynxADElasticStrainRatioAux.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "python.pythonPath": "/opt/moose/miniconda/bin/python"
