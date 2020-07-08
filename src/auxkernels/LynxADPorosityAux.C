@@ -31,14 +31,16 @@ LynxADPorosityAux::LynxADPorosityAux(const InputParameters & parameters)
     _biot(getMaterialProperty<Real>("biot_coefficient")),
     _C_d(getMaterialProperty<Real>("bulk_compressibility")),
     _strain_increment(getADMaterialProperty<RankTwoTensor>("strain_increment")),
-    // TO CORRECT with hasADMaterialProperty
-    _has_viscous(hasMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
+    _has_viscous(hasADMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
     _viscous_strain_incr(
         _has_viscous ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),
-    // TO CORRECT with hasADMaterialProperty
-    _has_plastic(hasMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
+    _has_plastic(hasADMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
     _plastic_strain_incr(
-        _has_viscous ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr)
+        _has_viscous ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr),
+    _has_damage(hasADMaterialProperty<Real>("damage_poro_mechanical")),
+    _damage_poro_mech(_has_damage
+                          ? &getADMaterialProperty<Real>("damage_poro_mechanical")
+                          : nullptr)
 {
 }
 
@@ -47,6 +49,7 @@ LynxADPorosityAux::computeValue()
 {
   Real ev_dot = computeEvDot();
   Real ev_in_dot = computeEvInDot();
+  Real damage_contrib = (_has_damage) ? MetaPhysicL::raw_value((*_damage_poro_mech)[_qp]) : 0.0;
 
   return _u_old[_qp] +
          (_biot[_qp] - _u[_qp]) *
@@ -54,7 +57,8 @@ LynxADPorosityAux::computeValue()
                   _pf_dot[_qp] +
               ev_dot) *
              _dt +
-         (1.0 - _biot[_qp]) * ev_in_dot * _dt;
+         (1.0 - _biot[_qp]) * ev_in_dot * _dt +
+         (1.0 - _biot[_qp]) * damage_contrib * _dt;
 }
 
 Real

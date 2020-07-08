@@ -23,13 +23,13 @@ public:
   void setQp(unsigned int qp);
   virtual void creepUpdate(ADRankTwoTensor & stress_dev,
                            const ADReal & pressure,
-                           const Real & G,
+                           const ADReal & G,
                            ADRankTwoTensor & elastic_strain_incr);
   void resetQpProperties() final {}
   void resetProperties() final {}
 
 protected:
-  virtual ADReal viscousIncrement(const ADReal & pressure, const ADReal & eqv_stress, const Real & G);
+  virtual ADReal viscousIncrement(const ADReal & pressure, const ADReal & eqv_stress, const ADReal & G);
   virtual ADReal computeQpEffectiveViscosity(const ADReal & pressure);
   virtual ADReal computeQpOneOnDiffViscosity(const ADReal A);
   virtual ADReal computeQpOneOnDislViscosity(const ADReal A, const ADReal n, const ADReal eII);
@@ -80,5 +80,5 @@ protected:
 
   // For iterative update
   ADReal _tau_II_tr;
-  Real _G;
+  ADReal _G;
 };

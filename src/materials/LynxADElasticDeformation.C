@@ -49,8 +49,8 @@ LynxADElasticDeformation::LynxADElasticDeformation(const InputParameters & param
     // Elastic properties
     _plith_old(isCoupled("lithostatic_pressure") ? coupledValueOld("lithostatic_pressure") : _zero),
     _elastic_strain_incr(declareADProperty<RankTwoTensor>("elastic_strain_increment")),
-    _K(declareProperty<Real>("bulk_modulus")),
-    _G(declareProperty<Real>("shear_modulus")),
+    _K(declareADProperty<Real>("bulk_modulus")),
+    _G(declareADProperty<Real>("shear_modulus")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
     _viscous_strain_incr(
         _has_creep ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),
@@ -168,5 +168,5 @@ LynxADElasticDeformation::computeQpThermalSources()
   // else if (_coupled_temp_aux && !_coupled_temp)
   //   inelastic_strain_incr.addIa((*_thermal_exp)[_qp] * _temp_dot_aux[_qp] * _dt / 3.0);
 
-  _inelastic_heat[_qp] = _stress[_qp].doubleContraction(inelastic_strain_incr) / _dt;
+  _inelastic_heat[_qp] = (_dt != 0.0) ? _stress[_qp].doubleContraction(inelastic_strain_incr) / _dt : 0.0;
 }

@@ -33,7 +33,7 @@ LynxADDarcyVelocityAux::LynxADDarcyVelocityAux(const InputParameters & parameter
   : AuxKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _grad_pf(coupledGradient("fluid_pressure")),
-    _fluid_mobility(getMaterialProperty<Real>("fluid_mobility")),
+    _fluid_mobility(getADMaterialProperty<Real>("fluid_mobility")),
     _coupled_grav(hasMaterialProperty<RealVectorValue>("gravity_vector")),
     _gravity(_coupled_grav ? &getMaterialProperty<RealVectorValue>("gravity_vector") : nullptr),
     _rho_f(_coupled_grav ? &getADMaterialProperty<Real>("fluid_density") : nullptr)
@@ -47,6 +47,6 @@ LynxADDarcyVelocityAux::computeValue()
                                                   (*_gravity)[_qp]
                                             : RealVectorValue();
 
-  return -_fluid_mobility[_qp] *
+  return -MetaPhysicL::raw_value(_fluid_mobility[_qp]) *
          (_grad_pf[_qp](_component) + grav_term(_component));
 }

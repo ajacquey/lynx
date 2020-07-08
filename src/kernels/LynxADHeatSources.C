@@ -39,8 +39,7 @@ LynxADHeatSources::LynxADHeatSources(const InputParameters & parameters)
     _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : adZeroGradient()),
     _rhoC_b(getADMaterialProperty<Real>("bulk_specific_heat")),
     _radiogenic_heat(getMaterialProperty<Real>("radiogenic_heat_production")),
-    // Here she need hasADMaterialProperty...
-    _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),
+    _has_inelastic_heat_mat(hasADMaterialProperty<Real>("inelastic_heat")),
     _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat")
                                                 : nullptr),
     _coupled_inelastic_heat(isCoupled("inelastic_heat")),

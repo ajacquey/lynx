@@ -33,5 +33,6 @@ LynxADVolStrainAux::LynxADVolStrainAux(const InputParameters & parameters)
 Real
 LynxADVolStrainAux::computeValue()
 {
-  return _u_old[_qp] + MetaPhysicL::raw_value((*_strain_incr)[_qp].trace());
+  Real vol_strain_incr = MetaPhysicL::raw_value((*_strain_incr)[_qp].trace());
+  return (_is_transient) ? _u_old[_qp] + vol_strain_incr : vol_strain_incr;
 }

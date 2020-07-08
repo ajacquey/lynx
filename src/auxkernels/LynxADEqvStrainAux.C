@@ -32,6 +32,6 @@ LynxADEqvStrainAux::LynxADEqvStrainAux(const InputParameters & parameters)
 Real
 LynxADEqvStrainAux::computeValue()
 {
-  return _u_old[_qp] +
-         std::sqrt(2.0 / 3.0) * MetaPhysicL::raw_value((*_strain_incr)[_qp].deviatoric().L2norm());
+  Real eqv_strain_incr = std::sqrt(2.0 / 3.0) * MetaPhysicL::raw_value((*_strain_incr)[_qp].deviatoric().L2norm());
+  return (_is_transient) ? _u_old[_qp] + eqv_strain_incr : eqv_strain_incr;
 }

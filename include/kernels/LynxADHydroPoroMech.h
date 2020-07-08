@@ -25,4 +25,7 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const ADMaterialProperty<Real> & _poro_mech;
+  const ADMaterialProperty<Real> & _biot;
+  const bool _has_damage;
+  const ADMaterialProperty<Real> * _damage_poro_mech;
 };

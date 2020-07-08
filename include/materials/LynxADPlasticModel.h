@@ -23,16 +23,16 @@ public:
   void setQp(unsigned int qp);
   virtual void plasticUpdate(ADRankTwoTensor & stress_dev,
                              ADReal & pressure,
-                             const Real & G,
-                             const Real & K,
+                             const ADReal & G,
+                             const ADReal & K,
                              ADRankTwoTensor & elastic_strain_incr);
   void resetQpProperties() final {}
   void resetProperties() final {}
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual ADReal plasticIncrement(const ADReal & eqv_stress, const ADReal & pressure, const Real G, const Real K);
-  virtual void initPlasticParameters(const ADReal & pressure, const Real & K);
+  virtual ADReal plasticIncrement(const ADReal & eqv_stress, const ADReal & pressure, const ADReal G, const ADReal K);
+  virtual void initPlasticParameters(const ADReal & pressure, const ADReal & K);
   virtual ADReal plasticYieldFunction(const ADReal & eqv_stress, const ADReal & pressure);
 
   // Plastic parameters

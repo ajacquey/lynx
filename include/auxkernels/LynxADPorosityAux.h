@@ -35,4 +35,6 @@ protected:
   const ADMaterialProperty<RankTwoTensor> * _viscous_strain_incr;
   const bool _has_plastic;
   const ADMaterialProperty<RankTwoTensor> * _plastic_strain_incr;
+  const bool _has_damage;
+  const ADMaterialProperty<Real> * _damage_poro_mech;
 };

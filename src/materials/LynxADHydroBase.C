@@ -25,20 +25,20 @@ LynxADHydroBase::validParams()
 LynxADHydroBase::LynxADHydroBase(const InputParameters & parameters)
   : LynxADMaterialBase(parameters),
     _porosity(coupledValue("porosity")),
-    _coupled_mech(hasMaterialProperty<Real>("bulk_modulus")),
-    _K(_coupled_mech ? &getMaterialProperty<Real>("bulk_modulus") : nullptr),
+    _coupled_mech(hasADMaterialProperty<Real>("bulk_modulus")),
+    _K(_coupled_mech ? &getADMaterialProperty<Real>("bulk_modulus") : nullptr),
     _strain_increment(_coupled_mech ? &getADMaterialProperty<RankTwoTensor>("strain_increment")
                                     : nullptr),
-    _has_viscous(hasMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
+    _has_viscous(hasADMaterialProperty<RankTwoTensor>("viscous_strain_increment")),
     _viscous_strain_incr(
         _has_viscous ? &getADMaterialProperty<RankTwoTensor>("viscous_strain_increment") : nullptr),
-    _has_plastic(hasMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
+    _has_plastic(hasADMaterialProperty<RankTwoTensor>("plastic_strain_increment")),
     _plastic_strain_incr(
-        _has_viscous ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr),
-    _biot(declareProperty<Real>("biot_coefficient")),
-    _C_d(declareProperty<Real>("bulk_compressibility")),
-    _C_biot(declareProperty<Real>("biot_compressibility")),
-    _fluid_mobility(declareProperty<Real>("fluid_mobility")),
+        _has_plastic ? &getADMaterialProperty<RankTwoTensor>("plastic_strain_increment") : nullptr),
+    _biot(declareADProperty<Real>("biot_coefficient")),
+    _C_d(declareADProperty<Real>("bulk_compressibility")),
+    _C_biot(declareADProperty<Real>("biot_compressibility")),
+    _fluid_mobility(declareADProperty<Real>("fluid_mobility")),
     _poro_mech(declareADProperty<Real>("poro_mechanical")),
     _C_f(_fe_problem.getMaxQps()),
     _C_s(_fe_problem.getMaxQps()),
@@ -70,7 +70,7 @@ LynxADHydroBase::computeQpCompressibilities()
     _biot[_qp] -= _C_s[_qp] / _C_d[_qp];
 
   // Pore compressibility
-  Real C_phi = (_biot[_qp] - _porosity[_qp]) * _C_d[_qp];
+  ADReal C_phi = (_biot[_qp] - _porosity[_qp]) * _C_d[_qp];
 
   // Biot compressibility
   _C_biot[_qp] = _porosity[_qp] * _C_f[_qp] + (1.0 - _biot[_qp]) * C_phi;
@@ -93,12 +93,12 @@ LynxADHydroBase::computeQpPoroMech()
 {
   if (_coupled_mech)
   {
-    ADRankTwoTensor e_tot = (*_strain_increment)[_qp] / _dt;
+    ADRankTwoTensor e_tot = _is_transient ? (*_strain_increment)[_qp] / _dt : ADRankTwoTensor();
     ADRankTwoTensor e_in = ADRankTwoTensor();
     if (_has_viscous)
-      e_in += (*_viscous_strain_incr)[_qp] / _dt;
+      e_in += _is_transient ? (*_viscous_strain_incr)[_qp] / _dt : ADRankTwoTensor();
     if (_has_plastic)
-      e_in += (*_plastic_strain_incr)[_qp] / _dt;
+      e_in += _is_transient ? (*_plastic_strain_incr)[_qp] / _dt : ADRankTwoTensor();
 
     _poro_mech[_qp] = _biot[_qp] * e_tot.trace() + (1.0 - _biot[_qp]) * e_in.trace();
 

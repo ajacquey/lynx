@@ -30,7 +30,7 @@ protected:
   const bool _vol_locking_correction;
   const ADMaterialProperty<RankTwoTensor> & _stress;
   const bool _coupled_pf;
-  const MaterialProperty<Real> * _biot;
+  const ADMaterialProperty<Real> * _biot;
   const bool _coupled_grav;
   const MaterialProperty<RealVectorValue> * _gravity;
   const ADMaterialProperty<Real> * _rho_b;

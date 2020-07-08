@@ -25,7 +25,7 @@ LynxADHydroDarcy::validParams()
 
 LynxADHydroDarcy::LynxADHydroDarcy(const InputParameters & parameters)
   : ADKernel(parameters),
-    _fluid_mobility(getMaterialProperty<Real>("fluid_mobility")),
+    _fluid_mobility(getADMaterialProperty<Real>("fluid_mobility")),
     _coupled_grav(hasMaterialProperty<RealVectorValue>("gravity_vector")),
     _gravity(_coupled_grav ? &getMaterialProperty<RealVectorValue>("gravity_vector") : nullptr),
     _rho_f(_coupled_grav ? &getADMaterialProperty<Real>("fluid_density") : nullptr)

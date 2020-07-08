@@ -100,8 +100,8 @@ LynxADPlasticModel::setQp(unsigned int qp)
 void
 LynxADPlasticModel::plasticUpdate(ADRankTwoTensor & stress_dev,
                                   ADReal & pressure,
-                                  const Real & G,
-                                  const Real & K,
+                                  const ADReal & G,
+                                  const ADReal & K,
                                   ADRankTwoTensor & elastic_strain_incr)
 {
   const ADReal eqv_stress = std::sqrt(1.5) * stress_dev.L2norm();
@@ -124,8 +124,8 @@ LynxADPlasticModel::plasticUpdate(ADRankTwoTensor & stress_dev,
 ADReal
 LynxADPlasticModel::plasticIncrement(const ADReal & eqv_stress,
                                      const ADReal & pressure,
-                                     const Real G,
-                                     const Real K)
+                                     const ADReal G,
+                                     const ADReal K)
 {
   // Initialize hardening
   if (_has_hardening)
@@ -168,7 +168,7 @@ LynxADPlasticModel::plasticIncrement(const ADReal & eqv_stress,
 }
 
 void
-LynxADPlasticModel::initPlasticParameters(const ADReal & pressure, const Real & K)
+LynxADPlasticModel::initPlasticParameters(const ADReal & pressure, const ADReal & K)
 {
   _alpha_0 = std::sqrt(3.0) * std::sin(averageProperty(_friction_angle_0) * libMesh::pi / 180.0);
   _alpha_res =

@@ -43,5 +43,6 @@ LynxADStrainAux::LynxADStrainAux(const InputParameters & parameters)
 Real
 LynxADStrainAux::computeValue()
 {
-  return _u_old[_qp] + MetaPhysicL::raw_value((*_strain_incr)[_qp](_i, _j));
+  Real strain_incr = MetaPhysicL::raw_value((*_strain_incr)[_qp](_i, _j));
+  return (_is_transient) ? _u_old[_qp] + strain_incr : strain_incr;
 }
