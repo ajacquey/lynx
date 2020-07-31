@@ -36,7 +36,7 @@ LynxADHeatSources::LynxADHeatSources(const InputParameters & parameters)
     _coeff_Hs(getParam<Real>("coeff_shear_heating")),
     _nvel(coupledComponents("velocities")),
     _vel(3),
-    _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : adZeroGradient()),
+    _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : _ad_grad_zero),
     _rhoC_b(getADMaterialProperty<Real>("bulk_specific_heat")),
     _radiogenic_heat(getMaterialProperty<Real>("radiogenic_heat_production")),
     _has_inelastic_heat_mat(hasADMaterialProperty<Real>("inelastic_heat")),

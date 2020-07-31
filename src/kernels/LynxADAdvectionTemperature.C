@@ -32,7 +32,7 @@ LynxADAdvectionTemperature::validParams()
 LynxADAdvectionTemperature::LynxADAdvectionTemperature(const InputParameters & parameters)
   : LynxADAdvectionBase(parameters),
     _coeff_Hs(getParam<Real>("coeff_shear_heating")),
-    _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : adZeroGradient()),
+    _grad_pressure(isCoupled("pressure") ? adCoupledGradient("pressure") : _ad_grad_zero),
     _thermal_diff(getADMaterialProperty<Real>("thermal_diffusivity")),
     _rhoC(getADMaterialProperty<Real>("bulk_specific_heat")),
     _has_inelastic_heat_mat(hasMaterialProperty<Real>("inelastic_heat")),

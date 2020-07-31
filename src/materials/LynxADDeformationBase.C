@@ -88,7 +88,7 @@ LynxADDeformationBase::initialSetup()
   // set unused dimensions to zero
   for (unsigned i = _ndisp; i < 3; ++i)
   {
-    _grad_disp[i] = &adZeroGradient();
+    _grad_disp[i] = &_ad_grad_zero;
     _grad_disp_old[i] = &_grad_zero;
   }
 }
