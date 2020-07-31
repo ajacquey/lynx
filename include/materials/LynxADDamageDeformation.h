@@ -36,5 +36,5 @@ protected:
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
   // Elasticity tensor
-  RankFourTensor _Cijkl;
+  ADRankFourTensor _Cijkl;
 };

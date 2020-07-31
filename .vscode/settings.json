@@ -220,8 +220,18 @@
         "LynxADDamageModelBase.C": "cpp",
         "LynxADLyakhovskyDamage.C": "cpp",
         "LynxADElasticStrainRatio.C": "cpp",
-        "LynxADElasticStrainRatioAux.C": "cpp"
+        "LynxADElasticStrainRatioAux.C": "cpp",
+        "LynxADLyakhovskyDamage copy.C": "cpp",
+        "LynxADLyakhovskyDamage2.C": "cpp",
+        "LynxADVelocityAux.C": "cpp",
+        "LyakhovskyDamage3.C": "cpp",
+        "LynxADLyakhovskyDamage3.C": "cpp",
+        "materials_Unity.C": "cpp",
+        "future": "cpp",
+        "numeric": "cpp",
+        "regex": "cpp",
+        "strstream": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
-    "python.pythonPath": "/opt/moose/miniconda/bin/python"
+    "python.pythonPath": "/Users/ajacquey/miniconda/envs/moose/bin/python"
 }

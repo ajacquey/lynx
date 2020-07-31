@@ -75,18 +75,20 @@ LynxADDamageDeformation::initializeQpDeformation()
 void
 LynxADDamageDeformation::computeQpStress()
 {
-  ADRankTwoTensor stress_old = spinRotation(_stress_old[_qp]);
+  // ADRankTwoTensor stress_old = spinRotation(_stress_old[_qp]);
   ADRankTwoTensor elastic_strain_old = spinRotation(_elastic_strain_old[_qp]);
-  
-  // Damage elastic guess
+  // // Damage elastic guess
   _damage_model->setQp(_qp);
-  _damage_model->elasticGuess(_stress[_qp], stress_old, _Cijkl, elastic_strain_old, _elastic_strain_incr[_qp]);
+  // _damage_model->elasticGuess(_stress[_qp], stress_old, _Cijkl, elastic_strain_old, _elastic_strain_incr[_qp]);
 
-  _stress[_qp].addIa(_plith_old[_qp] - _plith[_qp]);
+  // _stress[_qp].addIa(_plith_old[_qp] - _plith[_qp]);
 
   // Damage - plastic correction
-  _damage_model->damageUpdate(_stress[_qp], _elastic_strain_incr[_qp]);
+  _damage_model->damageUpdate(_stress[_qp], _Cijkl, elastic_strain_old, _elastic_strain_incr[_qp]);
   _elastic_strain[_qp] = elastic_strain_old + _elastic_strain_incr[_qp];
+
+  // // Update elastic moduli for biot coefficient
+  // _damage_model->updateElasticModuli(_K[_qp], _G[_qp], _elastic_strain[_qp]);
 }
 
 // void

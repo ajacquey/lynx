@@ -21,22 +21,30 @@ public:
   static InputParameters validParams();
   LynxADDamageModelBase(const InputParameters & parameters);
   void setQp(unsigned int qp);
-  virtual void elasticGuess(ADRankTwoTensor & stress,
-                            const ADRankTwoTensor & stress_old,
-                            const RankFourTensor & Cijkl,
+  // virtual void elasticGuess(ADRankTwoTensor & stress,
+  //                           const ADRankTwoTensor & stress_old,
+  //                           const ADRankFourTensor & Cijkl,
+  //                           const ADRankTwoTensor & elastic_strain_old,
+  //                           const ADRankTwoTensor & elastic_strain_incr) = 0;
+  // virtual void damageUpdate(ADRankTwoTensor & stress, ADRankTwoTensor & elastic_strain_incr) = 0;
+  virtual void damageUpdate(ADRankTwoTensor & stress,
+                            const ADRankFourTensor & Cijkl,
                             const ADRankTwoTensor & elastic_strain_old,
-                            const ADRankTwoTensor & elastic_strain_incr) = 0;
-  virtual void damageUpdate(ADRankTwoTensor & stress, ADRankTwoTensor & elastic_strain_incr) = 0;
+                            ADRankTwoTensor & elastic_strain_incr) = 0;
+  virtual void updateElasticModuli(ADReal & K, ADReal & G, const ADRankTwoTensor & elastic_strain) = 0;
   void resetQpProperties() final {}
   void resetProperties() final {}
 
 protected:
   virtual void initQpStatefulProperties() override;
 
+  const ADVariableValue & _pf;
   const Real _abs_tol;
   const Real _rel_tol;
   const unsigned int _max_its;
   const std::vector<Real> _damage0;
+  const std::vector<Real> _damage0_rand;
+  const std::vector<Real> _pf0;
 
   // Damage properties
   ADMaterialProperty<Real> & _damage;
@@ -45,4 +53,5 @@ protected:
   ADMaterialProperty<RankTwoTensor> & _plastic_strain_incr;
   ADMaterialProperty<Real> & _damage_incr;
   ADMaterialProperty<Real> & _yield_function;
+  ADMaterialProperty<Real> & _damage_poro_mech;
 };
