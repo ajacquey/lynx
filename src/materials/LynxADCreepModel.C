@@ -64,7 +64,7 @@ LynxADCreepModel::validParams()
 LynxADCreepModel::LynxADCreepModel(const InputParameters & parameters)
   : LynxADMaterialBase(parameters),
     _coupled_temp(isCoupled("temperature")),
-    _temp(_coupled_temp ? adCoupledValue("temperature") : adZeroValue()),
+    _temp(_coupled_temp ? adCoupledValue("temperature") : _ad_zero),
     // Creep parameters
     _has_diffusion_creep(isParamValid("A_diffusion")),
     _A_diffusion(_has_diffusion_creep ? getLynxParam<Real>("A_diffusion")

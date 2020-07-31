@@ -42,7 +42,7 @@ LynxADAdvectionTemperature::LynxADAdvectionTemperature(const InputParameters & p
     _inelastic_heat_mat(_has_inelastic_heat_mat ? &getADMaterialProperty<Real>("inelastic_heat")
                                                 : nullptr),
     _coupled_inelastic_heat(isCoupled("inelastic_heat")),
-    _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : adZeroValue()),
+    _inelastic_heat(_coupled_inelastic_heat ? adCoupledValue("inelastic_heat") : _ad_zero),
     _thermal_exp(getADMaterialProperty<Real>("thermal_expansion_coefficient"))
 {
 }

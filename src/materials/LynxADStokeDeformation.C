@@ -50,8 +50,8 @@ LynxADStokeDeformation::validParams()
 
 LynxADStokeDeformation::LynxADStokeDeformation(const InputParameters & parameters)
   : LynxADDeformationBase(parameters),
-    _pdyn(isCoupled("dynamic_pressure") ? adCoupledValue("dynamic_pressure") : adZeroValue()),
-    _temp(_coupled_temp ? adCoupledValue("temperature") : adZeroValue()),
+    _pdyn(isCoupled("dynamic_pressure") ? adCoupledValue("dynamic_pressure") : _ad_zero),
+    _temp(_coupled_temp ? adCoupledValue("temperature") : _ad_zero),
     // Stoke parameters
     _has_diffusion_creep(isParamValid("A_diffusion")),
     _A_diffusion(_has_diffusion_creep ? getLynxParam<Real>("A_diffusion")

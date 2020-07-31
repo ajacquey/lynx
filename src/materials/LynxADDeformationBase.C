@@ -44,11 +44,11 @@ LynxADDeformationBase::LynxADDeformationBase(const InputParameters & parameters)
     _grad_disp(3),
     _grad_disp_old(3),
     _plith(isCoupled("lithostatic_pressure") ? adCoupledValue("lithostatic_pressure")
-                                             : adZeroValue()),
+                                             : _ad_zero),
     _coupled_temp(isCoupled("temperature")),
-    _temp_dot(_coupled_temp ? adCoupledDot("temperature") : adZeroValue()),
+    _temp_dot(_coupled_temp ? adCoupledDot("temperature") : _ad_zero),
     _coupled_temp_aux(isCoupled("temperature_dot")),
-    _temp_dot_aux(_coupled_temp_aux ? adCoupledValue("temperature_dot") : adZeroValue()),
+    _temp_dot_aux(_coupled_temp_aux ? adCoupledValue("temperature_dot") : _ad_zero),
     // Strain parameters
     _strain_model(getParam<MooseEnum>("strain_model")),
     _vol_locking_correction(getParam<bool>("volumetric_locking_correction")),
