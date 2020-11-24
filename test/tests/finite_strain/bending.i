@@ -1,35 +1,38 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 10
-  ymin = 0
-  ymax = 2
-  nx = 10
-  ny = 2
-  elem_type = QUAD4
-[]
-
-[GlobalParams]
-  displacements = 'disp_x disp_y'
-[]
-
-[MeshModifiers]
+  [./mesh_input]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = 10
+    ymin = 0
+    ymax = 2
+    nx = 10
+    ny = 2
+    elem_type = QUAD4
+  [../]
   [./corner]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
+    input = mesh_input
     new_boundary = 101
     coord = '0 0'
   [../]
   [./side]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
+    input = corner
     new_boundary = 102
     coord = '10 0'
   [../]
   [./mid]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
+    input = side
     new_boundary = 103
     coord = '5 2'
   [../]
+[]
+
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]

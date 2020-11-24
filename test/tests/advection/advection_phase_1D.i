@@ -34,10 +34,11 @@
 
 [BCs]
   [./left_phase]
-    type = PresetBC
+    type = DirichletBC
     variable = phase
     value = 0.0
     boundary = 'left right'
+    preset = true
   [../]
 []
 
@@ -94,7 +95,7 @@
     petsc_options_iname =  '-snes_atol -snes_rtol -snes_max_it
                            -ksp_type -ksp_atol -ksp_max_it
                            -pc_type -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = '1e-16 1e-20 200
+    petsc_options_value = '1e-10 1e-20 200
                            fgmres 1e-8 500
                            asm ilu NONZERO'
   [../]
