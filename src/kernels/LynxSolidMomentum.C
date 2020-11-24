@@ -199,7 +199,7 @@ LynxSolidMomentum::computeQpJacobian()
 /******************************************************************************/
 
 void
-LynxSolidMomentum::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+LynxSolidMomentum::computeOffDiagJacobian(unsigned int jvar)
 {
   if (_vol_locking_correction)
   {
