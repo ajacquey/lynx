@@ -11,9 +11,6 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: LYNX
-    repo: https://gitext.gfz-potsdam.de/ajacquey/lynx
-    # home: https://www.mooseframework.org
     google_analytics: True
 
 Translators:
@@ -22,9 +19,8 @@ Translators:
 
 Extensions:
     MooseDocs.extensions.navigation:
-        name: 'LYNX'
-        repo: https://gitext.gfz-potsdam.de/ajacquey/lynx
-        # home: https://www.mooseframework.org
+        name: Lynx
+        repo: https://github.com/ajacquey/lynx
         menu:
             Getting Started: getting_started/index.md
             Documentation: documentation.menu.md
