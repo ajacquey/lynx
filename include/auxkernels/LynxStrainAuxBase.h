@@ -29,6 +29,7 @@ public:
   static MooseEnum strainType();
 
 protected:
+  const VariableValue & _u_old;
   MooseEnum _strain_type;
   std::string _strain_name;
   const MaterialProperty<RankTwoTensor> * _strain_incr;

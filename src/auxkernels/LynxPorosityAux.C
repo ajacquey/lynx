@@ -27,6 +27,7 @@ validParams<LynxPorosityAux>()
 
 LynxPorosityAux::LynxPorosityAux(const InputParameters & parameters)
   : DerivativeMaterialInterface<AuxKernel>(parameters),
+    _u_old(uOld()),
     _coupled_pf(isCoupled("fluid_pressure")),
     _pf_dot(_coupled_pf ? coupledDot("fluid_pressure") : _zero),
     _biot(getDefaultMaterialProperty<Real>("biot_coefficient")),

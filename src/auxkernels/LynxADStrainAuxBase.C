@@ -25,7 +25,9 @@ LynxADStrainAuxBase::validParams()
 }
 
 LynxADStrainAuxBase::LynxADStrainAuxBase(const InputParameters & parameters)
-  : AuxKernel(parameters), _strain_type(getParam<MooseEnum>("strain_type"))
+  : AuxKernel(parameters),
+    _u_old(uOld()),
+    _strain_type(getParam<MooseEnum>("strain_type"))
 {
   switch (_strain_type)
   {

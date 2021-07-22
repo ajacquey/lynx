@@ -27,6 +27,7 @@ LynxADPorosityAux::validParams()
 
 LynxADPorosityAux::LynxADPorosityAux(const InputParameters & parameters)
   : AuxKernel(parameters),
+    _u_old(uOld()),
     _pf_dot(coupledDot("fluid_pressure")),
     _biot(getMaterialProperty<Real>("biot_coefficient")),
     _C_d(getMaterialProperty<Real>("bulk_compressibility")),

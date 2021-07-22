@@ -27,6 +27,7 @@ validParams<LynxStrainAuxBase>()
 
 LynxStrainAuxBase::LynxStrainAuxBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<AuxKernel>(parameters),
+    _u_old(uOld()),
     _strain_type(getParam<MooseEnum>("strain_type"))
 {
   switch (_strain_type)

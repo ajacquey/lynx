@@ -48,25 +48,25 @@
 
 [BCs]
   [./T1_everywhere]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 'left right front back bottom top'
     value = 100.0
   [../]
   [./no_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./no_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./no_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0

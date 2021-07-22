@@ -32,6 +32,7 @@ protected:
   virtual Real computeEvDot();
   virtual Real computeEvInDot();
 
+  const VariableValue & _u_old;
   bool _coupled_pf;
   const VariableValue & _pf_dot;
   const MaterialProperty<Real> & _biot;
